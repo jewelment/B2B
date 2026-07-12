@@ -1,0 +1,41 @@
+@import "tailwindcss";
+
+:root {
+  /* LIGHT MODE: Crisp White & Ashok Maroon */
+  --brand-primary: #4e080f;
+  --brand-primary-hover: #3a060b;
+  --brand-text: #ffffff; /* White text on Maroon buttons */
+  
+  --bg-base: #fcfcfc;
+  --bg-surface: #ffffff;
+  --text-main: #2a2a2a;
+  --text-muted: #888888;
+  --border-color: #ebebeb;
+  
+  /* Glassmorphism Variables */
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.8);
+}
+
+.dark {
+  /* DARK MODE: Deep Black & Luxury Gold */
+  --brand-primary: #ffd491; /* Luxury Gold */
+  --brand-primary-hover: #e5bf82; /* Deep Gold for Hover */
+  --brand-text: #0a0a0a; /* Black text on Gold buttons for high contrast */
+  
+  --bg-base: #0a0a0a;
+  --bg-surface: #141414;
+  --text-main: #f0f0f0;
+  --text-muted: #a0a0a0;
+  --border-color: #2a2a2a;
+  
+  /* Glassmorphism Variables */
+  --glass-bg: rgba(20, 20, 20, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.05);
+}
+
+body {
+  background-color: var(--bg-base);
+  color: var(--text-main);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}

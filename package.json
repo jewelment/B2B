@@ -1,0 +1,50 @@
+{
+  "name": "ajb2b-platform",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.22.0",
+    "@react-pdf/renderer": "^4.5.1",
+    "@tanstack/react-table": "^8.21.3",
+    "adm-zip": "^0.5.18",
+    "bcryptjs": "^3.0.3",
+    "dotenv": "^17.4.2",
+    "framer-motion": "^12.42.2",
+    "jose": "^6.2.3",
+    "jspdf": "^4.2.1",
+    "jspdf-autotable": "^5.0.8",
+    "libphonenumber-js": "^1.13.7",
+    "next": "16.2.9",
+    "next-auth": "^4.24.14",
+    "papaparse": "^5.5.4",
+    "prisma": "^5.22.0",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "react-pageflip": "^2.0.3",
+    "react-phone-number-input": "^3.4.17",
+    "zustand": "^5.0.14"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.1",
+    "@types/adm-zip": "^0.5.8",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/node": "^20",
+    "@types/papaparse": "^5.5.2",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.9",
+    "tailwindcss": "^4",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  },
+  "prisma": {
+    "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
+  }
+}

@@ -1,0 +1,667 @@
+'use client';
+
+import React, { useEffect, useState, useRef, ClipboardEvent } from 'react';
+import Link from 'next/link';
+
+// --- SVGs ---
+const IconEye = () => <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.543 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>;
+const IconBook = () => <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>;
+const IconEdit = () => <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>;
+const IconDownload = () => <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>;
+const IconShare = () => <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg>;
+const IconSparkles = () => <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg>;
+const IconCheck = () => <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>;
+const IconTrash = () => <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>;
+const IconLockSmall = () => <svg className="w-3 h-3 text-[var(--brand-primary)] inline-block ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>;
+const IconUpload = () => <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>;
+
+export default function AdminCatalogsDashboard() {
+  const [catalogs, setCatalogs] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  
+  const [campaignName, setCampaignName] = useState('');
+  const [clientSearch, setClientSearch] = useState('');
+  const [skuPayload, setSkuPayload] = useState('');
+  const [isCreating, setIsCreating] = useState(false);
+
+  const [showBuilder, setShowBuilder] = useState(false);
+  const [builderTab, setBuilderTab] = useState<'PRODUCTS' | 'APPEARANCE'>('PRODUCTS');
+  const [inventory, setInventory] = useState<any[]>([]); 
+  const [selectedVisualItems, setSelectedVisualItems] = useState<string[]>([]);
+
+  const [gridCols, setGridCols] = useState<3 | 4 | 5 | 6>(4);
+  const [searchFilter, setSearchFilter] = useState('');
+  const [purityFilter, setPurityFilter] = useState('ALL');
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 120;
+  
+  const gridScrollRef = useRef<HTMLDivElement>(null);
+
+  const [config, setConfig] = useState({
+    theme: 'LIGHT',
+    orientation: 'PORTRAIT', 
+    desktopItemsPerPage: 4,
+    mobileItemsPerPage: 1,
+    hidePricing: false,
+    poMatrix: true,
+    password: '',
+    frontCover: '',
+    backCover: '',
+    lifestyleInserts: [] as string[]
+  });
+
+  const fetchData = async () => {
+    try {
+      const catRes = await fetch('/api/catalog');
+      if (catRes.ok) {
+        const catData = await catRes.json();
+        if (catData.success) setCatalogs(catData.catalogs);
+      }
+      const invRes = await fetch('/api/inventory'); 
+      if (invRes.ok) {
+        const invData = await invRes.json();
+        setInventory(Array.isArray(invData) ? invData : (invData?.products || []));
+      }
+    } catch (error) {
+      console.error('Failed to sync data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { fetchData(); }, []);
+
+  const toggleVisualSelection = (code: string) => {
+    setSelectedVisualItems(prev => {
+      const next = prev.includes(code) ? prev.filter(c => c !== code) : [...prev, code];
+      setSkuPayload(next.join(', '));
+      return next;
+    });
+  };
+
+  const handleSkuTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const val = e.target.value;
+    setSkuPayload(val);
+    const parsed = val.split(/[\n\t,]+/).map(s => s.trim().toUpperCase()).filter(Boolean);
+    setSelectedVisualItems(parsed);
+  };
+
+  const handleSkuPaste = (e: ClipboardEvent<HTMLTextAreaElement>) => {
+    e.preventDefault();
+    const pastedText = e.clipboardData.getData('text');
+    const formatted = pastedText.split(/[\n\t,]+/).map(s => s.trim().toUpperCase()).filter(Boolean).join(', ');
+    const newPayload = skuPayload ? `${skuPayload}, ${formatted}` : formatted;
+    setSkuPayload(newPayload);
+    setSelectedVisualItems(newPayload.split(', ').filter(Boolean));
+  };
+
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
+    if (gridScrollRef.current) {
+      gridScrollRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  const handleImageDrop = (e: React.DragEvent<HTMLDivElement> | React.ChangeEvent<HTMLInputElement>, target: 'frontCover' | 'backCover' | number) => {
+    e.preventDefault();
+    let file: File | undefined;
+    
+    if ('dataTransfer' in e) file = e.dataTransfer.files?.[0];
+    else if ('target' in e) file = (e.target as HTMLInputElement).files?.[0];
+
+    if (!file || !['image/jpeg', 'image/png'].includes(file.type)) return alert("Please upload a JPG or PNG file.");
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      if (event.target?.result) {
+        if (typeof target === 'number') updateLifestyleInsert(target, event.target.result as string);
+        else setConfig(prev => ({ ...prev, [target]: event.target!.result as string }));
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleCreate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsCreating(true);
+
+    if (selectedVisualItems.length === 0) {
+      alert("Please provide at least one valid SKU.");
+      setIsCreating(false);
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/catalog', { 
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: campaignName || `Catalog ${new Date().toLocaleDateString()}`,
+          clientId: clientSearch || 'Guest Target',
+          designCodes: selectedVisualItems,
+          configuration: config 
+        }),
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        setCampaignName(''); setClientSearch(''); setSkuPayload(''); setSelectedVisualItems([]);
+        setConfig({ ...config, password: '', frontCover: '', backCover: '', lifestyleInserts: [] });
+        setShowBuilder(false);
+        fetchData();
+      } else {
+        alert(data.error || "Creation failed.");
+      }
+    } catch (error) {
+      console.error('Failed to dispatch:', error);
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
+  const toggleCatalogStatus = async (catalogId: string, currentStatus: boolean) => {
+    setCatalogs(catalogs.map(c => c.id === catalogId ? { ...c, isActive: !currentStatus } : c));
+    await fetch('/api/catalog', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: catalogId, isActive: !currentStatus }) });
+  };
+
+  const handleDeleteCatalog = async (catalogId: string) => {
+    if (!confirm('Are you sure you want to delete this catalog? This action cannot be undone.')) return;
+    
+    try {
+      const res = await fetch(`/api/catalog?id=${catalogId}`, { method: 'DELETE' });
+      if (res.ok) {
+        setCatalogs(catalogs.filter(c => c.id !== catalogId));
+      } else {
+        alert('Failed to delete catalog.');
+      }
+    } catch (error) {
+      console.error('Delete failed', error);
+    }
+  };
+
+  const addLifestyleInsert = () => setConfig({ ...config, lifestyleInserts: [...config.lifestyleInserts, ''] });
+  const updateLifestyleInsert = (index: number, val: string) => {
+    const newInserts = [...config.lifestyleInserts];
+    newInserts[index] = val;
+    setConfig({ ...config, lifestyleInserts: newInserts });
+  };
+  const removeLifestyleInsert = (index: number) => {
+    setConfig({ ...config, lifestyleInserts: config.lifestyleInserts.filter((_, i) => i !== index) });
+  };
+
+  const safeInventory = Array.isArray(inventory) ? inventory : [];
+
+  const filteredInventory = safeInventory.filter(item => {
+    const matchesSearch = item.designCode?.toLowerCase().includes(searchFilter.toLowerCase()) || item.title?.toLowerCase().includes(searchFilter.toLowerCase());
+    const matchesPurity = purityFilter === 'ALL' || item.metalPurity === purityFilter;
+    return matchesSearch && matchesPurity;
+  });
+
+  const paginatedInventory = filteredInventory.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+  const totalPages = Math.ceil(filteredInventory.length / ITEMS_PER_PAGE);
+
+  const getGridClass = () => {
+    switch (gridCols) {
+      case 3: return "grid-cols-2 md:grid-cols-3 lg:grid-cols-3";
+      case 5: return "grid-cols-3 md:grid-cols-4 lg:grid-cols-5";
+      case 6: return "grid-cols-3 md:grid-cols-5 lg:grid-cols-6";
+      default: return "grid-cols-2 md:grid-cols-3 lg:grid-cols-4";
+    }
+  };
+
+  const formatPrice = (amount: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(amount);
+
+  const activeCatalogs = catalogs.filter(c => c.isActive);
+  const totalPipelineValue = activeCatalogs.reduce((acc, cat) => acc + (cat.pipelineValue || 0), 0);
+
+  if (loading) return (<div className="flex justify-center py-32 text-[var(--brand-primary)]"><svg className="animate-spin w-8 h-8" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg></div>);
+
+  return (
+    <div className="w-full max-w-7xl mx-auto animate-in fade-in duration-700 pb-20 relative">
+      
+      <div className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-4 px-2">
+        <div>
+          <h1 className="text-3xl font-light text-[var(--text-main)] tracking-wide">Flipbook Command Center</h1>
+          <p className="text-sm text-[var(--text-muted)] mt-2">Generate customized digital catalogs, inject lifestyle assets, and monitor B2B engagement.</p>
+        </div>
+        {/* The data ingestion buttons have been entirely removed to decouple PIM from Presentation */}
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+        <div className="relative group overflow-hidden bg-[var(--glass-bg)] backdrop-blur-2xl border border-[var(--glass-border)] rounded-[2rem] p-8 transition-all hover:-translate-y-1 hover:border-[var(--brand-primary)]/30 shadow-sm">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--brand-primary)]/10 rounded-full blur-3xl -mr-10 -mt-10 group-hover:bg-[var(--brand-primary)]/20 transition-all"></div>
+          <div className="flex justify-between items-start mb-4 relative z-10">
+            <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-[0.2em]">Total Shared Links</p>
+            <span className="text-[var(--text-muted)] opacity-50"><IconShare /></span>
+          </div>
+          <p className="text-3xl font-light text-[var(--text-main)] tracking-tight relative z-10">{activeCatalogs.length} <span className="text-lg text-[var(--text-muted)]">Active</span></p>
+        </div>
+
+        <div className="relative group overflow-hidden bg-[var(--glass-bg)] backdrop-blur-2xl border border-[var(--glass-border)] rounded-[2rem] p-8 transition-all hover:-translate-y-1 hover:border-blue-500/30 shadow-sm">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl -mr-10 -mt-10 group-hover:bg-blue-500/20 transition-all"></div>
+          <div className="flex justify-between items-start mb-4 relative z-10">
+            <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-[0.2em]">Digital Impressions</p>
+            <span className="text-[var(--text-muted)] opacity-50"><IconEye /></span>
+          </div>
+          <p className="text-3xl font-light text-[var(--text-main)] tracking-tight relative z-10">142 <span className="text-lg text-[var(--text-muted)]">Views</span></p>
+        </div>
+
+        <div className="relative group overflow-hidden bg-[var(--glass-bg)] backdrop-blur-2xl border border-[var(--glass-border)] rounded-[2rem] p-8 transition-all hover:-translate-y-1 hover:border-emerald-500/30 shadow-sm">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-3xl -mr-10 -mt-10 group-hover:bg-emerald-500/20 transition-all"></div>
+          <div className="flex justify-between items-start mb-4 relative z-10">
+            <p className="text-[10px] font-bold text-emerald-500 uppercase tracking-[0.2em]">Influenced Pipeline</p>
+            <span className="flex h-2.5 w-2.5 relative">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-50"></span>
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+            </span>
+          </div>
+          <p className="text-3xl font-light text-emerald-500 tracking-tight relative z-10">{formatPrice(totalPipelineValue)}</p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 items-start">
+        <div className="xl:col-span-1 bg-[var(--glass-bg)] backdrop-blur-xl border border-[var(--glass-border)] rounded-2xl p-6 shadow-sm">
+          <div className="flex justify-between items-center mb-6 border-b border-[var(--border-color)] pb-3">
+            <h3 className="text-sm font-bold uppercase tracking-wider text-[var(--text-main)]">Generate Link</h3>
+          </div>
+          
+          <form onSubmit={handleCreate} className="space-y-5">
+            <div>
+              <label className="block text-[10px] font-bold text-[var(--text-muted)] uppercase mb-2">Campaign Name *</label>
+              <input required type="text" placeholder="e.g. Reliance Festive Curation" value={campaignName} onChange={(e) => setCampaignName(e.target.value)} className="w-full px-4 py-3 bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-xl text-xs text-[var(--text-main)] focus:ring-1 focus:ring-[var(--brand-primary)]" />
+            </div>
+
+            <div>
+              <label className="block text-[10px] font-bold text-[var(--text-muted)] uppercase mb-2">Target Client (Optional)</label>
+              <input type="text" placeholder="e.g. Malabar HQ" value={clientSearch} onChange={(e) => setClientSearch(e.target.value)} className="w-full px-4 py-3 bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-xl text-xs text-[var(--text-main)] focus:ring-1 focus:ring-[var(--brand-primary)]" />
+            </div>
+
+            <div>
+              <div className="flex justify-between items-end mb-2">
+                <label className="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Design Payload *</label>
+                <button type="button" onClick={() => setShowBuilder(true)} className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest bg-[var(--brand-primary)]/10 text-[var(--brand-primary)] px-3 py-1.5 rounded-lg hover:bg-[var(--brand-primary)]/20 transition-all active:scale-95">
+                  <IconSparkles /> Visual Builder
+                </button>
+              </div>
+              <textarea required rows={5} placeholder="Select products visually or paste SKUs..." value={skuPayload} onChange={handleSkuTextChange} onPaste={handleSkuPaste} className="w-full px-4 py-3 bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-xl text-xs font-mono text-[var(--text-main)] focus:ring-1 focus:ring-[var(--brand-primary)] resize-none" />
+              <p className="text-[9px] text-[var(--text-muted)] mt-2 text-right">{selectedVisualItems.length} SKUs Staged</p>
+            </div>
+            
+            <button disabled={isCreating} className="w-full py-4 bg-[var(--brand-primary)] text-[var(--brand-text)] text-[10px] font-bold uppercase tracking-[0.2em] rounded-xl hover:opacity-90 disabled:opacity-50 transition-all active:scale-[0.98]">
+              {isCreating ? 'Compiling...' : 'Generate Catalog Link'}
+            </button>
+          </form>
+        </div>
+
+        <div className="xl:col-span-2 bg-[var(--glass-bg)] backdrop-blur-xl rounded-2xl border border-[var(--glass-border)] overflow-hidden shadow-sm">
+          <div className="p-4 border-b border-[var(--border-color)] bg-[var(--bg-surface)]/50">
+            <h3 className="text-xs font-bold uppercase tracking-widest text-[var(--text-muted)] pl-2">Active Link Allocations</h3>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left whitespace-nowrap">
+              <thead>
+                <tr className="bg-[var(--bg-base)] text-[9px] uppercase tracking-[0.2em] font-bold text-[var(--text-muted)] border-b border-[var(--border-color)]">
+                  <th className="px-6 py-4">Allocation Details</th>
+                  <th className="px-4 py-4 text-center">SKUs</th>
+                  <th className="px-6 py-4 text-right">Value</th>
+                  <th className="px-6 py-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[var(--border-color)] text-xs">
+                {catalogs.length === 0 && (<tr><td colSpan={4} className="p-8 text-center text-[var(--text-muted)]">No catalogs generated. Use the form to compile a link.</td></tr>)}
+                {catalogs.map((cat) => (
+                  <tr key={cat.id} className="hover:bg-[var(--bg-surface)] transition-colors">
+                    <td className="px-6 py-5 flex items-center gap-3">
+                      <button onClick={() => toggleCatalogStatus(cat.id, cat.isActive)} className={`w-2 h-2 rounded-full ${cat.isActive ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]' : 'bg-red-500'}`}></button>
+                      <div>
+                        <p className="font-semibold text-[var(--text-main)] mb-1 flex items-center">
+                          {cat.name}
+                          {cat.configuration?.password && <IconLockSmall />}
+                        </p>
+                        <p className="text-[10px] text-[var(--text-muted)]">Target: {cat.clientId || 'Guest'}</p>
+                      </div>
+                    </td>
+                    <td className="px-4 py-5 text-center"><span className="bg-[var(--bg-base)] border border-[var(--border-color)] text-[var(--text-main)] text-[10px] font-bold px-2.5 py-1 rounded">{cat._count?.items || cat.items?.length || 0}</span></td>
+                    <td className="px-6 py-5 text-right font-medium text-[var(--text-main)]">{formatPrice(cat.pipelineValue || 0)}</td>
+                    <td className="px-6 py-5 text-right">
+                      <div className="flex justify-end items-center gap-1.5">
+                        <button title="Edit Configuration" onClick={() => { 
+                          setCampaignName(cat.name); 
+                          setClientSearch(cat.clientId); 
+                          
+                          const skus = cat.items?.map((i: any) => i.designCode) || [];
+                          setSkuPayload(skus.join(', '));
+                          setSelectedVisualItems(skus);
+                          
+                          if (cat.configuration) {
+                            setConfig({
+                              theme: cat.configuration.theme || 'LIGHT',
+                              orientation: cat.configuration.orientation || 'PORTRAIT',
+                              desktopItemsPerPage: cat.configuration.desktopItemsPerPage || 4,
+                              mobileItemsPerPage: cat.configuration.mobileItemsPerPage || 1,
+                              hidePricing: cat.configuration.hidePricing || false,
+                              poMatrix: cat.configuration.poMatrix !== false,
+                              password: cat.configuration.password || '',
+                              frontCover: cat.configuration.frontCover || '',
+                              backCover: cat.configuration.backCover || '',
+                              lifestyleInserts: cat.configuration.lifestyleInserts || []
+                            });
+                          }
+                          
+                          setShowBuilder(true); 
+                        }} className="w-8 h-8 flex items-center justify-center rounded border border-[var(--border-color)] text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-surface)] transition-colors"><IconEdit /></button>
+                        <Link href={`/catalog/view/${cat.id}`} target="_blank" title="Standard Grid View" className="w-8 h-8 flex items-center justify-center rounded border border-[var(--border-color)] text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-surface)] transition-colors"><IconEye /></Link>
+                        <Link href={`/catalog/flipbook/${cat.id}`} target="_blank" title="Immersive 3D Flipbook" className="w-8 h-8 flex items-center justify-center rounded border border-[var(--brand-primary)]/50 text-[var(--brand-primary)] bg-[var(--brand-primary)]/10 hover:bg-[var(--brand-primary)]/20 transition-colors"><IconBook /></Link>
+                        <a href={`/api/catalog/${cat.id}/pdf`} download title="Download PDF" className="w-8 h-8 flex items-center justify-center rounded border border-[var(--border-color)] text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-surface)] transition-colors"><IconDownload /></a>
+                        <button onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/catalog/view/${cat.id}`); alert('Link Copied!'); }} title="Copy Link" className="w-8 h-8 flex items-center justify-center rounded border border-[var(--border-color)] bg-[var(--brand-primary)] text-[var(--brand-text)] hover:opacity-90 transition-opacity"><IconShare /></button>
+                        <button onClick={() => handleDeleteCatalog(cat.id)} title="Delete Catalog" className="w-8 h-8 flex items-center justify-center rounded border border-red-200 text-red-500 hover:text-white hover:bg-red-500 transition-colors ml-1"><IconTrash /></button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      {/* VISUAL BUILDER MODAL */}
+      {showBuilder && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-8 animate-in fade-in duration-200">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowBuilder(false)}></div>
+          
+          <div className="relative w-full max-w-[95vw] lg:max-w-7xl h-[90vh] bg-[var(--bg-base)] border border-[var(--glass-border)] rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-300">
+            
+            <div className="px-8 py-5 border-b border-[var(--border-color)] bg-[var(--bg-surface)] flex justify-between items-center z-10">
+              <div>
+                <h2 className="text-xl font-light text-[var(--text-main)] flex items-center gap-2"><IconSparkles /> Visual Catalog Architect</h2>
+              </div>
+              <button onClick={() => setShowBuilder(false)} className="w-8 h-8 rounded-full border border-[var(--border-color)] flex items-center justify-center text-[var(--text-muted)] hover:text-red-500 hover:bg-red-500/10 transition-colors">✕</button>
+            </div>
+
+            <div className="flex border-b border-[var(--border-color)] bg-[var(--bg-base)] px-8 z-10">
+              <button onClick={() => setBuilderTab('PRODUCTS')} className={`px-6 py-4 text-xs font-bold uppercase tracking-widest border-b-2 transition-all ${builderTab === 'PRODUCTS' ? 'border-[var(--brand-primary)] text-[var(--brand-primary)]' : 'border-transparent text-[var(--text-muted)] hover:text-[var(--text-main)]'}`}>1. Product Selection</button>
+              <button onClick={() => setBuilderTab('APPEARANCE')} className={`px-6 py-4 text-xs font-bold uppercase tracking-widest border-b-2 transition-all ${builderTab === 'APPEARANCE' ? 'border-[var(--brand-primary)] text-[var(--brand-primary)]' : 'border-transparent text-[var(--text-muted)] hover:text-[var(--text-main)]'}`}>2. Flipbook Settings & Media</button>
+            </div>
+
+            {/* TAB: PRODUCTS */}
+            {builderTab === 'PRODUCTS' && (
+              <div className="flex-1 flex flex-col overflow-hidden">
+                <div className="flex-1 overflow-y-auto p-6 bg-[var(--bg-base)] custom-scrollbar" ref={gridScrollRef}>
+                  
+                  {/* TOOLBAR */}
+                  <div className="flex flex-wrap justify-between items-center mb-6 gap-4 bg-[var(--bg-surface)] p-4 rounded-xl border border-[var(--border-color)]">
+                    <div className="flex gap-4 flex-1">
+                      <input type="text" placeholder="Search Design Code or Title..." value={searchFilter} onChange={(e) => setSearchFilter(e.target.value)} className="w-64 px-4 py-2 bg-[var(--bg-base)] border border-[var(--border-color)] rounded-lg text-xs focus:ring-1 focus:ring-[var(--brand-primary)] outline-none" />
+                      <select value={purityFilter} onChange={(e) => setPurityFilter(e.target.value)} className="px-4 py-2 bg-[var(--bg-base)] border border-[var(--border-color)] rounded-lg text-xs focus:ring-1 focus:ring-[var(--brand-primary)] outline-none">
+                        <option value="ALL">All Purities</option>
+                        <option value="18KT">18KT</option>
+                        <option value="14KT">14KT</option>
+                        <option value="22KT">22KT</option>
+                      </select>
+                    </div>
+                    
+                    {/* Visual Grid Controls */}
+                    <div className="flex items-center gap-1.5">
+                      {[3, 4, 5, 6].map(num => (
+                        <button key={num} onClick={() => setGridCols(num as any)} className={`w-8 h-8 flex items-center justify-center rounded transition-all ${gridCols === num ? 'bg-[var(--brand-primary)] text-[var(--brand-text)] shadow-md scale-105' : 'bg-[var(--bg-base)] text-[var(--text-muted)] border border-[var(--border-color)] hover:bg-[var(--bg-surface)]'}`}>
+                          {num}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  {/* INVENTORY GRID */}
+                  <div className={`grid ${getGridClass()} gap-4 md:gap-6 content-start`}>
+                    {paginatedInventory.length === 0 ? (
+                      <div className="col-span-full py-20 text-center text-[var(--text-muted)] text-sm">
+                        No inventory found. Use the "Inventory Pipeline" to upload your catalog.
+                      </div>
+                    ) : (
+                      paginatedInventory.map((item, i) => {
+                        const isSelected = selectedVisualItems.includes(item.designCode);
+                        return (
+                          <div key={i} onClick={() => toggleVisualSelection(item.designCode)} className={`relative group rounded-xl border-2 cursor-pointer transition-all overflow-hidden ${isSelected ? 'border-[var(--brand-primary)] ring-2 ring-[var(--brand-primary)]/30 shadow-lg scale-[1.02]' : 'border-[var(--border-color)] hover:border-[var(--brand-primary)]/50'}`}>
+                            {isSelected && (
+                              <div className="absolute top-2 right-2 w-6 h-6 bg-[var(--brand-primary)] text-[var(--brand-text)] rounded-full flex items-center justify-center z-10 shadow-lg animate-in zoom-in-90">
+                                <IconCheck />
+                              </div>
+                            )}
+                            <div className="aspect-square bg-white relative">
+                              <img src={item.mainImage || item.render8k || item.description || 'https://via.placeholder.com/400?text=No+Image'} alt={item.title} className="w-full h-full object-cover mix-blend-multiply transition-transform duration-500 group-hover:scale-110" />
+                            </div>
+                            <div className="p-3 bg-[var(--bg-surface)] border-t border-[var(--border-color)] relative z-10">
+                              <div className="flex justify-between items-center mb-1">
+                                <p className="text-[10px] font-mono text-[var(--text-muted)] truncate">{item.designCode}</p>
+                                <span className="text-[9px] font-bold text-[var(--brand-primary)] bg-[var(--brand-primary)]/10 px-1.5 py-0.5 rounded">{item.metalPurity}</span>
+                              </div>
+                              <p className="text-xs font-bold text-[var(--text-main)] truncate">{item.title}</p>
+                            </div>
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
+                </div>
+
+                {/* DOCKED PAGINATION */}
+                {totalPages > 1 && (
+                  <div className="p-4 border-t border-[var(--border-color)] flex justify-between items-center bg-[var(--bg-base)] z-20 shadow-[0_-10px_20px_rgba(0,0,0,0.02)]">
+                    <button disabled={currentPage === 1} onClick={() => handlePageChange(currentPage - 1)} className="px-6 py-2 border border-[var(--border-color)] rounded-lg text-xs font-bold uppercase tracking-widest disabled:opacity-50 hover:bg-[var(--bg-surface)] transition-colors">Previous Page</button>
+                    <span className="text-xs font-bold text-[var(--brand-primary)] tracking-widest bg-[var(--brand-primary)]/10 px-4 py-1.5 rounded-full">Page {currentPage} of {totalPages}</span>
+                    <button disabled={currentPage === totalPages} onClick={() => handlePageChange(currentPage + 1)} className="px-6 py-2 border border-[var(--border-color)] rounded-lg text-xs font-bold uppercase tracking-widest disabled:opacity-50 hover:bg-[var(--bg-surface)] transition-colors">Load Next 120</button>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* TAB: APPEARANCE */}
+            {builderTab === 'APPEARANCE' && (
+              <div className="flex-1 overflow-y-auto p-8 bg-[var(--bg-base)]">
+                <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
+                  
+                  {/* Left Column: Logic & Theme */}
+                  <div className="space-y-6">
+                    
+                    <div className="bg-[var(--bg-surface)] p-6 rounded-2xl border border-[var(--border-color)]">
+                      <h4 className="text-xs font-bold uppercase tracking-widest text-[var(--text-main)] border-b border-[var(--border-color)] pb-3 mb-5">Presentation Engine & Layout</h4>
+                      <div className="space-y-5">
+                        
+                        <div>
+                          <label className="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Device Orientation Preference</label>
+                          <div className="flex gap-3">
+                            <button onClick={() => setConfig({...config, orientation: 'PORTRAIT'})} className={`flex-1 py-2.5 rounded-xl border transition-all ${config.orientation === 'PORTRAIT' ? 'border-[var(--brand-primary)] bg-[var(--brand-primary)]/10 text-[var(--brand-primary)]' : 'border-[var(--border-color)] text-[var(--text-muted)] hover:bg-[var(--bg-base)]'} text-[10px] font-bold uppercase`}>Portrait (Mobile)</button>
+                            <button onClick={() => setConfig({...config, orientation: 'LANDSCAPE'})} className={`flex-1 py-2.5 rounded-xl border transition-all ${config.orientation === 'LANDSCAPE' ? 'border-[var(--brand-primary)] bg-[var(--brand-primary)]/10 text-[var(--brand-primary)]' : 'border-[var(--border-color)] text-[var(--text-muted)] hover:bg-[var(--bg-base)]'} text-[10px] font-bold uppercase`}>Landscape (Tablet)</button>
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Desktop & Tablet (Products Per Page)</label>
+                          <select value={config.desktopItemsPerPage} onChange={(e) => setConfig({...config, desktopItemsPerPage: Number(e.target.value)})} className="w-full bg-[var(--bg-base)] border border-[var(--border-color)] text-xs py-3 px-4 rounded-xl focus:ring-1 focus:ring-[var(--brand-primary)] outline-none cursor-pointer text-[var(--text-main)]">
+                            <option value={1}>1 Item Per Page (Hero View)</option>
+                            <option value={2}>2 Items Per Page (Large Imagery)</option>
+                            <option value={4}>4 Items Per Page (Lookbook Style)</option>
+                            <option value={8}>8 Items Per Page (Dense Wholesale Grid)</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Mobile (Products Per Page)</label>
+                          <select value={config.mobileItemsPerPage} onChange={(e) => setConfig({...config, mobileItemsPerPage: Number(e.target.value)})} className="w-full bg-[var(--bg-base)] border border-[var(--border-color)] text-xs py-3 px-4 rounded-xl focus:ring-1 focus:ring-[var(--brand-primary)] outline-none cursor-pointer text-[var(--text-main)]">
+                            <option value={1}>1 Item Per Page (Swipe Vertical)</option>
+                            <option value={2}>2 Items Per Page (Standard E-com)</option>
+                            <option value={4}>4 Items Per Page (Dense Grid)</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Color Theme</label>
+                          <div className="flex gap-3">
+                            <button onClick={() => setConfig({...config, theme: 'LIGHT'})} className={`flex-1 py-3 rounded-xl border-2 transition-all ${config.theme === 'LIGHT' ? 'border-[var(--brand-primary)] ring-2 ring-[var(--brand-primary)]/20 bg-[var(--brand-primary)]/5' : 'border-[var(--border-color)] bg-white'} text-black text-[10px] font-bold uppercase`}>Classic Light</button>
+                            <button onClick={() => setConfig({...config, theme: 'DARK'})} className={`flex-1 py-3 rounded-xl border-2 transition-all ${config.theme === 'DARK' ? 'border-[var(--brand-primary)] ring-2 ring-[var(--brand-primary)]/20 bg-slate-800' : 'border-[var(--border-color)] bg-slate-900'} text-white text-[10px] font-bold uppercase`}>Slate Dark</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-[var(--bg-surface)] p-6 rounded-2xl border border-[var(--border-color)]">
+                      <h4 className="text-xs font-bold uppercase tracking-widest text-[var(--text-main)] border-b border-[var(--border-color)] pb-3 mb-5">Business Logic & Security</h4>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border border-[var(--border-color)] rounded-xl bg-[var(--bg-base)]">
+                          <div>
+                            <span className="block text-[10px] font-bold uppercase text-[var(--text-main)]">Hide Product Pricing</span>
+                            <span className="text-[9px] text-[var(--text-muted)] mt-0.5 block">Remove financial data for distributors.</span>
+                          </div>
+                          <button onClick={() => setConfig({...config, hidePricing: !config.hidePricing})} className={`w-11 h-6 rounded-full relative transition-colors ${config.hidePricing ? 'bg-[var(--brand-primary)]' : 'bg-gray-300'}`}>
+                            <span className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${config.hidePricing ? 'translate-x-5' : ''}`}></span>
+                          </button>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 border border-[var(--border-color)] rounded-xl bg-[var(--bg-base)]">
+                          <div>
+                            <span className="block text-[10px] font-bold uppercase text-[var(--text-main)]">Purchase Order Matrix</span>
+                            <span className="text-[9px] text-[var(--text-muted)] mt-0.5 block">Enable price breakup popup in viewer.</span>
+                          </div>
+                          <button onClick={() => setConfig({...config, poMatrix: !config.poMatrix})} className={`w-11 h-6 rounded-full relative transition-colors ${config.poMatrix ? 'bg-emerald-500' : 'bg-gray-300'}`}>
+                            <span className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${config.poMatrix ? 'translate-x-5' : ''}`}></span>
+                          </button>
+                        </div>
+
+                        <div className="pt-2">
+                          <label className="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Password Protection (Gatekeeper)</label>
+                          <input type="text" placeholder="Enter secure PIN to lock link..." value={config.password} onChange={(e) => setConfig({...config, password: e.target.value})} className="w-full px-4 py-3 bg-[var(--bg-base)] border border-[var(--border-color)] rounded-xl text-xs font-mono focus:ring-1 focus:ring-[var(--brand-primary)] outline-none" />
+                        </div>
+                      </div>
+                    </div>
+
+                  </div>
+
+                  {/* Right Column: Covers & Collateral */}
+                  <div className="space-y-6">
+                    
+                    <div className="bg-[var(--bg-surface)] p-6 rounded-2xl border border-[var(--border-color)]">
+                      <h4 className="text-xs font-bold uppercase tracking-widest text-[var(--text-main)] border-b border-[var(--border-color)] pb-3 mb-5">Flipbook Cover Designs</h4>
+                      <p className="text-[9px] text-[var(--brand-primary)] mb-4 bg-[var(--brand-primary)]/10 px-3 py-2 rounded-lg font-medium border border-[var(--brand-primary)]/20">
+                        Upload format: <strong>JPG / PNG</strong>.<br/>
+                        Required Ratio: <strong>{config.orientation === 'PORTRAIT' ? 'A4 Size (1 : 1.414)' : 'Landscape (16 : 9)'}</strong>.
+                      </p>
+
+                      <div className="space-y-4">
+                        {/* Drag and Drop Front Cover */}
+                        <div>
+                          <label className="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Front Cover Image</label>
+                          <div 
+                            onDragOver={(e) => e.preventDefault()}
+                            onDrop={(e) => handleImageDrop(e, 'frontCover')}
+                            className="relative w-full h-32 bg-[var(--bg-base)] border-2 border-dashed border-[var(--border-color)] rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-[var(--brand-primary)] hover:bg-[var(--brand-primary)]/5 transition-colors overflow-hidden group"
+                          >
+                            <input type="file" accept="image/jpeg, image/png" onChange={(e) => handleImageDrop(e, 'frontCover')} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" />
+                            {config.frontCover ? (
+                              <img src={config.frontCover} alt="Front Cover" className="w-full h-full object-cover opacity-60 group-hover:opacity-30 transition-opacity" />
+                            ) : (
+                              <>
+                                <IconUpload />
+                                <span className="text-[10px] font-bold text-[var(--text-muted)] mt-2">Drag & Drop or Click</span>
+                              </>
+                            )}
+                            {config.frontCover && <span className="absolute text-[10px] font-bold text-[var(--text-main)] bg-[var(--bg-surface)] px-3 py-1 rounded shadow opacity-0 group-hover:opacity-100 transition-opacity">Change Image</span>}
+                          </div>
+                        </div>
+
+                        {/* Drag and Drop Back Cover */}
+                        <div>
+                          <label className="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Back Cover Image</label>
+                          <div 
+                            onDragOver={(e) => e.preventDefault()}
+                            onDrop={(e) => handleImageDrop(e, 'backCover')}
+                            className="relative w-full h-32 bg-[var(--bg-base)] border-2 border-dashed border-[var(--border-color)] rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-[var(--brand-primary)] hover:bg-[var(--brand-primary)]/5 transition-colors overflow-hidden group"
+                          >
+                            <input type="file" accept="image/jpeg, image/png" onChange={(e) => handleImageDrop(e, 'backCover')} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" />
+                            {config.backCover ? (
+                              <img src={config.backCover} alt="Back Cover" className="w-full h-full object-cover opacity-60 group-hover:opacity-30 transition-opacity" />
+                            ) : (
+                              <>
+                                <IconUpload />
+                                <span className="text-[10px] font-bold text-[var(--text-muted)] mt-2">Drag & Drop or Click</span>
+                              </>
+                            )}
+                            {config.backCover && <span className="absolute text-[10px] font-bold text-[var(--text-main)] bg-[var(--bg-surface)] px-3 py-1 rounded shadow opacity-0 group-hover:opacity-100 transition-opacity">Change Image</span>}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-[var(--bg-surface)] p-6 rounded-2xl border border-[var(--border-color)]">
+                      <div className="flex justify-between items-center border-b border-[var(--border-color)] pb-3 mb-5">
+                        <h4 className="text-xs font-bold uppercase tracking-widest text-[var(--text-main)]">Dynamic Lifestyle Inserts</h4>
+                        <button onClick={addLifestyleInsert} className="text-[10px] font-bold text-[var(--brand-text)] bg-[var(--brand-primary)] px-3 py-1.5 rounded-lg uppercase tracking-wider hover:opacity-90 transition-opacity">+ Add Page</button>
+                      </div>
+                      
+                      <div className="space-y-3 max-h-[200px] overflow-y-auto pr-2 custom-scrollbar">
+                        {config.lifestyleInserts.map((insert, index) => (
+                          <div key={index} className="flex items-center gap-3 bg-[var(--bg-base)] p-2 rounded-xl border border-[var(--border-color)] relative">
+                            <span className="text-[10px] font-bold text-[var(--brand-primary)] w-12 text-center bg-[var(--brand-primary)]/10 py-1 rounded">Pg {index + 1}</span>
+                            
+                            {/* Drag Drop for Insert */}
+                            <div className="flex-1 relative h-8 bg-[var(--bg-surface)] rounded border border-dashed border-[var(--border-color)] flex items-center justify-center overflow-hidden hover:border-[var(--brand-primary)] transition-colors">
+                               <input type="file" accept="image/jpeg, image/png" onChange={(e) => handleImageDrop(e, index)} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" />
+                               {insert ? (
+                                 <span className="text-[10px] font-mono text-[var(--brand-primary)] truncate px-2">{insert.substring(0, 30)}...</span>
+                               ) : (
+                                 <span className="text-[9px] font-bold text-[var(--text-muted)] uppercase tracking-widest">Drop Image Here</span>
+                               )}
+                            </div>
+                            <button onClick={() => removeLifestyleInsert(index)} className="w-8 h-8 flex items-center justify-center text-[var(--text-muted)] hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"><IconTrash /></button>
+                          </div>
+                        ))}
+                        {config.lifestyleInserts.length === 0 && (
+                          <div className="text-center py-6 border-2 border-dashed border-[var(--border-color)] rounded-xl">
+                            <p className="text-[10px] text-[var(--text-muted)] font-medium">No internal inserts staged.</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* ACTION FOOTER */}
+            <div className="px-8 py-5 border-t border-[var(--border-color)] bg-[var(--bg-surface)] flex justify-between items-center z-20">
+              <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">
+                Staged for Compile: <strong className="text-[var(--text-main)] text-sm">{selectedVisualItems.length}</strong> SKUs
+              </p>
+              <div className="flex gap-4">
+                <button onClick={() => setShowBuilder(false)} className="px-6 py-3 border border-[var(--border-color)] text-[10px] font-bold text-[var(--text-muted)] hover:text-[var(--text-main)] uppercase tracking-widest rounded-xl hover:bg-[var(--bg-base)] transition-colors">Keep Draft & Close</button>
+                <button onClick={handleCreate} disabled={isCreating || selectedVisualItems.length === 0} className="relative overflow-hidden group px-8 py-3 bg-[var(--brand-primary)] text-[var(--brand-text)] text-[10px] font-bold uppercase tracking-widest rounded-xl hover:opacity-90 disabled:opacity-50 transition-all shadow-lg active:scale-95">
+                  <span className={`relative z-10 flex items-center gap-2 ${isCreating ? 'opacity-0' : 'opacity-100'}`}>Compile & Launch Flipbook</span>
+                  
+                  {/* Animated Loading State inside Button */}
+                  {isCreating && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-[var(--brand-primary)] z-20">
+                      <svg className="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                      <span className="ml-2">Compiling...</span>
+                    </div>
+                  )}
+                </button>
+              </div>
+            </div>
+            
+            {/* Full Modal Overlay During Creation */}
+            {isCreating && (
+              <div className="absolute inset-0 z-50 bg-black/40 backdrop-blur-sm flex flex-col items-center justify-center">
+                <div className="bg-[var(--bg-base)] p-8 rounded-2xl shadow-2xl flex flex-col items-center border border-[var(--glass-border)] animate-in zoom-in-95">
+                  <div className="w-16 h-16 border-4 border-[var(--brand-primary)] border-t-transparent rounded-full animate-spin mb-4"></div>
+                  <h3 className="text-sm font-bold text-[var(--text-main)] uppercase tracking-widest">Compiling Assets</h3>
+                  <p className="text-[10px] text-[var(--text-muted)] mt-2">Processing base64 images and generating payload...</p>
+                </div>
+              </div>
+            )}
+
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

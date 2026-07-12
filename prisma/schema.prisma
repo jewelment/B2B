@@ -1,0 +1,257 @@
+// ======================================================
+// 1. DATABASE CONFIGURATION
+// ======================================================
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ======================================================
+// 2. THE CORE INVENTORY & PIM MODULE
+// ======================================================
+
+model AccessRequest {
+  id        String   @id @default(cuid())
+  gstin     String
+  salesCode String?
+  status    String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  createdAt DateTime @default(now())
+}
+
+model Product {
+  id             String  @id @default(cuid())
+  handle         String  @unique
+  designCode     String  @unique
+  title          String
+  description    String?
+  category       String? // Core field for template generation
+  
+  // Pricing & Inventory Core
+  price          Float   @default(0) 
+  compareAtPrice Float?
+  weightGrams    Float?
+  
+  // Legacy Core Fields
+  metalPurity    String?
+  grossWeight    Float?
+  pureWeight     Float?
+  igiCertNumber  String?
+  estimatedPrice Float?  @default(0)
+
+  status         String  @default("DRAFT")
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // RELATIONS
+  components        Component[]
+  customFieldValues ProductFieldValue[] // Links to dynamic custom attributes
+  media             ProductMedia[]      // The localized Asset Pipeline
+}
+
+model Component {
+  id        String  @id @default(cuid())
+  productId String
+  type      String  // e.g., "Metal", "Diamond", "Making Charges"
+  details   String
+  weight    Float?
+  rate      Float
+  finalCost Float
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+// ------------------------------------------------------
+// PRODUCT INFORMATION MANAGEMENT (PIM) ENGINE
+// ------------------------------------------------------
+
+model CustomField {
+  id          String              @id @default(cuid())
+  name        String              @unique // e.g., "Diamond pcs", "Offer text"
+  dataType    String              // "TEXT", "NUMBER", "URL", "JSON"
+  isMandatory Boolean             @default(false)
+  options     String?             
+  createdAt   DateTime            @default(now())
+  
+  values      ProductFieldValue[]
+}
+
+model ProductFieldValue {
+  id            String      @id @default(cuid())
+  productId     String
+  fieldId       String
+  value         String      
+  
+  product       Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  customField   CustomField @relation(fields: [fieldId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, fieldId])
+}
+
+model ProductMedia {
+  id          String   @id @default(cuid())
+  productId   String
+  url         String   // Local server path (e.g., /uploads/SKU_1.jpg)
+  isPrimary   Boolean  @default(false)
+  sequence    Int      @default(0) // 1, 2, 3 based on regex matching
+
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+// ======================================================
+// 3. THE FLIPBOOK CATALOG MODULE 
+// ======================================================
+
+model Catalog {
+  id            String    @id @default(cuid())
+  name          String
+  clientId      String?
+  validUntil    DateTime?
+  theme         String    @default("LIGHT")
+  itemsPerPage  Int       @default(4)
+  configuration String?   // Stores advanced flipbook settings as stringified JSON
+  views         Int       @default(0)
+  totalOrders   Int       @default(0)
+  pipelineValue Float     @default(0.0)
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  items CatalogItem[]
+}
+
+model CatalogItem {
+  id         String @id @default(cuid())
+  catalogId  String
+  designCode String
+  sequence   Int
+
+  catalog Catalog @relation(fields: [catalogId], references: [id], onDelete: Cascade)
+
+  @@unique([catalogId, designCode])
+  @@index([catalogId])
+}
+
+// ======================================================
+// 4. UNIFIED B2B USERS, AUTH & CRM MODULE
+// ======================================================
+
+model User {
+  id              String  @id @default(cuid())
+  name            String? // Added for UI/CRM mapping
+  email           String  @unique
+  passwordHash    String
+  companyName     String?
+
+  contactName     String?
+  gstin           String? // Standardized to match registration API
+  phone           String?
+  phoneNumber     String? // Fallback for Next-Auth UI
+
+  role            String  @default("CLIENT")  // "ADMIN", "SALES", "CLIENT"
+  status          String  @default("PENDING") // "PENDING", "APPROVED", "SUSPENDED"
+  referralCode    String?
+  isApproved      Boolean @default(false) 
+
+  businessType    String? 
+  yearEstablished Int?
+
+  // CRM Mapping: Links a Business Owner to a specific Sales Rep
+  assignedSalesmanId String?
+  salesman           User?   @relation("SalesToClient", fields: [assignedSalesmanId], references: [id])
+  clients            User[]  @relation("SalesToClient")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // RELATIONS
+  orders    PurchaseOrder[]
+  contacts  ContactPerson[]
+  addresses Address[]
+}
+
+model ContactPerson {
+  id          String  @id @default(cuid())
+  userId      String
+  user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  fullName    String
+  designation String?
+  email       String?
+  mobile      String?
+  whatsapp    String?
+  isPrimary   Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Address {
+  id          String  @id @default(cuid())
+  userId      String
+  user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  type        String  // "BILLING" or "SHIPPING"
+  country     String?
+  state       String?
+  city        String?
+  zipCode     String?
+  fullAddress String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ======================================================
+// 5. THE B2B GLOBAL PURCHASE ORDER MATRIX (PHASE 4)
+// ======================================================
+
+model PurchaseOrder {
+  id          String   @id @default(cuid())
+  poNumber    String   @unique
+  catalogId   String?  // Maps to the Flipbook they ordered from
+  
+  clientId    String
+  client      User     @relation(fields: [clientId], references: [id])
+  
+  createdBy   String?
+  totalUnits  Int
+  totalAmount Float
+  status      String   @default("PENDING") // PENDING, PROCESSING, FULFILLED
+  notes       String?
+  matrixData  String?  // Stores the 2D B2B matrix payload as JSON
+
+  items       OrderItem[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model OrderItem {
+  id         String        @id @default(cuid())
+  orderId    String
+  order      PurchaseOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  
+  designCode String
+  purity     String
+  size       String
+  quantity   Int
+  unitPrice  Float
+  totalPrice Float
+}
+
+// ======================================================
+// 6. PRICING CONTROL MODULE 
+// ======================================================
+
+model StoreSettings {
+  id                String   @id @default(cuid())
+  pricingMode       String   @default("MANUAL")
+  manualGoldRate24K Float    @default(7250.0)
+  manualSilverRate  Float    @default(88.0)
+  updatedAt         DateTime @updatedAt
+}
