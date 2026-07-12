@@ -9,6 +9,8 @@ export default function SystemRoutesAuditor() {
     { path: '/', label: 'B2B Front Door (Gateway)', type: 'Public', status: 'Active' },
     { path: '/login', label: 'B2B Login & PIN Lock', type: 'Public', status: 'Active' },
     { path: '/register', label: 'Partner Onboarding', type: 'Public', status: 'Active' },
+    { path: '/reset-password', label: 'Password Reset Gateway', type: 'Public', status: 'Active' },
+    { path: '/sitemap.xml', label: 'SEO Sitemap', type: 'Public', status: 'Active' },
     
     // --- Business Owner / Client (Protected) ---
     { path: '/dashboard', label: 'Wholesale Catalog & Matrix', type: 'Protected', status: 'Active' },
@@ -16,6 +18,8 @@ export default function SystemRoutesAuditor() {
     { path: '/dashboard/history', label: 'Order History & Ledger', type: 'Protected', status: 'Active' },
     { path: '/dashboard/settings', label: 'Client Profile Hub', type: 'Protected', status: 'Active' },
     { path: '/inventory', label: 'Global Inventory Explorer', type: 'Protected', status: 'Active' },
+    { path: '/catalog/view/[id]', label: 'Dynamic Catalog View', type: 'Protected', status: 'Active' },
+    { path: '/catalog/flipbook/[id]', label: 'Dynamic Flipbook View', type: 'Protected', status: 'Active' },
     
     // --- Admin / Salesman ---
     { path: '/admin', label: 'Sales & Admin Dashboard', type: 'Admin', status: 'Active' },
@@ -29,11 +33,15 @@ export default function SystemRoutesAuditor() {
     { path: '/admin/orders', label: 'PO Inbox & Kanban', type: 'Admin', status: 'Active' },
     { path: '/admin/assets', label: 'Asset Library / CDN', type: 'Admin', status: 'Active' },
     
-    // --- API & Engine Subsystems ---
+    // --- Core API & Engine Subsystems ---
     { path: '/api/auth/[...nextauth]', label: 'NextAuth Security Gateway', type: 'API', status: 'Active' },
     { path: '/api/checkout/execute', label: 'PO Generation Engine', type: 'API', status: 'Active' },
     { path: '/api/catalog/mirror-cdn', label: 'CDN Image Mirroring', type: 'API', status: 'Active' },
     { path: '/api/pricing/mcx', label: 'MCX Live Bullion Sync', type: 'API', status: 'Active' },
+    { path: '/api/admin/products/bulk-sync', label: 'Products Bulk Sync API', type: 'API', status: 'Active' },
+    { path: '/api/catalog/generate', label: 'Catalog Generation API', type: 'API', status: 'Active' },
+    { path: '/api/catalog/[id]/pdf', label: 'PDF Generation Engine', type: 'API', status: 'Active' },
+    { path: '/api/inventory/sync', label: 'Inventory Sync Webhook', type: 'API', status: 'Active' },
     
     // --- Dev & Tracking ---
     { path: '/admin/system-routes', label: 'System Route Auditor', type: 'Dev Only', status: 'Active' },
