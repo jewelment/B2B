@@ -1,12 +1,36 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 
 // --- Dev Security Check ---
 const isDev = process.env.NODE_ENV === 'development';
 
 export default function DevRoadmapDashboard() {
+  const [expandedTask, setExpandedTask] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'roadmap' | 'pseudo_code' | 'documentation' | 'qc_testing'>('roadmap');
+  
+  const [isQC, setIsQC] = useState(false);
+  const [qcResults, setQcResults] = useState<any>(null);
+
+  const runQC = async () => {
+    setIsQC(true);
+    try {
+      const res = await fetch('/api/admin/qc-runner');
+      const data = await res.json();
+      setQcResults(data);
+    } catch(e) {
+      console.error(e);
+      setQcResults({ systemStatus: 'ERROR', results: [] });
+    } finally {
+      setIsQC(false);
+    }
+  };
+
+  const toggleTask = (id: string) => {
+    setExpandedTask(expandedTask === id ? null : id);
+  };
+
   if (!isDev) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[var(--bg-base)] text-[var(--text-main)]">
@@ -86,6 +110,34 @@ export default function DevRoadmapDashboard() {
         { name: "7.2 CSS Variable Injection API", profile: "Admin", status: "Not Started", progress: 0, url: "/api/admin/theme" },
         { name: "7.3 Live Preview Engine", profile: "Admin", status: "Not Started", progress: 0, url: "/admin/settings/theme" }
       ]
+    },
+    {
+      phase: "8.0 V2: MULTI-TENANT ISOLATION (SAAS PIVOT)",
+      description: "Database migration to PostgreSQL & Next.js Subdomain Middleware.",
+      tasks: [
+        { name: "8.1 PostgreSQL Tenant Schema", profile: "Super Admin", status: "Not Started", progress: 0, url: "prisma/schema.prisma" },
+        { name: "8.2 Edge Subdomain Routing", profile: "System Wide", status: "Not Started", progress: 0, url: "middleware.ts" },
+        { name: "8.3 Headless JWT Strict Auth", profile: "All Profiles", status: "Not Started", progress: 0, url: "/api/auth/[...nextauth]" }
+      ]
+    },
+    {
+      phase: "9.0 V2: SERVER-DRIVEN UI & NATIVE APP",
+      description: "Decoupling API for React Native Expo App & Dynamic Builders.",
+      tasks: [
+        { name: "9.1 Admin SDUI Layout Builder", profile: "Super Admin, Admin", status: "Not Started", progress: 0, url: "/admin/layout-builder" },
+        { name: "9.2 Native Mobile Auth (Expo)", profile: "Client, Sales", status: "Not Started", progress: 0, url: "/api/mobile/auth" },
+        { name: "9.3 Headless PO Matrix Checkout", profile: "Client, Sales", status: "Not Started", progress: 0, url: "/api/checkout/execute" },
+        { name: "9.4 Mobile Responsive Flipbook", profile: "Client, Sales", status: "Completed", progress: 100, url: "/catalog/flipbook/[id]" }
+      ]
+    },
+    {
+      phase: "10.0 V2: OTA SCALE & SUPER ADMIN COMMAND",
+      description: "Automated scaling, APK deployment, and multi-tenant troubleshooting.",
+      tasks: [
+        { name: "10.1 Bulk Sync Data Validation", profile: "Super Admin, Admin", status: "Completed", progress: 100, url: "/admin/inventory/import" },
+        { name: "10.2 Expo EAS OTA Update Pipeline", profile: "Super Admin", status: "Not Started", progress: 0, url: "eas.json" },
+        { name: "10.3 Impersonation JWT Token Swap", profile: "Super Admin", status: "Not Started", progress: 0, url: "/api/admin/impersonate" }
+      ]
     }
   ];
 
@@ -140,18 +192,37 @@ export default function DevRoadmapDashboard() {
                 <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">Global Completion</p>
                 <p className="text-2xl font-bold text-[var(--text-main)]">{globalProgress}%</p>
               </div>
-              <div className="w-16 h-16 rounded-full border-4 border-[var(--bg-surface)] flex items-center justify-center relative">
-                <svg className="absolute inset-0 w-full h-full -rotate-90">
-                  <circle cx="30" cy="30" r="28" stroke="currentColor" strokeWidth="4" fill="transparent" className="text-[var(--border-color)]" />
-                  <circle cx="30" cy="30" r="28" stroke="currentColor" strokeWidth="4" fill="transparent" strokeDasharray="175" strokeDashoffset={175 - (175 * globalProgress) / 100} className="text-emerald-500 transition-all duration-1000" />
+              <div className="w-16 h-16 flex items-center justify-center relative bg-[var(--bg-base)] rounded-full p-1 border border-[var(--border-color)]">
+                <svg viewBox="0 0 60 60" className="absolute inset-1 w-full h-full -rotate-90">
+                  <circle cx="30" cy="30" r="26" stroke="currentColor" strokeWidth="4" fill="transparent" className="text-[var(--border-color)]" />
+                  <circle cx="30" cy="30" r="26" stroke="currentColor" strokeWidth="4" fill="transparent" strokeDasharray="163" strokeDashoffset={163 - (163 * globalProgress) / 100} className="text-emerald-500 transition-all duration-1000" />
                 </svg>
               </div>
             </div>
           </div>
         </div>
 
-        {/* PHASES GRID */}
-        <div className="space-y-12">
+        {/* TABS NAVIGATION */}
+        <div className="flex space-x-1 border-b border-[var(--border-color)] pb-px overflow-x-auto">
+          {[
+            { id: 'roadmap', label: 'Roadmap Ledger' },
+            { id: 'pseudo_code', label: 'Pseudo Code' },
+            { id: 'documentation', label: 'Detail Documentation' },
+            { id: 'qc_testing', label: 'Auto QC & Diagnostics' }
+          ].map(tab => (
+            <button 
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as any)}
+              className={`px-6 py-3 text-sm font-bold uppercase tracking-widest border-b-2 transition-colors ${activeTab === tab.id ? 'border-[var(--brand-primary)] text-[var(--brand-primary)]' : 'border-transparent text-[var(--text-muted)] hover:text-[var(--text-main)]'}`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        {/* TAB CONTENT: ROADMAP GRID */}
+        {activeTab === 'roadmap' && (
+        <div className="space-y-12 animate-in fade-in slide-in-from-bottom-2 duration-300">
           {roadmapData.map((phase, pIdx) => (
             <div key={pIdx} className="space-y-4">
               <div className="border-b border-[var(--border-color)] pb-3">
@@ -172,34 +243,82 @@ export default function DevRoadmapDashboard() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-[var(--border-color)]">
-                      {phase.tasks.map((task, tIdx) => (
-                        <tr key={tIdx} className="hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
-                          <td className="py-4 px-6 text-sm font-medium">{task.name}</td>
-                          <td className="py-4 px-6">
-                            <span className="text-[10px] font-bold text-[var(--text-main)] uppercase tracking-widest px-2 py-1 bg-[var(--bg-base)] border border-[var(--border-color)] rounded-md shadow-sm">
-                              {task.profile}
-                            </span>
-                          </td>
-                          <td className="py-4 px-6 text-center">
-                            <span className={`inline-flex items-center justify-center px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border ${getStatusColor(task.status)}`}>
-                              {task.status}
-                            </span>
-                          </td>
-                          <td className="py-4 px-6 align-middle">
-                            <div className="flex items-center gap-3">
-                              <div className="w-full h-2 bg-[var(--bg-base)] rounded-full border border-[var(--border-color)] overflow-hidden">
-                                <div className={`h-full rounded-full transition-all duration-500 ${getProgressColor(task.progress)}`} style={{ width: `${task.progress}%` }}></div>
-                              </div>
-                              <span className="text-xs font-mono font-bold text-[var(--text-muted)] w-8 text-right">{task.progress}%</span>
-                            </div>
-                          </td>
-                          <td className="py-4 px-6">
-                            <span className="text-xs font-mono text-[var(--text-muted)] bg-[var(--bg-base)] border border-[var(--border-color)] px-2 py-1 rounded">
-                              {task.url}
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
+                      {phase.tasks.map((task, tIdx) => {
+                        const taskId = `${pIdx}-${tIdx}`;
+                        const isExpanded = expandedTask === taskId;
+                        return (
+                          <React.Fragment key={tIdx}>
+                            <tr className={`hover:bg-black/5 dark:hover:bg-white/5 transition-colors ${isExpanded ? 'bg-black/5 dark:bg-white/5' : ''}`}>
+                              <td className="py-4 px-6 text-sm font-medium">{task.name}</td>
+                              <td className="py-4 px-6">
+                                <span className="text-[10px] font-bold text-[var(--text-main)] uppercase tracking-widest px-2 py-1 bg-[var(--bg-base)] border border-[var(--border-color)] rounded-md shadow-sm">
+                                  {task.profile}
+                                </span>
+                              </td>
+                              <td className="py-4 px-6 text-center">
+                                <span className={`inline-flex items-center justify-center px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border ${getStatusColor(task.status)}`}>
+                                  {task.status}
+                                </span>
+                              </td>
+                              <td className="py-4 px-6 align-middle">
+                                <div className="flex items-center gap-3">
+                                  <div className="w-full h-2 bg-[var(--bg-base)] rounded-full border border-[var(--border-color)] overflow-hidden">
+                                    <div className={`h-full rounded-full transition-all duration-500 ${getProgressColor(task.progress)}`} style={{ width: `${task.progress}%` }}></div>
+                                  </div>
+                                  <span className="text-xs font-mono font-bold text-[var(--text-muted)] w-8 text-right">{task.progress}%</span>
+                                </div>
+                              </td>
+                              <td className="py-4 px-6 text-right space-x-2">
+                                <button 
+                                  onClick={() => toggleTask(taskId)}
+                                  className="text-[10px] uppercase font-bold tracking-widest px-3 py-1.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-surface)] hover:bg-[var(--bg-base)] transition-colors"
+                                >
+                                  {isExpanded ? 'Hide Details' : 'Details'}
+                                </button>
+                                <a 
+                                  href={task.url.startsWith('/') ? task.url : `/${task.url}`} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center text-[10px] uppercase font-bold tracking-widest px-3 py-1.5 rounded-lg border border-transparent bg-[var(--brand-primary)] text-white hover:opacity-90 transition-opacity"
+                                >
+                                  Open
+                                  <svg className="w-3 h-3 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                                </a>
+                              </td>
+                            </tr>
+                            {isExpanded && (
+                              <tr className="bg-black/5 dark:bg-white/5 border-b border-[var(--border-color)]">
+                                <td colSpan={5} className="px-6 py-6 border-l-4 border-[var(--brand-primary)] whitespace-normal">
+                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="bg-[var(--bg-base)] p-5 rounded-xl border border-[var(--border-color)]">
+                                      <h4 className="text-xs font-bold uppercase tracking-widest text-[var(--text-muted)] mb-3 flex items-center gap-2">
+                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                        Implementation Details
+                                      </h4>
+                                      <ul className="list-disc pl-5 text-sm space-y-2 text-[var(--text-main)]">
+                                        <li>Architectural specification and pseudo-code definition based on roadmap guidelines.</li>
+                                        <li>Ensuring full isolation and non-breaking implementations relative to existing legacy cord.</li>
+                                        <li>Deploying necessary database updates, routing configurations, and NextAuth wrappers for this module.</li>
+                                      </ul>
+                                    </div>
+                                    <div className="bg-emerald-500/5 p-5 rounded-xl border border-emerald-500/20">
+                                      <h4 className="text-xs font-bold uppercase tracking-widest text-emerald-600 mb-3 flex items-center gap-2">
+                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                        QA & Testing Pointers
+                                      </h4>
+                                      <ul className="list-disc pl-5 text-sm space-y-2 text-emerald-700/80 dark:text-emerald-400/80">
+                                        <li>Verify route guards block unauthorized profile access (e.g., Salesman vs Super Admin).</li>
+                                        <li>Execute boundary tests on edge cases (e.g., invalid tokens, malformed POST payloads).</li>
+                                        <li>Confirm global styling consistency and contrast visibility in dark/light modes.</li>
+                                      </ul>
+                                    </div>
+                                  </div>
+                                </td>
+                              </tr>
+                            )}
+                          </React.Fragment>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
@@ -207,6 +326,300 @@ export default function DevRoadmapDashboard() {
             </div>
           ))}
         </div>
+        )}
+
+        {/* TAB CONTENT: PSEUDO CODE */}
+        {activeTab === 'pseudo_code' && (
+          <div className="bg-[var(--bg-surface)] border border-[var(--border-color)] shadow-sm rounded-2xl p-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
+            <h2 className="text-xl font-bold tracking-tight mb-6">Core Engines: Pseudo-Code Algorithms</h2>
+            <div className="space-y-8">
+              <div>
+                <h3 className="text-sm font-bold uppercase tracking-widest text-[var(--text-muted)] mb-3">1. The Matrix Checkout Engine</h3>
+                <div className="bg-black/80 text-emerald-400 p-5 rounded-xl font-mono text-xs overflow-x-auto">
+<pre>{`// Pseudo-code for /api/checkout/execute
+function executeMatrixCheckout(userId, cartItems) {
+    // 1. Verify Session
+    const session = getSession();
+    if (!session || session.userId !== userId) throw Error("Unauthorized");
+
+    // 2. Fetch Live Commodity Rates (MCX)
+    const liveRates = fetchLiveRatesFromMCX(); // { GOLD_24K: 7200, SILVER: 85 }
+
+    let orderTotal = 0;
+    let processedLineItems = [];
+
+    // 3. Process the Matrix Grid
+    for (let item of cartItems) {
+        const productVariant = db.ProductVariant.findById(item.variantId);
+        
+        // Calculate Metal Value based on Purity (e.g. 18K is 75% of 24K)
+        const purityMultiplier = getPurityMultiplier(productVariant.metal); 
+        const metalCost = productVariant.weight * (liveRates.GOLD_24K * purityMultiplier);
+        
+        // Add Making Charges / Markup
+        const finalItemPrice = metalCost + productVariant.markup;
+        const lineTotal = finalItemPrice * item.quantity;
+        
+        orderTotal += lineTotal;
+        processedLineItems.push({
+            variantId: productVariant.id,
+            quantity: item.quantity,
+            priceLocked: finalItemPrice
+        });
+    }
+
+    // 4. Atomic Database Transaction
+    const newOrder = db.transaction(() => {
+        return db.Order.create({
+            userId: userId,
+            status: "PENDING",
+            totalValue: orderTotal,
+            lineItems: processedLineItems
+        });
+    });
+
+    // 5. Trigger Post-Checkout Hooks
+    triggerEmailInvoice(newOrder);
+    return newOrder.id;
+}`}</pre>
+                </div>
+              </div>
+              
+              <div>
+                <h3 className="text-sm font-bold uppercase tracking-widest text-[var(--text-muted)] mb-3">2. The Responsive Immersive Flipbook Engine</h3>
+                <div className="bg-black/80 text-sky-400 p-5 rounded-xl font-mono text-xs overflow-x-auto">
+<pre>{`// Pseudo-code for /catalog/flipbook/[id]/FlipbookClient.tsx
+function renderFlipbook(catalogData, config) {
+    // 1. Listen for viewport changes
+    const windowState = useWindowSizeListener();
+    
+    // 2. Dynamic Layout Calculation
+    // If device height > width (Portrait phone), force Single Page Mode
+    const isPortrait = windowState.height > windowState.width && windowState.width < 1024;
+    
+    // 3. Contrast Calculation Algorithm
+    // If texture is dark wood or marble, text must be white to prevent blending artifacts
+    const darkTextures = ["WOOD", "MARBLE", "VELVET", "SLATE"];
+    const isBackgroundDark = darkTextures.includes(config.viewerBackground);
+    const textColorClass = isBackgroundDark ? "text-white drop-shadow-md" : "text-black";
+
+    // 4. Render Engine
+    return (
+        <FlipBookEngine 
+            usePortrait={isPortrait} 
+            width={isPortrait ? windowState.width - 40 : 450} 
+            height={isPortrait ? windowState.height - 180 : 636}
+            centerOffset={isPortrait ? 0 : calculateDesktopOffset(currentPage)}
+        >
+            {catalogData.pages.map(page => (
+                <Page content={page} overlayTextColor={textColorClass} />
+            ))}
+        </FlipBookEngine>
+    );
+}`}</pre>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-sm font-bold uppercase tracking-widest text-[var(--text-muted)] mb-3">3. Headless Subdomain Routing (SaaS Pivot)</h3>
+                <div className="bg-black/80 text-amber-400 p-5 rounded-xl font-mono text-xs overflow-x-auto">
+<pre>{`// Pseudo-code for middleware.ts
+export function middleware(req) {
+    const url = req.nextUrl.clone();
+    const hostname = req.headers.get("host");
+
+    // 1. Extract Tenant Subdomain (e.g. tanishq.ajb2b.com -> tanishq)
+    const currentHost = hostname.replace(\`.$\{process.env.NEXT_PUBLIC_ROOT_DOMAIN}\`, "");
+
+    // 2. Ignore static files and API routes
+    if (url.pathname.startsWith('/api') || url.pathname.includes('.')) return NextResponse.next();
+
+    // 3. Invisible Rewrite to Dynamic Tenant Folder
+    url.pathname = \`/[domain]/$\{currentHost}$\{url.pathname}\`;
+    return NextResponse.rewrite(url);
+}`}</pre>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB CONTENT: DETAIL DOCUMENTATION (USER MANUAL) */}
+        {activeTab === 'documentation' && (
+          <div className="bg-[var(--bg-surface)] border border-[var(--border-color)] shadow-sm rounded-2xl p-8 animate-in fade-in slide-in-from-bottom-2 duration-300 space-y-8 text-[var(--text-main)]">
+            <div className="border-b border-[var(--border-color)] pb-6 flex items-start justify-between">
+              <div>
+                <h2 className="text-2xl font-bold tracking-tight mb-2">Platform User Manual</h2>
+                <p className="text-[var(--text-muted)]">The complete B2B guide on how to navigate the portal, use the matrix cart, and view immersive catalogs.</p>
+              </div>
+              <span className="px-3 py-1 bg-amber-500/10 text-amber-600 border border-amber-500/20 text-[10px] uppercase font-bold tracking-widest rounded-lg">Version 1.0</span>
+            </div>
+            
+            {/* INDEX */}
+            <div className="bg-[var(--bg-base)] p-6 rounded-xl border border-[var(--border-color)] mb-8">
+              <h3 className="text-sm font-bold uppercase tracking-widest text-[var(--text-main)] mb-4">Manual Index</h3>
+              <ul className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-[var(--brand-primary)] font-medium">
+                <li><a href="#section-1" className="hover:underline">1. Getting Started & Secure Access</a></li>
+                <li><a href="#section-2" className="hover:underline">2. The Immersive 3D Flipbook</a></li>
+                <li><a href="#section-3" className="hover:underline">3. Ordering via the Wholesale Matrix Cart</a></li>
+                <li><a href="#section-4" className="hover:underline">4. Tracking Purchase Orders & History</a></li>
+              </ul>
+            </div>
+
+            <div className="space-y-8">
+              
+              {/* SECTION 1 */}
+              <div id="section-1" className="space-y-3 pt-4">
+                <h3 className="text-lg font-bold flex items-center gap-2"><span className="w-6 h-6 rounded bg-[var(--text-main)] text-[var(--bg-base)] flex items-center justify-center text-xs">1</span> Getting Started & Secure Access</h3>
+                <p className="text-sm leading-relaxed text-[var(--text-muted)]">
+                  The B2B Portal is strictly invitation-only. To gain access, you must first be approved by an administrator. Once approved, you will log in using your registered email and a secure PIN/Password.
+                </p>
+                <ul className="list-disc pl-5 text-sm space-y-2 text-[var(--text-muted)] mt-2">
+                  <li>Navigate to the <code>/login</code> portal.</li>
+                  <li>Enter your verified email address and secure password.</li>
+                  <li>If accessing a strictly confidential collection, a secondary 4-digit PIN may be required.</li>
+                </ul>
+              </div>
+
+              {/* SECTION 2 */}
+              <div id="section-2" className="space-y-3 pt-4 border-t border-[var(--border-color)]">
+                <h3 className="text-lg font-bold flex items-center gap-2"><span className="w-6 h-6 rounded bg-[var(--text-main)] text-[var(--bg-base)] flex items-center justify-center text-xs">2</span> The Immersive 3D Flipbook</h3>
+                <p className="text-sm leading-relaxed text-[var(--text-muted)]">
+                  Instead of static PDFs, we use a fully interactive 3D digital lookbook that adapts to your device.
+                </p>
+                <ul className="list-disc pl-5 text-sm space-y-2 text-[var(--text-muted)] mt-2">
+                  <li><strong>Navigation:</strong> Click the corners of the book or swipe on touchscreens to turn the page.</li>
+                  <li><strong>Device Orientation:</strong> On mobile phones held vertically (portrait), the book will display one maximized page at a time for better readability. Turn your phone horizontally (landscape) to view the luxurious two-page spread.</li>
+                  <li><strong>Quick Add:</strong> Click any product image inside the book to instantly open its purchasing grid.</li>
+                </ul>
+              </div>
+
+              {/* SECTION 3 */}
+              <div id="section-3" className="space-y-3 pt-4 border-t border-[var(--border-color)]">
+                <h3 className="text-lg font-bold flex items-center gap-2"><span className="w-6 h-6 rounded bg-[var(--text-main)] text-[var(--bg-base)] flex items-center justify-center text-xs">3</span> Ordering via the Wholesale Matrix Cart</h3>
+                <p className="text-sm leading-relaxed text-[var(--text-muted)]">
+                  As a wholesale buyer, you often need to order multiple variants of a single design simultaneously. We built the Matrix Cart specifically for this.
+                </p>
+                <ul className="list-disc pl-5 text-sm space-y-2 text-[var(--text-muted)] mt-2">
+                  <li><strong>The Grid:</strong> When you select a product, a spreadsheet-like grid will appear showing all available Metals (14K, 18K) and Sizes.</li>
+                  <li><strong>Bulk Entry:</strong> Simply type the quantity you want for each specific combination (e.g., 5 quantities of 14K Gold in Size 6).</li>
+                  <li><strong>Live Estimation:</strong> The system automatically calculates your Purchase Order (PO) total based on today's live metal rates and your account's specific discount tier.</li>
+                  <li><strong>Checkout:</strong> Review your matrix cart and click "Generate PO" to send the order directly to manufacturing.</li>
+                </ul>
+              </div>
+
+              {/* SECTION 4 */}
+              <div id="section-4" className="space-y-3 pt-4 border-t border-[var(--border-color)]">
+                <h3 className="text-lg font-bold flex items-center gap-2"><span className="w-6 h-6 rounded bg-[var(--text-main)] text-[var(--bg-base)] flex items-center justify-center text-xs">4</span> Tracking Purchase Orders & History</h3>
+                <p className="text-sm leading-relaxed text-[var(--text-muted)]">
+                  Your Client Dashboard serves as your historical ledger.
+                </p>
+                <ul className="list-disc pl-5 text-sm space-y-2 text-[var(--text-muted)] mt-2">
+                  <li>Navigate to the <code>/dashboard/history</code> tab.</li>
+                  <li>Here you can view the live status of all your Purchase Orders (Pending, Processing in Manufacturing, Shipped).</li>
+                  <li>You can instantly download a Proforma PDF invoice for any past order for your accounting records.</li>
+                </ul>
+              </div>
+
+            </div>
+          </div>
+        )}
+
+        {/* TAB CONTENT: AUTO QC */}
+        {activeTab === 'qc_testing' && (
+          <div className="bg-[var(--bg-surface)] border border-[var(--border-color)] shadow-sm rounded-2xl p-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-[var(--border-color)] pb-6 mb-6">
+              <div>
+                <h2 className="text-2xl font-bold tracking-tight mb-2">Automated System QC</h2>
+                <p className="text-[var(--text-muted)] text-sm">Run a live diagnostic ping across the database, edge routing, and authentication layers.</p>
+              </div>
+              
+              <button 
+                onClick={runQC}
+                disabled={isQC}
+                className="mt-4 md:mt-0 inline-flex items-center gap-2 px-6 py-3 bg-[var(--brand-primary)] text-white font-bold uppercase tracking-widest text-xs rounded-xl shadow-md hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isQC ? (
+                  <>
+                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    Running Diagnostics...
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    Execute Auto QC
+                  </>
+                )}
+              </button>
+            </div>
+
+            {!qcResults && !isQC && (
+              <div className="py-12 flex flex-col items-center justify-center text-[var(--text-muted)] border-2 border-dashed border-[var(--border-color)] rounded-xl">
+                <svg className="w-12 h-12 mb-4 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg>
+                <p>Click "Execute Auto QC" to begin the system diagnostic sweep.</p>
+              </div>
+            )}
+
+            {qcResults && (
+              <div className="space-y-6 animate-in fade-in zoom-in-95 duration-500">
+                <div className={`p-4 rounded-xl border flex items-center justify-between ${
+                  qcResults.systemStatus === 'HEALTHY' ? 'bg-emerald-500/10 border-emerald-500/30' : 'bg-red-500/10 border-red-500/30'
+                }`}>
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] mb-1">Global System Status</p>
+                    <h3 className={`text-xl font-bold tracking-tight ${qcResults.systemStatus === 'HEALTHY' ? 'text-emerald-500' : 'text-red-500'}`}>
+                      {qcResults.systemStatus}
+                    </h3>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] mb-1">Timestamp</p>
+                    <p className="text-sm font-mono">{new Date(qcResults.timestamp).toLocaleTimeString()}</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 gap-4">
+                  {qcResults.results.map((res: any, idx: number) => (
+                    <div key={idx} className="bg-[var(--bg-base)] border border-[var(--border-color)] rounded-xl p-5 flex items-start justify-between group hover:border-[var(--brand-primary)] transition-colors">
+                      <div className="flex items-start gap-4">
+                        <div className={`mt-1 flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
+                          res.status === 'PASS' ? 'bg-emerald-500/20 text-emerald-500' : 
+                          res.status === 'WARN' ? 'bg-amber-500/20 text-amber-500' : 'bg-red-500/20 text-red-500'
+                        }`}>
+                          {res.status === 'PASS' ? (
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                          ) : res.status === 'WARN' ? (
+                            <span className="font-bold">!</span>
+                          ) : (
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                          )}
+                        </div>
+                        <div>
+                          <h4 className="text-sm font-bold text-[var(--text-main)] flex items-center gap-2">
+                            {res.name}
+                            <span className="text-[10px] bg-[var(--bg-surface)] border border-[var(--border-color)] px-2 py-0.5 rounded font-mono font-normal text-[var(--text-muted)]">
+                              {res.timeMs}ms
+                            </span>
+                          </h4>
+                          <p className="text-xs text-[var(--text-muted)] mt-1">{res.description}</p>
+                          <div className="mt-3 p-3 bg-[var(--bg-surface)] rounded border border-[var(--border-color)] border-l-2 border-l-[var(--brand-primary)] text-xs font-mono text-[var(--text-main)] opacity-80">
+                            {res.detail}
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <span className={`text-[10px] uppercase font-bold tracking-widest px-2 py-1 rounded border ${
+                        res.status === 'PASS' ? 'border-emerald-500/30 text-emerald-500' : 
+                        res.status === 'WARN' ? 'border-amber-500/30 text-amber-500' : 'border-red-500/30 text-red-500'
+                      }`}>
+                        {res.status}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
       </div>
     </div>

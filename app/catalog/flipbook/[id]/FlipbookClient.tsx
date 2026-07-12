@@ -99,6 +99,20 @@ export default function FlipbookClient({ catalog }: { catalog: any }) {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(1);
   const [showThumbnails, setShowThumbnails] = useState(false);
+  const [windowDimensions, setWindowDimensions] = useState({ width: 0, height: 0 });
+
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowDimensions({ width: window.innerWidth, height: window.innerHeight });
+    };
+    // Initialize
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const isPortrait = windowDimensions.height > windowDimensions.width && windowDimensions.width < 1024;
+
 
   const [showPOMatrix, setShowPOMatrix] = useState(false);
   const [activeMatrixSku, setActiveMatrixSku] = useState<string | null>(null);
@@ -320,39 +334,40 @@ export default function FlipbookClient({ catalog }: { catalog: any }) {
       `}</style>
       <audio ref={audioRef} src="/dflip/sound/turn2.mp3" preload="auto"></audio>
 
-      <div className="fixed top-0 left-0 p-6 z-40 pointer-events-none mix-blend-difference text-white">
-        <div className="flex flex-col">
-          <span className="text-[10px] font-bold tracking-[0.3em] uppercase">Ashok Jewels</span>
-          <span className="text-xs tracking-widest uppercase mt-1 font-bold">{catalog.name}</span>
+      <div className="fixed top-0 left-0 p-4 md:p-6 z-40 pointer-events-none">
+        {/* Text color is now explicitly determined based on background contrast instead of using mix-blend-difference which caused blue/cyan rendering on wood backgrounds */}
+        <div className={`flex flex-col ${['WOOD', 'MARBLE', 'SLATE', 'VELVET', 'UNSPLASH_BROWN_WOOD', 'UNSPLASH_METAL', 'UNSPLASH_BLUR'].includes(previewConfig.viewerBackground) || (!previewConfig.viewerBackground && isDark) ? 'text-white/90 drop-shadow-md' : 'text-black/80 drop-shadow-sm'}`}>
+          <span className="text-[9px] md:text-[10px] font-bold tracking-[0.3em] uppercase">Ashok Jewels</span>
+          <span className="text-[10px] md:text-xs tracking-widest uppercase mt-1 font-bold">{catalog.name}</span>
         </div>
       </div>
 
-      <div className="fixed top-0 right-0 p-6 flex items-center gap-4 z-40">
+      <div className="fixed top-0 right-0 p-4 md:p-6 flex items-center gap-2 md:gap-4 z-40">
 
           {/* CRITICAL FIX: Pointed the Export URL to /pdf instead of /export */}
           <button
             onClick={() => window.open(`/api/catalog/${catalog.id}/pdf`, '_blank')}
-            className="px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest rounded-xl backdrop-blur-xl bg-white/80 border border-black/10 text-gray-800 shadow-lg transition-all duration-200 ease-in-out hover:bg-white hover:shadow-xl active:scale-95 flex items-center gap-2"
+            className="px-3 md:px-5 py-2 md:py-2.5 text-[9px] md:text-[10px] font-bold uppercase tracking-widest rounded-xl backdrop-blur-xl bg-white/80 border border-black/10 text-gray-800 shadow-lg transition-all duration-200 ease-in-out hover:bg-white hover:shadow-xl active:scale-95 flex items-center gap-1 md:gap-2"
           >
-            <IconDownload /> Export PDF / CSV
+            <IconDownload /> <span className="hidden md:inline">Export PDF / CSV</span><span className="md:hidden">Export</span>
           </button>
 
-          <button onClick={() => window.close()} className="w-10 h-10 rounded-full flex items-center justify-center backdrop-blur-xl bg-white/80 border border-black/10 text-gray-800 shadow-lg transition-all duration-200 ease-in-out hover:bg-white hover:shadow-xl active:scale-90">
+          <button onClick={() => window.close()} className="w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center backdrop-blur-xl bg-white/80 border border-black/10 text-gray-800 shadow-lg transition-all duration-200 ease-in-out hover:bg-white hover:shadow-xl active:scale-90">
             <IconClose />
           </button>
         </div>
       <div
         className="w-full max-w-7xl mx-auto flex items-center justify-center perspective-[2000px] transition-transform duration-700 ease-in-out"
         style={{
-          height: 'calc(100vh - 200px)',
-          marginTop: '75px',
-          marginBottom: '125px',
-          transform: `scale(${zoomLevel}) ${currentPage === 0 ? 'translateX(-225px)' : currentPage >= pages.length - 2 ? 'translateX(225px)' : 'translateX(0)'}`,
+          height: 'calc(100vh - 160px)',
+          marginTop: '60px',
+          marginBottom: '100px',
+          transform: `scale(${zoomLevel}) ${isPortrait ? 'translateX(0)' : (currentPage === 0 ? 'translateX(-225px)' : currentPage >= pages.length - 2 ? 'translateX(225px)' : 'translateX(0)')}`,
           transformOrigin: 'center center'
         }}
       >
         {/* @ts-ignore */}
-        <HTMLFlipBook width={450} height={636} size="stretch" minWidth={250} maxWidth={544} minHeight={250} maxHeight={360} maxShadowOpacity={0.6} drawShadow={true} showCover={true} mobileScrollSupport={true} onFlip={onPageFlip} flippingTime={1000} swipeDistance={30} className="" ref={bookRef}>
+        <HTMLFlipBook width={isPortrait ? Math.min(windowDimensions.width - 40, 450) : 450} height={isPortrait ? Math.min(windowDimensions.height - 180, 636) : 636} size="stretch" minWidth={250} maxWidth={isPortrait ? 600 : 544} minHeight={250} maxHeight={800} maxShadowOpacity={0.6} drawShadow={true} showCover={true} mobileScrollSupport={true} usePortrait={true} onFlip={onPageFlip} flippingTime={1000} swipeDistance={30} className="" ref={bookRef}>
           {pages.map((page, index) => (
             <Page key={index} number={index} isCover={page.type === 'COVER'}>
               {page.type === 'COVER' && (
