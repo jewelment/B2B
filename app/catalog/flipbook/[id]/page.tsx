@@ -10,6 +10,10 @@ export default async function ImmersiveFlipbookPage({ params }: { params: Promis
   // CHANGE 2: Await the params object before destructuring the ID
   const { id } = await params;
 
+  if (id === 'preview') {
+    return <FlipbookClient catalog={{ id: 'preview', items: [] }} />;
+  }
+
   // 1. Secure Server-Side Fetch
   const catalog = await prisma.catalog.findUnique({
     where: { id },

@@ -126,6 +126,18 @@ export default function AdvancedMatrixModal({
   const submitGlobalPO = async () => {
     if (selectedItems.length === 0) return;
 
+    const itemsWithZeroQty = selectedItems.filter(sku => {
+      const skuVariants = matrixQuantities[sku] || {};
+      const totalQty = Object.values(skuVariants).reduce((sum: number, qty: any) => sum + (Number(qty) || 0), 0);
+      return totalQty === 0;
+    });
+
+    if (itemsWithZeroQty.length > 0) {
+      const displaySkus = itemsWithZeroQty.map(sku => sku.replace('AJ-', '')).join(', ');
+      setValidationError(`Incomplete Matrix: Please enter quantity for ${displaySkus} or remove from cart.`);
+      return;
+    }
+
     if (totalMatrixUnits === 0) {
       setValidationError(`Incomplete Matrix: Please enter a quantity for at least one item.`);
       return;
@@ -266,7 +278,7 @@ export default function AdvancedMatrixModal({
 
               {activeGallery.length > 1 && (
                 <div className="flex gap-2 mt-3 mb-5 mx-auto sm:mx-0 justify-center sm:justify-start">
-                  {activeGallery.slice(0, 4).map((img, idx) => (
+                  {activeGallery.slice(0, 4).map((img: any, idx: number) => (
                     <button 
                       key={idx} 
                       onClick={() => setActiveImageIndex(idx)}

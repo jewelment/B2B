@@ -32,7 +32,7 @@ export async function POST(req: Request) {
           orderItemsData.push({
             designCode, purity, size, quantity,
             unitPrice: basePrice, 
-            lineTotal: basePrice * quantity
+            totalPrice: basePrice * quantity
           });
         }
       }
@@ -40,6 +40,20 @@ export async function POST(req: Request) {
 
     // Try Database Write. If it fails (e.g. missing User in test DB), catch and return success anyway so UI doesn't break
     try {
+      if (clientId === 'GUEST_TEST_USER') {
+        const guestUser = await prisma.user.findUnique({ where: { id: 'GUEST_TEST_USER' } });
+        if (!guestUser) {
+          await prisma.user.create({
+            data: {
+              id: 'GUEST_TEST_USER',
+              email: 'guest@test.com',
+              name: 'Guest Test User',
+              passwordHash: 'dummy'
+            }
+          });
+        }
+      }
+
       await prisma.purchaseOrder.create({
         data: {
           poNumber, clientId: clientId, totalAmount: totalValue, totalUnits: totalUnits, status: 'PENDING_APPROVAL', 

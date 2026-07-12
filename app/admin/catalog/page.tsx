@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useRef, ClipboardEvent } from 'react';
 import Link from 'next/link';
+import ImageCropper from '@/components/ImageCropper';
 
 // --- SVGs ---
 const IconEye = () => <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.543 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>;
@@ -23,9 +24,14 @@ export default function AdminCatalogsDashboard() {
   const [clientSearch, setClientSearch] = useState('');
   const [skuPayload, setSkuPayload] = useState('');
   const [isCreating, setIsCreating] = useState(false);
+  const [editingCatalogId, setEditingCatalogId] = useState<string | null>(null);
+
+  const [isProcessingImage, setIsProcessingImage] = useState(false);
+  const [cropModalImage, setCropModalImage] = useState<string | null>(null);
+  const [cropTarget, setCropTarget] = useState<'frontCover' | 'backCover' | number | null>(null);
 
   const [showBuilder, setShowBuilder] = useState(false);
-  const [builderTab, setBuilderTab] = useState<'PRODUCTS' | 'APPEARANCE'>('PRODUCTS');
+  const [builderTab, setBuilderTab] = useState<'PRODUCTS' | 'APPEARANCE' | 'PREVIEW'>('PRODUCTS');
   const [inventory, setInventory] = useState<any[]>([]); 
   const [selectedVisualItems, setSelectedVisualItems] = useState<string[]>([]);
 
@@ -47,7 +53,8 @@ export default function AdminCatalogsDashboard() {
     password: '',
     frontCover: '',
     backCover: '',
-    lifestyleInserts: [] as string[]
+    viewerBackground: 'WOOD',
+    lifestyleInserts: [] as Array<{ position: number, image: string }>
   });
 
   const fetchData = async () => {
@@ -111,14 +118,36 @@ export default function AdminCatalogsDashboard() {
 
     if (!file || !['image/jpeg', 'image/png'].includes(file.type)) return alert("Please upload a JPG or PNG file.");
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      if (event.target?.result) {
-        if (typeof target === 'number') updateLifestyleInsert(target, event.target.result as string);
-        else setConfig(prev => ({ ...prev, [target]: event.target!.result as string }));
+    setIsProcessingImage(true);
+    
+    // Use setTimeout to allow the UI to re-render and show the loading state
+    setTimeout(() => {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        if (event.target?.result) {
+          setCropTarget(target);
+          setCropModalImage(event.target.result as string);
+          setIsProcessingImage(false);
+        }
+      };
+      reader.onerror = () => {
+        setIsProcessingImage(false);
+        alert("Failed to read file.");
       }
-    };
-    reader.readAsDataURL(file);
+      reader.readAsDataURL(file as File);
+    }, 50);
+  };
+
+  const handleCropComplete = (croppedBase64: string) => {
+    if (cropTarget === 'frontCover') setConfig(prev => ({ ...prev, frontCover: croppedBase64 }));
+    else if (cropTarget === 'backCover') setConfig(prev => ({ ...prev, backCover: croppedBase64 }));
+    else if (typeof cropTarget === 'number') {
+      const existingPosition = config.lifestyleInserts[cropTarget]?.position || 1;
+      updateLifestyleInsert(cropTarget, existingPosition, croppedBase64);
+    }
+    
+    setCropModalImage(null);
+    setCropTarget(null);
   };
 
   const handleCreate = async (e: React.FormEvent) => {
@@ -132,25 +161,31 @@ export default function AdminCatalogsDashboard() {
     }
 
     try {
-      const res = await fetch('/api/catalog', { 
-        method: 'POST',
+      const url = '/api/catalog';
+      const method = editingCatalogId ? 'PUT' : 'POST';
+      const body = JSON.stringify({
+        id: editingCatalogId,
+        name: campaignName || `Catalog ${new Date().toLocaleDateString()}`,
+        clientId: clientSearch || 'Guest Target',
+        designCodes: selectedVisualItems,
+        configuration: config 
+      });
+
+      const res = await fetch(url, { 
+        method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: campaignName || `Catalog ${new Date().toLocaleDateString()}`,
-          clientId: clientSearch || 'Guest Target',
-          designCodes: selectedVisualItems,
-          configuration: config 
-        }),
+        body,
       });
 
       const data = await res.json();
       if (data.success) {
         setCampaignName(''); setClientSearch(''); setSkuPayload(''); setSelectedVisualItems([]);
         setConfig({ ...config, password: '', frontCover: '', backCover: '', lifestyleInserts: [] });
+        setEditingCatalogId(null);
         setShowBuilder(false);
         fetchData();
       } else {
-        alert(data.error || "Creation failed.");
+        alert(data.error || "Operation failed.");
       }
     } catch (error) {
       console.error('Failed to dispatch:', error);
@@ -179,10 +214,13 @@ export default function AdminCatalogsDashboard() {
     }
   };
 
-  const addLifestyleInsert = () => setConfig({ ...config, lifestyleInserts: [...config.lifestyleInserts, ''] });
-  const updateLifestyleInsert = (index: number, val: string) => {
+  const addLifestyleInsert = () => {
+    const defaultPos = Math.max(1, Math.floor(selectedVisualItems.length / 2));
+    setConfig({ ...config, lifestyleInserts: [...config.lifestyleInserts, { position: defaultPos, image: '' }] });
+  };
+  const updateLifestyleInsert = (index: number, newPosition: number, newImage: string) => {
     const newInserts = [...config.lifestyleInserts];
-    newInserts[index] = val;
+    newInserts[index] = { position: newPosition, image: newImage || newInserts[index].image };
     setConfig({ ...config, lifestyleInserts: newInserts });
   };
   const removeLifestyleInsert = (index: number) => {
@@ -279,7 +317,12 @@ export default function AdminCatalogsDashboard() {
             <div>
               <div className="flex justify-between items-end mb-2">
                 <label className="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Design Payload *</label>
-                <button type="button" onClick={() => setShowBuilder(true)} className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest bg-[var(--brand-primary)]/10 text-[var(--brand-primary)] px-3 py-1.5 rounded-lg hover:bg-[var(--brand-primary)]/20 transition-all active:scale-95">
+                <button type="button" onClick={() => {
+                  setEditingCatalogId(null);
+                  setCampaignName(''); setClientSearch(''); setSkuPayload(''); setSelectedVisualItems([]);
+                  setConfig({...config, password: '', frontCover: '', backCover: '', lifestyleInserts: []});
+                  setShowBuilder(true);
+                }} className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest bg-[var(--brand-primary)]/10 text-[var(--brand-primary)] px-3 py-1.5 rounded-lg hover:bg-[var(--brand-primary)]/20 transition-all active:scale-95">
                   <IconSparkles /> Visual Builder
                 </button>
               </div>
@@ -326,6 +369,7 @@ export default function AdminCatalogsDashboard() {
                     <td className="px-6 py-5 text-right">
                       <div className="flex justify-end items-center gap-1.5">
                         <button title="Edit Configuration" onClick={() => { 
+                          setEditingCatalogId(cat.id);
                           setCampaignName(cat.name); 
                           setClientSearch(cat.clientId); 
                           
@@ -344,6 +388,7 @@ export default function AdminCatalogsDashboard() {
                               password: cat.configuration.password || '',
                               frontCover: cat.configuration.frontCover || '',
                               backCover: cat.configuration.backCover || '',
+                              viewerBackground: cat.configuration.viewerBackground || 'WOOD',
                               lifestyleInserts: cat.configuration.lifestyleInserts || []
                             });
                           }
@@ -367,21 +412,22 @@ export default function AdminCatalogsDashboard() {
 
       {/* VISUAL BUILDER MODAL */}
       {showBuilder && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-8 animate-in fade-in duration-200">
+        <div className="fixed top-0 right-0 bottom-0 left-64 z-50 flex items-center justify-center p-4 sm:p-8 animate-in fade-in duration-200">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowBuilder(false)}></div>
           
           <div className="relative w-full max-w-[95vw] lg:max-w-7xl h-[90vh] bg-[var(--bg-base)] border border-[var(--glass-border)] rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-300">
             
             <div className="px-8 py-5 border-b border-[var(--border-color)] bg-[var(--bg-surface)] flex justify-between items-center z-10">
               <div>
-                <h2 className="text-xl font-light text-[var(--text-main)] flex items-center gap-2"><IconSparkles /> Visual Catalog Architect</h2>
+                <h2 className="text-xl font-light text-[var(--text-main)] flex items-center gap-2"><IconSparkles /> {editingCatalogId ? 'Edit Catalog Architect' : 'Visual Catalog Architect'}</h2>
               </div>
-              <button onClick={() => setShowBuilder(false)} className="w-8 h-8 rounded-full border border-[var(--border-color)] flex items-center justify-center text-[var(--text-muted)] hover:text-red-500 hover:bg-red-500/10 transition-colors">✕</button>
+              <button onClick={() => { setShowBuilder(false); setEditingCatalogId(null); }} className="w-8 h-8 rounded-full border border-[var(--border-color)] flex items-center justify-center text-[var(--text-muted)] hover:text-red-500 hover:bg-red-500/10 transition-colors">✕</button>
             </div>
 
             <div className="flex border-b border-[var(--border-color)] bg-[var(--bg-base)] px-8 z-10">
               <button onClick={() => setBuilderTab('PRODUCTS')} className={`px-6 py-4 text-xs font-bold uppercase tracking-widest border-b-2 transition-all ${builderTab === 'PRODUCTS' ? 'border-[var(--brand-primary)] text-[var(--brand-primary)]' : 'border-transparent text-[var(--text-muted)] hover:text-[var(--text-main)]'}`}>1. Product Selection</button>
               <button onClick={() => setBuilderTab('APPEARANCE')} className={`px-6 py-4 text-xs font-bold uppercase tracking-widest border-b-2 transition-all ${builderTab === 'APPEARANCE' ? 'border-[var(--brand-primary)] text-[var(--brand-primary)]' : 'border-transparent text-[var(--text-muted)] hover:text-[var(--text-main)]'}`}>2. Flipbook Settings & Media</button>
+              <button onClick={() => setBuilderTab('PREVIEW')} className={`px-6 py-4 text-xs font-bold uppercase tracking-widest border-b-2 transition-all ${builderTab === 'PREVIEW' ? 'border-[var(--brand-primary)] text-[var(--brand-primary)]' : 'border-transparent text-[var(--text-muted)] hover:text-[var(--text-main)]'}`}>3. Live Preview</button>
             </div>
 
             {/* TAB: PRODUCTS */}
@@ -452,6 +498,39 @@ export default function AdminCatalogsDashboard() {
                     <button disabled={currentPage === totalPages} onClick={() => handlePageChange(currentPage + 1)} className="px-6 py-2 border border-[var(--border-color)] rounded-lg text-xs font-bold uppercase tracking-widest disabled:opacity-50 hover:bg-[var(--bg-surface)] transition-colors">Load Next 120</button>
                   </div>
                 )}
+              </div>
+            )}
+
+            {/* TAB: PREVIEW */}
+            {builderTab === 'PREVIEW' && (
+              <div className="flex-1 overflow-hidden p-0 bg-black relative flex flex-col">
+                 <div className="bg-[#111] border-b border-[#333] p-4 text-center">
+                    <p className="text-white text-xs font-bold uppercase tracking-widest">Live Catalog Simulation</p>
+                    <p className="text-gray-400 text-[10px]">Interact with the immersive viewer exactly as a buyer would.</p>
+                 </div>
+                 <div className="flex-1 w-full relative">
+                   {(() => {
+                     if (typeof window !== 'undefined') {
+                       localStorage.setItem('flipbook_preview_data', JSON.stringify({
+                         catalog: { 
+                           id: 'preview', 
+                           name: campaignName,
+                           clientId: clientSearch,
+                           items: selectedVisualItems.map(code => {
+                             const invItem = inventory.find(i => i.designCode === code);
+                             return { designCode: code, product: invItem };
+                           })
+                         },
+                         config: config
+                       }));
+                     }
+                     // Use a key derived from critical config elements to force the iframe to reload when covers or backgrounds change
+                     const iframeKey = (config.frontCover || '') + (config.backCover || '') + config.viewerBackground;
+                     return (
+                       <iframe key={iframeKey} src="/catalog/flipbook/preview" className="w-full h-full border-none" allow="autoplay" />
+                     );
+                   })()}
+                 </div>
               </div>
             )}
 
@@ -540,13 +619,24 @@ export default function AdminCatalogsDashboard() {
                   <div className="space-y-6">
                     
                     <div className="bg-[var(--bg-surface)] p-6 rounded-2xl border border-[var(--border-color)]">
-                      <h4 className="text-xs font-bold uppercase tracking-widest text-[var(--text-main)] border-b border-[var(--border-color)] pb-3 mb-5">Flipbook Cover Designs</h4>
-                      <p className="text-[9px] text-[var(--brand-primary)] mb-4 bg-[var(--brand-primary)]/10 px-3 py-2 rounded-lg font-medium border border-[var(--brand-primary)]/20">
-                        Upload format: <strong>JPG / PNG</strong>.<br/>
-                        Required Ratio: <strong>{config.orientation === 'PORTRAIT' ? 'A4 Size (1 : 1.414)' : 'Landscape (16 : 9)'}</strong>.
-                      </p>
-
-                      <div className="space-y-4">
+                      <h4 className="text-xs font-bold uppercase tracking-widest text-[var(--text-main)] mb-5 border-b border-[var(--border-color)] pb-3">Flipbook Cover Designs</h4>
+                      <div className="p-4 bg-[var(--brand-primary)]/5 rounded-xl border border-[var(--brand-primary)]/20 mb-6 flex justify-between items-center">
+                        <div>
+                          <p className="text-[10px] font-bold text-[var(--brand-primary)] uppercase tracking-wider">Upload Format: JPG / PNG</p>
+                          <div className="flex items-center gap-2 mt-2">
+                            {config.orientation === 'PORTRAIT' ? (
+                              <svg className="w-4 h-4 text-[var(--brand-primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
+                            ) : (
+                              <svg className="w-4 h-4 text-[var(--brand-primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6h16M4 10h16M4 14h16M4 18h16" /></svg>
+                            )}
+                            <p className="text-[9px] text-[var(--brand-primary)]/80 font-bold uppercase tracking-widest">
+                              Required: {config.orientation === 'PORTRAIT' ? 'A4 Portrait (1 : 1.414)' : 'Landscape (16 : 9)'}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-4">
                         {/* Drag and Drop Front Cover */}
                         <div>
                           <label className="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Front Cover Image</label>
@@ -555,8 +645,13 @@ export default function AdminCatalogsDashboard() {
                             onDrop={(e) => handleImageDrop(e, 'frontCover')}
                             className="relative w-full h-32 bg-[var(--bg-base)] border-2 border-dashed border-[var(--border-color)] rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-[var(--brand-primary)] hover:bg-[var(--brand-primary)]/5 transition-colors overflow-hidden group"
                           >
-                            <input type="file" accept="image/jpeg, image/png" onChange={(e) => handleImageDrop(e, 'frontCover')} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" />
-                            {config.frontCover ? (
+                            <input type="file" accept="image/jpeg, image/png" onChange={(e) => handleImageDrop(e, 'frontCover')} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" disabled={isProcessingImage} />
+                            {isProcessingImage && cropTarget === 'frontCover' ? (
+                              <div className="flex flex-col items-center">
+                                <svg className="animate-spin w-6 h-6 text-[var(--brand-primary)] mb-2" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                <span className="text-[10px] font-bold text-[var(--brand-primary)] animate-pulse">Processing High-Res Image...</span>
+                              </div>
+                            ) : config.frontCover ? (
                               <img src={config.frontCover} alt="Front Cover" className="w-full h-full object-cover opacity-60 group-hover:opacity-30 transition-opacity" />
                             ) : (
                               <>
@@ -576,8 +671,13 @@ export default function AdminCatalogsDashboard() {
                             onDrop={(e) => handleImageDrop(e, 'backCover')}
                             className="relative w-full h-32 bg-[var(--bg-base)] border-2 border-dashed border-[var(--border-color)] rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-[var(--brand-primary)] hover:bg-[var(--brand-primary)]/5 transition-colors overflow-hidden group"
                           >
-                            <input type="file" accept="image/jpeg, image/png" onChange={(e) => handleImageDrop(e, 'backCover')} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" />
-                            {config.backCover ? (
+                            <input type="file" accept="image/jpeg, image/png" onChange={(e) => handleImageDrop(e, 'backCover')} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" disabled={isProcessingImage} />
+                            {isProcessingImage && cropTarget === 'backCover' ? (
+                              <div className="flex flex-col items-center">
+                                <svg className="animate-spin w-6 h-6 text-[var(--brand-primary)] mb-2" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                <span className="text-[10px] font-bold text-[var(--brand-primary)] animate-pulse">Processing High-Res Image...</span>
+                              </div>
+                            ) : config.backCover ? (
                               <img src={config.backCover} alt="Back Cover" className="w-full h-full object-cover opacity-60 group-hover:opacity-30 transition-opacity" />
                             ) : (
                               <>
@@ -591,24 +691,55 @@ export default function AdminCatalogsDashboard() {
                       </div>
                     </div>
 
+                    {/* AMBIENT BACKGROUND SELECTOR */}
+                    <div className="bg-[var(--bg-surface)] p-6 rounded-2xl border border-[var(--border-color)]">
+                      <h4 className="text-xs font-bold uppercase tracking-widest text-[var(--text-main)] mb-5 border-b border-[var(--border-color)] pb-3">Viewer Ambient Background</h4>
+                      <div className="grid grid-cols-6 gap-3">
+                        {/* Exact Unsplash Backgrounds Requested */}
+                        <button onClick={() => setConfig({...config, viewerBackground: 'UNSPLASH_BED'})} className={`w-full aspect-square rounded-xl border-2 transition-all bg-cover bg-center ${config.viewerBackground === 'UNSPLASH_BED' ? 'border-[var(--brand-primary)] shadow-lg scale-105' : 'border-transparent hover:scale-105'} bg-[url("https://images.unsplash.com/photo-1543751416-705d3e34d02a?q=80&w=500")]`}></button>
+                        <button onClick={() => setConfig({...config, viewerBackground: 'UNSPLASH_BROWN_WOOD'})} className={`w-full aspect-square rounded-xl border-2 transition-all bg-cover bg-center ${config.viewerBackground === 'UNSPLASH_BROWN_WOOD' ? 'border-[var(--brand-primary)] shadow-lg scale-105' : 'border-transparent hover:scale-105'} bg-[url("https://images.unsplash.com/photo-1621295693450-080546d2ec8e?q=80&w=500")]`}></button>
+                        <button onClick={() => setConfig({...config, viewerBackground: 'UNSPLASH_PARQUET'})} className={`w-full aspect-square rounded-xl border-2 transition-all bg-cover bg-center ${config.viewerBackground === 'UNSPLASH_PARQUET' ? 'border-[var(--brand-primary)] shadow-lg scale-105' : 'border-transparent hover:scale-105'} bg-[url("https://images.unsplash.com/photo-1576092762791-dd9e2220abd1?q=80&w=500")]`}></button>
+                        <button onClick={() => setConfig({...config, viewerBackground: 'UNSPLASH_METAL'})} className={`w-full aspect-square rounded-xl border-2 transition-all bg-cover bg-center ${config.viewerBackground === 'UNSPLASH_METAL' ? 'border-[var(--brand-primary)] shadow-lg scale-105' : 'border-transparent hover:scale-105'} bg-[url("https://images.unsplash.com/photo-1781877621630-5a6497bea75d?q=80&w=500")]`}></button>
+                        <button onClick={() => setConfig({...config, viewerBackground: 'UNSPLASH_WHITE_LINES'})} className={`w-full aspect-square rounded-xl border-2 transition-all bg-cover bg-center ${config.viewerBackground === 'UNSPLASH_WHITE_LINES' ? 'border-[var(--brand-primary)] shadow-lg scale-105' : 'border-transparent hover:scale-105'} bg-[url("https://images.unsplash.com/photo-1756758933069-411ca6f96b1a?q=80&w=500")]`}></button>
+                        <button onClick={() => setConfig({...config, viewerBackground: 'UNSPLASH_BLUR'})} className={`w-full aspect-square rounded-xl border-2 transition-all bg-cover bg-center ${config.viewerBackground === 'UNSPLASH_BLUR' ? 'border-[var(--brand-primary)] shadow-lg scale-105' : 'border-transparent hover:scale-105'} bg-[url("https://images.unsplash.com/photo-1719496175716-a62c78af1ee8?q=80&w=500")]`}></button>
+                      </div>
+                    </div>
+
                     <div className="bg-[var(--bg-surface)] p-6 rounded-2xl border border-[var(--border-color)]">
                       <div className="flex justify-between items-center border-b border-[var(--border-color)] pb-3 mb-5">
-                        <h4 className="text-xs font-bold uppercase tracking-widest text-[var(--text-main)]">Dynamic Lifestyle Inserts</h4>
+                        <h4 className="text-xs font-bold uppercase tracking-widest text-[var(--text-main)]">Promotional & Campaign Pages</h4>
                         <button onClick={addLifestyleInsert} className="text-[10px] font-bold text-[var(--brand-text)] bg-[var(--brand-primary)] px-3 py-1.5 rounded-lg uppercase tracking-wider hover:opacity-90 transition-opacity">+ Add Page</button>
                       </div>
                       
                       <div className="space-y-3 max-h-[200px] overflow-y-auto pr-2 custom-scrollbar">
-                        {config.lifestyleInserts.map((insert, index) => (
+                        {config.lifestyleInserts.map((insertObj, index) => (
                           <div key={index} className="flex items-center gap-3 bg-[var(--bg-base)] p-2 rounded-xl border border-[var(--border-color)] relative">
-                            <span className="text-[10px] font-bold text-[var(--brand-primary)] w-12 text-center bg-[var(--brand-primary)]/10 py-1 rounded">Pg {index + 1}</span>
+                            
+                            <div className="flex flex-col w-20">
+                              <label className="text-[8px] font-bold text-[var(--text-muted)] uppercase">Position Index</label>
+                              <input 
+                                type="number" min="0" 
+                                value={insertObj.position} 
+                                onChange={(e) => updateLifestyleInsert(index, parseInt(e.target.value) || 0, insertObj.image)}
+                                className="w-full bg-[var(--bg-surface)] border border-[var(--border-color)] rounded px-2 py-1 text-xs text-center outline-none focus:border-[var(--brand-primary)]"
+                              />
+                            </div>
                             
                             {/* Drag Drop for Insert */}
-                            <div className="flex-1 relative h-8 bg-[var(--bg-surface)] rounded border border-dashed border-[var(--border-color)] flex items-center justify-center overflow-hidden hover:border-[var(--brand-primary)] transition-colors">
-                               <input type="file" accept="image/jpeg, image/png" onChange={(e) => handleImageDrop(e, index)} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" />
-                               {insert ? (
-                                 <span className="text-[10px] font-mono text-[var(--brand-primary)] truncate px-2">{insert.substring(0, 30)}...</span>
+                            <div className="flex-1 relative h-16 bg-[var(--bg-surface)] rounded-lg border-2 border-dashed border-[var(--border-color)] flex items-center justify-center overflow-hidden hover:border-[var(--brand-primary)] transition-colors">
+                               <input type="file" accept="image/jpeg, image/png" onChange={(e) => handleImageDrop(e, index)} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" disabled={isProcessingImage} />
+                               {isProcessingImage && cropTarget === index ? (
+                                  <div className="flex flex-col items-center">
+                                    <svg className="animate-spin w-6 h-6 text-[var(--brand-primary)] mb-2" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                    <span className="text-[10px] font-bold text-[var(--brand-primary)] animate-pulse">Processing...</span>
+                                  </div>
+                               ) : insertObj.image ? (
+                                 <img src={insertObj.image} alt={`Promo ${index+1}`} className="w-full h-full object-contain bg-[var(--bg-base)]" />
                                ) : (
-                                 <span className="text-[9px] font-bold text-[var(--text-muted)] uppercase tracking-widest">Drop Image Here</span>
+                                 <div className="flex flex-col items-center pointer-events-none p-4 text-center">
+                                   <IconUpload />
+                                   <span className="text-[10px] font-bold text-[var(--text-muted)] mt-2">Drop promo image here</span>
+                                 </div>
                                )}
                             </div>
                             <button onClick={() => removeLifestyleInsert(index)} className="w-8 h-8 flex items-center justify-center text-[var(--text-muted)] hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"><IconTrash /></button>
@@ -616,7 +747,7 @@ export default function AdminCatalogsDashboard() {
                         ))}
                         {config.lifestyleInserts.length === 0 && (
                           <div className="text-center py-6 border-2 border-dashed border-[var(--border-color)] rounded-xl">
-                            <p className="text-[10px] text-[var(--text-muted)] font-medium">No internal inserts staged.</p>
+                            <p className="text-[10px] text-[var(--text-muted)] font-medium">No promotional pages staged.</p>
                           </div>
                         )}
                       </div>
@@ -633,9 +764,9 @@ export default function AdminCatalogsDashboard() {
                 Staged for Compile: <strong className="text-[var(--text-main)] text-sm">{selectedVisualItems.length}</strong> SKUs
               </p>
               <div className="flex gap-4">
-                <button onClick={() => setShowBuilder(false)} className="px-6 py-3 border border-[var(--border-color)] text-[10px] font-bold text-[var(--text-muted)] hover:text-[var(--text-main)] uppercase tracking-widest rounded-xl hover:bg-[var(--bg-base)] transition-colors">Keep Draft & Close</button>
+                <button onClick={() => { setShowBuilder(false); setEditingCatalogId(null); }} className="px-6 py-3 border border-[var(--border-color)] text-[10px] font-bold text-[var(--text-muted)] hover:text-[var(--text-main)] uppercase tracking-widest rounded-xl hover:bg-[var(--bg-base)] transition-colors">Keep Draft & Close</button>
                 <button onClick={handleCreate} disabled={isCreating || selectedVisualItems.length === 0} className="relative overflow-hidden group px-8 py-3 bg-[var(--brand-primary)] text-[var(--brand-text)] text-[10px] font-bold uppercase tracking-widest rounded-xl hover:opacity-90 disabled:opacity-50 transition-all shadow-lg active:scale-95">
-                  <span className={`relative z-10 flex items-center gap-2 ${isCreating ? 'opacity-0' : 'opacity-100'}`}>Compile & Launch Flipbook</span>
+                  <span className={`relative z-10 flex items-center gap-2 ${isCreating ? 'opacity-0' : 'opacity-100'}`}>{editingCatalogId ? 'Update & Launch Flipbook' : 'Compile & Launch Flipbook'}</span>
                   
                   {/* Animated Loading State inside Button */}
                   {isCreating && (
@@ -661,6 +792,16 @@ export default function AdminCatalogsDashboard() {
 
           </div>
         </div>
+      )}
+
+      {/* CROPPER MODAL */}
+      {cropModalImage && (
+        <ImageCropper 
+          imageSrc={cropModalImage} 
+          aspectRatio={config.orientation === 'PORTRAIT' ? 1 / 1.414 : 16 / 9}
+          onCropComplete={handleCropComplete} 
+          onCancel={() => { setCropModalImage(null); setCropTarget(null); }} 
+        />
       )}
     </div>
   );

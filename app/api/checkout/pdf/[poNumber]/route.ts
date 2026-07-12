@@ -56,7 +56,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ poNumber
 
     // 4. Generate PDF Stream
     const pdfStream = await renderToStream(
-      React.createElement(PurchaseOrderPDF, { orderData })
+      React.createElement(PurchaseOrderPDF, { orderData }) as any
     );
 
     // 5. Convert Node Stream to Web ReadableStream

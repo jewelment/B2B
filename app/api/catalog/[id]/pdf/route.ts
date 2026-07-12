@@ -41,7 +41,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
 
     // 4. Generate PDF Stream using React.createElement so we don't need .tsx extension for the route
     const pdfStream = await renderToStream(
-      React.createElement(CatalogDocument, { catalog, products, config })
+      React.createElement(CatalogDocument, { catalog, products, config }) as any
     );
 
     // 5. Convert Node Stream to Web ReadableStream

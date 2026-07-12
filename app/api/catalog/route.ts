@@ -11,6 +11,9 @@ export async function GET() {
       include: {
         _count: {
           select: { items: true }
+        },
+        items: {
+          select: { designCode: true }
         }
       }
     });
@@ -69,7 +72,53 @@ export async function POST(req: Request) {
   }
 }
 
-// 3. PATCH: Toggle catalog status (Active/Draft)
+// 3. PUT: Update an existing catalog
+export async function PUT(req: Request) {
+  try {
+    const { id, name, clientId, designCodes, configuration } = await req.json();
+
+    if (!id) return NextResponse.json({ success: false, error: 'Catalog ID is required.' }, { status: 400 });
+
+    if (!designCodes || !Array.isArray(designCodes) || designCodes.length === 0) {
+      return NextResponse.json({ success: false, error: 'No SKUs provided.' }, { status: 400 });
+    }
+
+    const products = await prisma.product.findMany({
+      where: { designCode: { in: designCodes } },
+      select: { estimatedPrice: true }
+    });
+
+    const totalPipelineValue = products.reduce((sum, p) => sum + (p.estimatedPrice || 0), 0);
+
+    // Delete existing items to recreate them
+    await prisma.catalogItem.deleteMany({ where: { catalogId: id } });
+
+    const updatedCatalog = await prisma.catalog.update({
+      where: { id },
+      data: {
+        name,
+        clientId,
+        theme: configuration?.theme || 'LIGHT',
+        itemsPerPage: configuration?.desktopItemsPerPage || 4,
+        pipelineValue: totalPipelineValue,
+        configuration: JSON.stringify(configuration),
+        items: {
+          create: designCodes.map((code: string, index: number) => ({
+            designCode: code,
+            sequence: index + 1
+          }))
+        }
+      }
+    });
+
+    return NextResponse.json({ success: true, catalog: updatedCatalog }, { status: 200 });
+  } catch (error) {
+    console.error('Catalog PUT Error:', error);
+    return NextResponse.json({ success: false, error: 'Failed to update catalog.' }, { status: 500 });
+  }
+}
+
+// 4. PATCH: Toggle catalog status (Active/Draft)
 export async function PATCH(req: Request) {
   try {
     const { id, isActive } = await req.json();

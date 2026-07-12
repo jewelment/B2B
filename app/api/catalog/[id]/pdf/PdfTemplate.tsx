@@ -160,6 +160,48 @@ export const CatalogDocument = ({ catalog, products, config }: { catalog: any, p
   const hidePricing = config.hidePricing || false;
   const formatPrice = (amount: number) => `INR ${new Intl.NumberFormat('en-IN', { maximumFractionDigits: 0 }).format(amount)}`;
 
+  const chunks: Array<{ type: 'PRODUCTS', items: any[] } | { type: 'INSERT', image: string }> = [];
+  
+  let currentProducts: any[] = [];
+  
+  const inserts = Array.isArray(config.lifestyleInserts) 
+    ? [...config.lifestyleInserts].sort((a: any, b: any) => {
+        const posA = typeof a === 'object' ? a.position : 0;
+        const posB = typeof b === 'object' ? b.position : 0;
+        return posA - posB; // ascending
+      })
+    : [];
+
+  let nextInsertIndex = 0;
+
+  catalog.items?.forEach((catItem: any, idx: number) => {
+    while (nextInsertIndex < inserts.length) {
+       const ins = inserts[nextInsertIndex];
+       const pos = typeof ins === 'object' ? ins.position : 0;
+       if (pos === idx) {
+          if (currentProducts.length > 0) {
+             chunks.push({ type: 'PRODUCTS', items: currentProducts });
+             currentProducts = [];
+          }
+          chunks.push({ type: 'INSERT', image: typeof ins === 'object' ? ins.image : ins });
+          nextInsertIndex++;
+       } else {
+          break;
+       }
+    }
+    currentProducts.push(catItem);
+  });
+
+  if (currentProducts.length > 0) {
+     chunks.push({ type: 'PRODUCTS', items: currentProducts });
+  }
+
+  while (nextInsertIndex < inserts.length) {
+     const ins = inserts[nextInsertIndex];
+     chunks.push({ type: 'INSERT', image: typeof ins === 'object' ? ins.image : ins });
+     nextInsertIndex++;
+  }
+
   return (
     <Document>
       {/* Front Cover */}
@@ -169,65 +211,77 @@ export const CatalogDocument = ({ catalog, products, config }: { catalog: any, p
         </Page>
       )}
 
-      {/* Internal Product Grid */}
-      <Page size="A4" style={styles.page}>
-        <View style={styles.header}>
-          <View style={styles.brandBox}>
-            <Text style={styles.brandName}>ASHOK JEWELS</Text>
-            <Text style={styles.catalogName}>{catalog.name || 'Catalog'}</Text>
-          </View>
-          <View style={styles.confidentialBadge}>
-             <Text style={styles.confidentialText}>Confidential / B2B</Text>
-          </View>
-        </View>
+      {/* Interleaved Products and Inserts */}
+      {chunks.map((chunk, chunkIdx) => {
+        if (chunk.type === 'INSERT') {
+          return (
+            <Page key={`chunk-${chunkIdx}`} size="A4" style={styles.coverPage}>
+              <PdfImage src={chunk.image} style={styles.coverImage} />
+            </Page>
+          );
+        }
 
-        <View style={styles.grid}>
-          {catalog.items.map((catItem: any, idx: number) => {
-            const p = products.find(prod => prod.designCode === catItem.designCode);
-            if (!p) return null;
-
-            let imgSrc = '';
-            if (p.media && p.media.length > 0 && p.media[0].url) {
-               imgSrc = p.media[0].url;
-            } else if (p.description && (p.description.startsWith('http') || p.description.startsWith('data:image'))) {
-               imgSrc = p.description;
-            }
-
-            return (
-              <View key={idx} style={styles.itemCard} wrap={false}>
-                <View style={styles.itemImageWrapper}>
-                  {imgSrc ? (
-                    <PdfImage src={imgSrc} style={styles.itemImage} />
-                  ) : (
-                    <View style={styles.itemImage} />
-                  )}
-                </View>
-                
-                <View style={styles.itemDetails}>
-                  <Text style={styles.itemCode}>{p.designCode || ''}</Text>
-                  <Text style={styles.itemTitle}>{p.title || ''}</Text>
-                  
-                  <View style={styles.itemPriceRow}>
-                    <Text style={styles.itemPurity}>{p.metalPurity || '18KT'}</Text>
-                    {!hidePricing && (
-                      <View style={styles.itemPriceCol}>
-                        <Text style={styles.itemPriceLabel}>Est. Value</Text>
-                        <Text style={styles.itemPrice}>{formatPrice(p.price || p.estimatedPrice || 0)}</Text>
-                      </View>
-                    )}
-                  </View>
-                </View>
+        return (
+          <Page key={`chunk-${chunkIdx}`} size="A4" style={styles.page}>
+            <View style={styles.header} fixed>
+              <View style={styles.brandBox}>
+                <Text style={styles.brandName}>ASHOK JEWELS</Text>
+                <Text style={styles.catalogName}>{catalog.name || 'Catalog'}</Text>
               </View>
-            );
-          })}
-        </View>
-        
-        <View style={styles.footer} fixed>
-          <Text style={styles.footerText}>Ashok Jewels Wholesale Partner Portal</Text>
-          <Text style={styles.pageNumber} render={({ pageNumber, totalPages }) => `PAGE ${pageNumber} / ${totalPages}`} />
-        </View>
-      </Page>
-      
+              <View style={styles.confidentialBadge}>
+                 <Text style={styles.confidentialText}>Confidential / B2B</Text>
+              </View>
+            </View>
+
+            <View style={styles.grid}>
+              {chunk.items.map((catItem: any, idx: number) => {
+                const p = products.find(prod => prod.designCode === catItem.designCode);
+                if (!p) return null;
+
+                let imgSrc = '';
+                if (p.media && p.media.length > 0 && p.media[0].url) {
+                   imgSrc = p.media[0].url;
+                } else if (p.description && (p.description.startsWith('http') || p.description.startsWith('data:image'))) {
+                   imgSrc = p.description;
+                }
+
+                return (
+                  <View key={`prod-${idx}`} style={styles.itemCard} wrap={false}>
+                    <View style={styles.itemImageWrapper}>
+                      {imgSrc ? (
+                        <PdfImage src={imgSrc} style={styles.itemImage} />
+                      ) : (
+                        <View style={styles.itemImage} />
+                      )}
+                    </View>
+                    
+                    <View style={styles.itemDetails}>
+                      <Text style={styles.itemCode}>{p.designCode || ''}</Text>
+                      <Text style={styles.itemTitle}>{p.title || ''}</Text>
+                      
+                      <View style={styles.itemPriceRow}>
+                        <Text style={styles.itemPurity}>{p.metalPurity || '18KT'}</Text>
+                        {!hidePricing && (
+                          <View style={styles.itemPriceCol}>
+                            <Text style={styles.itemPriceLabel}>Est. Value</Text>
+                            <Text style={styles.itemPrice}>{formatPrice(p.price || p.estimatedPrice || 0)}</Text>
+                          </View>
+                        )}
+                      </View>
+                    </View>
+                  </View>
+                );
+              })}
+            </View>
+            
+            <View style={styles.footer} fixed>
+              <Text style={styles.footerText}>Ashok Jewels Wholesale Partner Portal</Text>
+              <Text style={styles.pageNumber} render={({ pageNumber, totalPages }) => `PAGE ${pageNumber} / ${totalPages}`} />
+            </View>
+          </Page>
+        );
+      })}
+
       {/* Back Cover */}
       {config.backCover && (
         <Page size="A4" style={styles.coverPage}>
