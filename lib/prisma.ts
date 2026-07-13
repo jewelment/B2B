@@ -15,20 +15,34 @@ if (!globalForPrisma.tenantClients) {
   globalForPrisma.tenantClients = {};
 }
 
+import path from 'path';
+import fs from 'fs';
+
 // 11.2 BYODB (Bring Your Own Database) Routing Engine
 // If an enterprise client has their own isolated database, this router spins up a dedicated connection
 export function getTenantPrisma(tenantId: string | null): PrismaClient {
   if (!tenantId) return prisma;
 
-  // Prototype: Dictionary mapping Enterprise tenants to their private DB URLs
-  const enterpriseDatabases: Record<string, string> = {
-    'tenant-tiffany': process.env.TIFFANY_DATABASE_URL || '',
-    'tenant-cartier': process.env.CARTIER_DATABASE_URL || ''
+  // Map tenant IDs to their isolated physical folders in the external volume
+  const clientMap: Record<string, string> = {
+    'tenant-ashok': 'Ashok_Jewels',
+    'tenant-vaibhav': 'Vaibhav_Global',
+    'tenant-angara': 'Angara_eCommerce'
   };
 
-  const customUrl = enterpriseDatabases[tenantId];
+  const folderName = clientMap[tenantId];
+  let customUrl = '';
 
-  // If this tenant does not have a custom BYODB string, return the global pooled database
+  if (folderName) {
+    // Construct the path to the isolated client_data folder
+    // E.g., D:\Google AJ Drive - home\Maste B2B Jewelement Project\Jewelment B2B Dev V1\client_data\Ashok_Jewels\database.sqlite
+    const dbPath = path.resolve(process.cwd(), `../client_data/${folderName}/database.sqlite`);
+    
+    // In Phase 2, this will use a dedicated SQLite Prisma Client (e.g., @prisma/tenant-client)
+    customUrl = `file:${dbPath}`;
+  }
+
+  // If this tenant does not have an isolated DB string, return the global database
   if (!customUrl) {
     return prisma;
   }
@@ -38,7 +52,8 @@ export function getTenantPrisma(tenantId: string | null): PrismaClient {
     return globalForPrisma.tenantClients[tenantId];
   }
 
-  // Otherwise, instantiate a new isolated Prisma Client pointed at their private hardware
+  // NOTE: This currently requires splitting schema.prisma into schema.master.prisma (Postgres) 
+  // and schema.tenant.prisma (SQLite). For now, it scaffolds the routing logic.
   const tenantClient = new PrismaClient({
     datasources: {
       db: {

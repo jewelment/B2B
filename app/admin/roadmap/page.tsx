@@ -104,7 +104,8 @@ export default function DevRoadmapDashboard() {
         { name: "1.2 Bulk-Sync API Engine", profile: "Admin", status: "Completed", progress: 100, url: "/api/admin/products/bulk-sync" },
         { name: "1.3 System Route Auditor", profile: "Admin", status: "Completed", progress: 100, url: "/admin/system-routes" },
         { name: "1.4 Route Consolidation", profile: "Admin", status: "Completed", progress: 100, url: "next.config.mjs" },
-        { name: "1.5 Appearance Theme Engine", profile: "Admin", status: "Completed", progress: 100, url: "/admin/settings" }
+        { name: "1.5 Appearance Theme Engine", profile: "Admin", status: "Completed", progress: 100, url: "/admin/settings" },
+        { name: "1.6 Real Inventory CSV Import", profile: "Admin", status: "Completed", progress: 100, url: "scripts/import_inventory.ts" }
       ]
     },
     {
@@ -131,7 +132,7 @@ export default function DevRoadmapDashboard() {
       phase: "4.0 UNIFIED PO MATRIX & CART",
       description: "Frictionless wholesale ordering and cart logic.",
       tasks: [
-        { name: "4.1 Global Cart State", profile: "Business Owner", status: "Completed", progress: 100, url: "store/useCartStore.ts" },
+        { name: "4.1 Global Cart & PDP Pages", profile: "Business Owner", status: "Completed", progress: 100, url: "/dashboard/product" },
         { name: "4.2 PO Matrix Checkout UI", profile: "Business Owner", status: "Completed", progress: 100, url: "/dashboard/cart" },
         { name: "4.3 Real-Time Price Breakup", profile: "Business Owner", status: "Completed", progress: 100, url: "components/MatrixModal.tsx" },
         { name: "4.4 Draft PO Generation", profile: "Business Owner", status: "Completed", progress: 100, url: "/api/checkout/execute" }
@@ -194,8 +195,17 @@ export default function DevRoadmapDashboard() {
       description: "Automated scaling, APK deployment, and multi-tenant troubleshooting.",
       tasks: [
         { name: "10.1 Bulk Sync Data Validation", profile: "Super Admin, Admin", status: "Completed", progress: 100, url: "/admin/inventory/import" },
-        { name: "10.2 Expo EAS OTA Update Pipeline", profile: "Super Admin", status: "Completed", progress: 100, url: "eas.json" },
+        { name: "10.2 React Native CLI & CodePush Pipeline", profile: "Super Admin", status: "Completed", progress: 100, url: "/mobile" },
         { name: "10.3 Impersonation JWT Token Swap", profile: "Super Admin", status: "Completed", progress: 100, url: "/api/admin/impersonate" }
+      ]
+    },
+    {
+      phase: "12.0 V2: FLIPBOOK ANALYTICS & TELEMETRY",
+      description: "Tracking catalog impressions, page views, and user engagement metrics.",
+      tasks: [
+        { name: "12.1 Flipbook Telemetry Engine", profile: "Admin", status: "Pending", progress: 0, url: "/catalog/flipbook/[id]" },
+        { name: "12.2 Real-time Dashboard Analytics", profile: "Admin", status: "Pending", progress: 0, url: "/admin/analytics" },
+        { name: "12.3 Conversion Funnel Tracking", profile: "Admin", status: "Pending", progress: 0, url: "/api/analytics/track" }
       ]
     },
     {
@@ -225,7 +235,16 @@ export default function DevRoadmapDashboard() {
         { name: "13.1 Dynamic Component Engine", profile: "Admin", status: "Completed", progress: 100, url: "/admin/theme-builder" },
         { name: "13.2 Visual Property Editor (Liquidity Form)", profile: "Admin", status: "Completed", progress: 100, url: "/admin/theme-builder" },
         { name: "13.3 Banner Module (Image, Video, Live Text)", profile: "Admin", status: "Completed", progress: 100, url: "/admin/theme-builder" },
-        { name: "13.4 Advanced Styling Controls (Colors, Layout)", profile: "Admin", status: "In Progress", progress: 25, url: "/admin/theme-builder" }
+        { name: "13.4 Advanced Styling Controls (Colors, Layout)", profile: "Admin", status: "Completed", progress: 100, url: "/admin/theme-builder" },
+        { name: "13.5 Advanced SDUI Drag-and-Drop", profile: "Admin", status: "Completed", progress: 100, url: "/admin/pages" },
+        { name: "13.6 Multi-Environment Publishing", profile: "Admin", status: "Completed", progress: 100, url: "/dashboard" }
+      ]
+    },
+    {
+      phase: "14.0 INVENTORY SYNC & TESTING",
+      description: "Testing real-world data import via CSV to validate system stability.",
+      tasks: [
+        { name: "14.1 Real Inventory CSV Import Test", profile: "Admin", status: "Completed", progress: 100, url: "/admin/inventory/import" }
       ]
     }
   ];

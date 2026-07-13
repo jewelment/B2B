@@ -266,5 +266,30 @@ export const taskDetailsMap: Record<string, { description: string; howToTest: st
     description: "Updated the core PostgreSQL schema via Prisma to support complex relational mapping between Tickets, the Clients who reported them, and assigned Developers.",
     howToTest: "Review the Ticket and TicketMessage models in the Prisma schema.",
     testPath: "prisma/schema.prisma"
+  },
+  "9.3 Headless PO Matrix Checkout": {
+    description: "Engineered a headless order execution flow that consolidates PO matrix quantities into the database without requiring standard cart progression, enabling one-click multi-SKU generation.",
+    howToTest: "Add multiple variations to the matrix and generate a PO instantly.",
+    testPath: "/dashboard/cart"
+  },
+  "13.4 Advanced Styling Controls (Colors, Layout)": {
+    description: "Built the comprehensive SDUI visual property editor giving Admin full control over padding, typography, border-radius, background images, and layout spacing for all components.",
+    howToTest: "Navigate to the Theme Builder and tweak layout settings for any component.",
+    testPath: "/admin/theme-builder"
+  },
+  "13.5 Advanced SDUI Drag-and-Drop": {
+    description: "Engineered true cross-container drag-and-drop using @dnd-kit/core. Implemented a professional Layers panel for buttery-smooth hierarchical sorting and global Header/Footer pinning.",
+    howToTest: "Open the Builder, drag blocks from the library, reorder them in the layers panel, and upload local images.",
+    testPath: "/admin/pages"
+  },
+  "13.6 Multi-Environment Publishing": {
+    description: "Updated database architecture to support distinct Draft, Development, Staging, and Production environments for layouts, providing true enterprise deployment pipelines.",
+    howToTest: "Save a layout to Staging, then verify the storefront Dashboard defaults to fetching Production.",
+    testPath: "/dashboard"
+  },
+  "14.1 Real Inventory CSV Import Test": {
+    description: "Upload an authentic CSV containing real inventory variations to verify the PIM engine, pricing calculations, and matrix builder work smoothly with production-grade data volumes.",
+    howToTest: "Navigate to the Bulk Sync page and upload your real CSV file.",
+    testPath: "/admin/inventory/import"
   }
 };

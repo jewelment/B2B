@@ -4,6 +4,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import AdvancedMatrixModal from '@/components/AdvancedMatrixModal';
 import BrandLogo from '@/components/BrandLogo';
 
+import { useCartStore } from '@/store/useCartStore';
+
 // --- Icons ---
 const IconDownload = () => <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>;
 const IconShare = () => <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg>;
@@ -20,12 +22,13 @@ export default function GridClient({ catalog }: { catalog: any }) {
   // App State
   const [isUnlocked, setIsUnlocked] = useState(!config.password);
   const [passInput, setPassInput] = useState('');
-  const [selectedItems, setSelectedItems] = useState<string[]>([]);
   
-  // Matrix PO State
+  // Global Store State
+  const { selectedItems, toggleSelection, matrixQuantities } = useCartStore();
+  
+  // Local Matrix UI State
   const [showPOMatrix, setShowPOMatrix] = useState(false);
   const [activeMatrixSku, setActiveMatrixSku] = useState<string | null>(null);
-  const [matrixQuantities, setMatrixQuantities] = useState<Record<string, Record<string, number>>>({});
   const [validationError, setValidationError] = useState<string | null>(null);
   
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -40,12 +43,6 @@ export default function GridClient({ catalog }: { catalog: any }) {
     }
   }, [activeMatrixSku]);
 
-  const toggleSelection = (code: string) => {
-    setSelectedItems(prev => 
-      prev.includes(code) ? prev.filter(item => item !== code) : [...prev, code]
-    );
-  };
-
   const handlePORequest = () => {
     if (selectedItems.length > 0) {
       setActiveMatrixSku(selectedItems[0]);
@@ -55,18 +52,6 @@ export default function GridClient({ catalog }: { catalog: any }) {
 
   const closeMatrix = () => {
     setShowPOMatrix(false);
-  };
-
-  const handleRemoveSkuFromCart = (targetSku: string) => {
-    const newSelected = selectedItems.filter(s => s !== targetSku);
-    setSelectedItems(newSelected);
-    
-    const newQuantities = { ...matrixQuantities };
-    delete newQuantities[targetSku];
-    setMatrixQuantities(newQuantities);
-
-    if(newSelected.length === 0) setShowPOMatrix(false);
-    else if(activeMatrixSku === targetSku) setActiveMatrixSku(newSelected[0]); 
   };
 
   const formatPrice = (amount: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(amount);
@@ -242,12 +227,8 @@ export default function GridClient({ catalog }: { catalog: any }) {
       {showPOMatrix && activeProductData && (
         <AdvancedMatrixModal
           products={catalog.items.map((i: any) => i.product)}
-          selectedItems={selectedItems}
           activeMatrixSku={activeMatrixSku!}
           setActiveMatrixSku={setActiveMatrixSku}
-          matrixQuantities={matrixQuantities}
-          setMatrixQuantities={setMatrixQuantities}
-          handleRemoveSkuFromCart={handleRemoveSkuFromCart}
           closeMatrix={closeMatrix}
           catalogId={catalog.id}
           clientId={catalog.clientId}

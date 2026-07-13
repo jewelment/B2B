@@ -57,10 +57,10 @@ export async function POST(req: Request) {
     // Calculate total pipeline value from Master Inventory
     const products = await prisma.product.findMany({
       where: { tenantId, designCode: { in: designCodes } },
-      select: { estimatedPrice: true }
+      select: { price: true, estimatedPrice: true }
     });
 
-    const totalPipelineValue = products.reduce((sum, p) => sum + (p.estimatedPrice || 0), 0);
+    const totalPipelineValue = products.reduce((sum, p) => sum + (p.price || p.estimatedPrice || 0), 0);
 
     const newCatalog = await prisma.catalog.create({
       data: {
@@ -107,12 +107,12 @@ export async function PUT(req: Request) {
     const existing = await prisma.catalog.findFirst({ where: { id, tenantId } });
     if (!existing) return NextResponse.json({ success: false, error: 'Not found.' }, { status: 404 });
 
-    const products = await prisma.catalog.findMany({
-      where: { tenantId },
-      select: { pipelineValue: true } // Simplified for now
+    const products = await prisma.product.findMany({
+      where: { tenantId, designCode: { in: designCodes } },
+      select: { price: true, estimatedPrice: true }
     });
 
-    const totalPipelineValue = 0; // Replace with proper sum logic if needed
+    const totalPipelineValue = products.reduce((sum, p) => sum + (p.price || p.estimatedPrice || 0), 0);
 
     // Delete existing items to recreate them
     await prisma.catalogItem.deleteMany({ where: { catalogId: id } });

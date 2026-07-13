@@ -47,9 +47,9 @@ export default function CartPage() {
   return (
     <div className="w-full max-w-5xl animate-in fade-in duration-500">
       
-      <div className="mb-10">
-        <h1 className="text-2xl font-light tracking-wide text-[var(--text-main)] mb-2">Purchase Order Matrix</h1>
-        <p className="text-sm text-[var(--text-muted)]">Review your B2B matrix allocations before submitting for manufacturing.</p>
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold tracking-wide uppercase mb-2">Purchase Order Cart</h1>
+        <p className="text-sm text-[var(--text-muted)]">Review your B2B cart before submitting for manufacturing.</p>
       </div>
 
       {error && (

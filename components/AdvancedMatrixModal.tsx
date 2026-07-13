@@ -2,6 +2,9 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
+import { useCartStore } from '@/store/useCartStore';
 
 const IconClose = () => <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>;
 const IconChevronLeft = () => <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>;
@@ -11,12 +14,8 @@ const IconDownload = () => <svg className="w-4 h-4" fill="none" viewBox="0 0 24 
 
 export interface AdvancedMatrixModalProps {
   products: any[];
-  selectedItems: string[];
   activeMatrixSku: string;
   setActiveMatrixSku: (sku: string) => void;
-  matrixQuantities: Record<string, Record<string, number>>;
-  setMatrixQuantities: (quantities: Record<string, Record<string, number>> | ((prev: any) => any)) => void;
-  handleRemoveSkuFromCart: (sku: string) => void;
   closeMatrix: () => void;
   purities?: string[];
   sizes?: string[];
@@ -26,18 +25,18 @@ export interface AdvancedMatrixModalProps {
 
 export default function AdvancedMatrixModal({
   products,
-  selectedItems,
   activeMatrixSku,
   setActiveMatrixSku,
-  matrixQuantities,
-  setMatrixQuantities,
-  handleRemoveSkuFromCart,
   closeMatrix,
   purities = ['14K YG', '14K RG', '14K WG', '18K YG', '18K RG', '18K WG'],
   sizes = ['6', '7', '8', '9', '10', '11'],
   catalogId,
   clientId
 }: AdvancedMatrixModalProps) {
+  const { selectedItems, matrixQuantities, updateMatrixQty, removeSelection } = useCartStore();
+  const { data: session, status } = useSession();
+  const router = useRouter();
+
   const [validationError, setValidationError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [checkoutSuccess, setCheckoutSuccess] = useState<{status: boolean, poNumber: string}>({ status: false, poNumber: '' });
@@ -73,11 +72,9 @@ export default function AdvancedMatrixModal({
     setActiveImageIndex(0);
   }, [activeMatrixSku]);
 
-  const updateMatrixQty = (sku: string, variantKey: string, qty: number) => {
+  const handleMatrixChange = (sku: string, variantKey: string, qty: number) => {
     if (validationError) setValidationError(null);
-    setMatrixQuantities((prev: any) => ({
-      ...prev, [sku]: { ...(prev[sku] || {}), [variantKey]: Math.max(0, qty) }
-    }));
+    updateMatrixQty(sku, variantKey, qty);
   };
 
   const getProductPrice = (product: any) => {
@@ -143,6 +140,11 @@ export default function AdvancedMatrixModal({
       return;
     }
 
+    if (status === 'unauthenticated') {
+      router.push(`/login?callbackUrl=${encodeURIComponent(window.location.href)}`);
+      return;
+    }
+
     setIsSubmitting(true);
     
     try {
@@ -190,7 +192,7 @@ export default function AdvancedMatrixModal({
         <div className="absolute top-6 left-1/2 -translate-x-1/2 bg-red-50 border border-red-200 p-4 rounded-xl shadow-xl z-[120] flex items-center gap-4 animate-in slide-in-from-top-4 max-w-md w-[90%]">
           <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center text-red-600 shrink-0 font-bold">!</div>
           <div>
-            <p className="text-[10px] font-bold text-red-800 uppercase tracking-widest mb-0.5">Allocation Required</p>
+            <p className="text-[10px] font-bold text-red-800 uppercase tracking-widest mb-0.5">Cart Selection</p>
             <p className="text-xs text-red-600 leading-tight">{validationError}</p>
           </div>
           <button onClick={() => setValidationError(null)} className="p-1.5 hover:bg-red-100 rounded-lg text-red-500 transition-colors ml-auto"><IconClose /></button>
@@ -342,7 +344,7 @@ export default function AdvancedMatrixModal({
                         <span className="text-[9px] font-mono font-bold tracking-wide">{displaySku}</span>
                       </div>
                       <button 
-                        onClick={(e) => { e.stopPropagation(); handleRemoveSkuFromCart(sku); }} 
+                        onClick={(e) => { e.stopPropagation(); removeSelection(sku); }} 
                         className={`flex-shrink-0 text-[8px] leading-none transition-colors ml-0.5 ${isActive ? 'text-white/60 hover:text-white' : (isFilled ? 'text-emerald-400 hover:text-emerald-700' : 'text-red-400 hover:text-red-700')}`}
                       >
                         ✕
@@ -382,7 +384,7 @@ export default function AdvancedMatrixModal({
                             <td key={size} className="py-1 px-1.5 text-center">
                               <input 
                                 type="number" min="0" value={qty || ''} placeholder="0"
-                                onChange={(e) => updateMatrixQty(activeMatrixSku, variantKey, parseInt(e.target.value) || 0)}
+                                onChange={(e) => handleMatrixChange(activeMatrixSku, variantKey, parseInt(e.target.value) || 0)}
                                 className={`w-16 h-9 mx-auto pr-1 text-center rounded-lg text-sm font-medium outline-none transition-all focus:ring-1 focus:ring-[#4e080f] ${
                                   qty > 0 
                                     ? 'bg-white border-2 border-[#4e080f] text-[#4e080f] shadow-sm' 

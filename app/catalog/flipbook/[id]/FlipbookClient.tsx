@@ -3,10 +3,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import HTMLFlipBook from 'react-pageflip';
 import AdvancedMatrixModal from '@/components/AdvancedMatrixModal';
+import { useCartStore } from '@/store/useCartStore';
 
 // --- Consistent High-Quality Icons ---
 const IconClose = () => <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" /></svg>;
-const IconCart = () => <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>;
+const IconCart = () => <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>;
 const IconLock = () => <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>;
 const IconCheck = () => <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>;
 const IconChevronLeft = () => <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 19l-7-7 7-7" /></svg>;
@@ -73,7 +74,7 @@ export default function FlipbookClient({ catalog }: { catalog: any }) {
 
   const [isUnlocked, setIsUnlocked] = useState(!config.password);
   const [passInput, setPassInput] = useState('');
-  const [selectedItems, setSelectedItems] = useState<string[]>([]);
+  const { selectedItems, toggleSelection, removeSelection, matrixQuantities, setMatrixQuantities } = useCartStore();
   const [currentPage, setCurrentPage] = useState(0);
 
   // LIVE PREVIEW HYDRATION
@@ -111,12 +112,15 @@ export default function FlipbookClient({ catalog }: { catalog: any }) {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const isPortrait = windowDimensions.height > windowDimensions.width && windowDimensions.width < 1024;
+  const isPortrait = previewConfig.orientation === 'LANDSCAPE' 
+    ? false 
+    : (previewConfig.orientation === 'PORTRAIT' 
+      ? true 
+      : (windowDimensions.height > windowDimensions.width && windowDimensions.width < 1024));
 
 
   const [showPOMatrix, setShowPOMatrix] = useState(false);
   const [activeMatrixSku, setActiveMatrixSku] = useState<string | null>(null);
-  const [matrixQuantities, setMatrixQuantities] = useState<Record<string, Record<string, number>>>({});
   const [validationError, setValidationError] = useState<string | null>(null);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -157,7 +161,7 @@ export default function FlipbookClient({ catalog }: { catalog: any }) {
 
   const handleToggleCart = (code: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    setSelectedItems(prev => prev.includes(code) ? prev.filter(c => c !== code) : [...prev, code]);
+    toggleSelection(code);
   };
 
   const handlePORequest = () => {
@@ -181,18 +185,17 @@ export default function FlipbookClient({ catalog }: { catalog: any }) {
   };
 
   const handleRemoveSkuFromCart = (targetSku: string) => {
+    removeSelection(targetSku);
     const newSelected = selectedItems.filter(s => s !== targetSku);
-    setSelectedItems(newSelected);
-
-    const newQuantities = { ...matrixQuantities };
-    delete newQuantities[targetSku];
-    setMatrixQuantities(newQuantities);
 
     if (newSelected.length === 0) setShowPOMatrix(false);
     else if (activeMatrixSku === targetSku) setActiveMatrixSku(newSelected[0]);
   };
 
-  const formatPrice = (amount: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(amount);
+  const formatPrice = (amount: number) => {
+    if (!amount || amount === 0) return 'Price on Request';
+    return `Rs. ${new Intl.NumberFormat('en-IN', { maximumFractionDigits: 0 }).format(amount)}`;
+  };
 
   // If password protected and not unlocked yet
   if (!isUnlocked) {
@@ -245,12 +248,68 @@ export default function FlipbookClient({ catalog }: { catalog: any }) {
     objectPosition: isDefaultFront ? 'left center' : 'center'
   });
   
-  // 1. Load all products sequentially
-  previewCatalog.items?.forEach((item: any) => {
-    if (item.product) {
-      pages.push({ type: 'PRODUCT', data: item.product });
+  // 1. Load products sequentially or chunked based on itemsPerPage
+  const prefImgIdx = Number(previewConfig.preferredImageIndex || 0);
+  const getProductImage = (p: any) => {
+    if (!p.media || p.media.length === 0) return null;
+    
+    const targetSeq = prefImgIdx + 1;
+    
+    // 1. Exact match by sequence
+    const exact = p.media.find((m: any) => m.sequence === targetSeq);
+    if (exact && exact.url) return exact.url;
+    
+    // 2. User's specific fallback logic (Image 2 -> Image 3 -> Image 1)
+    if (targetSeq === 2) {
+      const fallback3 = p.media.find((m: any) => m.sequence === 3);
+      if (fallback3 && fallback3.url) return fallback3.url;
+      const fallback1 = p.media.find((m: any) => m.sequence === 1);
+      if (fallback1 && fallback1.url) return fallback1.url;
+    } else if (targetSeq === 3) {
+      const fallback2 = p.media.find((m: any) => m.sequence === 2);
+      if (fallback2 && fallback2.url) return fallback2.url;
+      const fallback1 = p.media.find((m: any) => m.sequence === 1);
+      if (fallback1 && fallback1.url) return fallback1.url;
     }
-  });
+    
+    // 3. Absolute fallback
+    return p.media[0].url;
+  };
+
+  const rawDesktop = previewConfig.desktopItemsPerPage !== undefined ? previewConfig.desktopItemsPerPage : previewCatalog.desktopItemsPerPage !== undefined ? previewCatalog.desktopItemsPerPage : 4;
+  const rawMobile = previewConfig.mobileItemsPerPage !== undefined ? previewConfig.mobileItemsPerPage : previewCatalog.mobileItemsPerPage !== undefined ? previewCatalog.mobileItemsPerPage : 1;
+  const itemsPerPage = Number(isPortrait ? rawMobile : rawDesktop);
+  
+  const productItems = previewCatalog.items?.filter((i: any) => i.product) || [];
+
+  let i = 0;
+  let patternIndex = 0;
+  const pattern = [1, 4, 4]; // Only 1 and 4 allowed!
+
+  while (i < productItems.length) {
+    const remaining = productItems.length - i;
+    let take = itemsPerPage;
+
+    if (itemsPerPage === 0) { // Smart Auto-Align
+      take = pattern[patternIndex % pattern.length];
+      patternIndex++;
+    }
+
+    // Force fallback to 1 if we need 4 but don't have enough to form a complete grid
+    if (take > 1 && remaining < take) {
+      take = 1;
+    }
+
+    const chunk = productItems.slice(i, i + take).map((item: any) => item.product);
+
+    if (take === 1) {
+      pages.push({ type: 'PRODUCT', data: chunk[0] });
+    } else {
+      pages.push({ type: 'PRODUCT_GRID', data: chunk, itemsPerPage: 4 });
+    }
+
+    i += take;
+  }
 
   // 2. Splice in promotional pages at exact defined positions
   if (previewConfig.lifestyleInserts && Array.isArray(previewConfig.lifestyleInserts)) {
@@ -378,9 +437,9 @@ export default function FlipbookClient({ catalog }: { catalog: any }) {
                     style={{ objectPosition: page.objectPosition || 'center' }} 
                     alt="Cover" 
                   />
-                  <div className="absolute inset-0 flex flex-col items-center justify-center p-10 text-center pointer-events-none mix-blend-difference">
-                    <h1 className="text-2xl lg:text-3xl text-white font-light tracking-[0.2em] uppercase leading-relaxed">{page.title}</h1>
-                    {index === 0 && <p className="text-[9px] text-white font-bold tracking-[0.4em] uppercase mt-4 border-b border-white pb-2">Confidential Line Sheet</p>}
+                  <div className="absolute inset-0 flex flex-col items-center justify-center p-10 text-center pointer-events-none bg-black/40">
+                    <h1 className="text-2xl lg:text-3xl text-white font-light tracking-[0.2em] uppercase leading-relaxed drop-shadow-md">{page.title}</h1>
+                    {index === 0 && <p className="text-[9px] text-white font-bold tracking-[0.4em] uppercase mt-4 border-b border-white pb-2 drop-shadow-md">Confidential Line Sheet</p>}
                   </div>
                 </div>
               )}
@@ -394,12 +453,14 @@ export default function FlipbookClient({ catalog }: { catalog: any }) {
                 <div className={`w-full h-full flex flex-col p-8 lg:p-12 ${isDark ? 'bg-[#141414] text-white' : 'bg-white text-gray-900'}`}>
 
                   {/* Image Container with precise ratio containment */}
-                  <div className="flex-1 relative bg-transparent overflow-hidden mb-8 cursor-pointer flex items-center justify-center" onClick={() => bookRef.current?.pageFlip().flipNext()}>
-                    <ProductImage 
-                      src={page.data.mainImage || page.data.render8k} 
-                      className="w-full h-full object-contain mix-blend-multiply transition-transform duration-700 hover:scale-[1.02]" 
-                      alt={page.data.title} 
-                    />
+                  <div className="flex-1 w-full relative bg-transparent overflow-hidden mb-8 min-h-0 flex items-center justify-center cursor-pointer" onClick={() => bookRef.current?.pageFlip().flipNext()}>
+                    <div className="aspect-square h-full max-w-full relative rounded-xl overflow-hidden">
+                      <ProductImage 
+                        src={getProductImage(page.data)} 
+                        className="absolute inset-0 w-full h-full object-cover mix-blend-multiply transition-transform duration-700 hover:scale-[1.02]" 
+                        alt={page.data.title} 
+                      />
+                    </div>
                   </div>
 
                   <div className="flex flex-col gap-2 mb-8 border-t border-black/10 pt-6">
@@ -408,18 +469,61 @@ export default function FlipbookClient({ catalog }: { catalog: any }) {
                     {showPricing && (
                       <div className="mt-2 flex flex-col gap-0.5">
                         <span className={`text-[9px] font-bold uppercase tracking-widest ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Estimated Value</span>
-                        <p className="text-xl font-light text-[#4e080f]">{formatPrice(page.data.estimatedPrice)}</p>
+                        <p className="text-xl font-light text-[#4e080f]">{formatPrice(page.data.price || page.data.estimatedPrice || 0)}</p>
                       </div>
                     )}
                   </div>
 
                   <button
                     onClick={(e) => handleToggleCart(page.data.designCode, e)}
-                    style={selectedItems.includes(page.data.designCode) ? { backgroundColor: '#4e080f', color: '#ffffff', borderColor: '#4e080f' } : {}}
-                    className={`w-full py-4 text-[11px] font-bold uppercase tracking-[0.2em] rounded-lg transition-all ${selectedItems.includes(page.data.designCode) ? 'shadow-md border border-transparent' : `border-2 ${isDark ? 'border-white/30 hover:border-white text-white' : 'border-[#4e080f] hover:bg-[#4e080f] hover:text-white text-[#4e080f]'}`}`}
+                    className={`w-full py-4 text-[11px] font-bold uppercase tracking-[0.2em] rounded-lg transition-all ${selectedItems.includes(page.data.designCode) ? 'bg-[#4e080f] text-white shadow-md border-transparent' : `border border-[#4e080f] text-[#4e080f] hover:bg-[#4e080f] hover:text-white`}`}
                   >
-                    {selectedItems.includes(page.data.designCode) ? '✓ Staged for PO' : '+ Add to Allocation'}
+                    {selectedItems.includes(page.data.designCode) ? '✓ In Cart' : '+ Add to Cart'}
                   </button>
+                </div>
+              )}
+              {page.type === 'PRODUCT_GRID' && (
+                <div className={`w-full h-full flex flex-col p-4 md:p-6 ${isDark ? 'bg-[#141414] text-white' : 'bg-white text-gray-900'}`}>
+                  <div className={`grid gap-3 md:gap-4 flex-1 ${
+                    page.data.length === 2 ? 'grid-cols-1 grid-rows-2' :
+                    page.data.length === 3 ? 'grid-cols-2 grid-rows-2' :
+                    page.data.length === 4 ? 'grid-cols-2 grid-rows-2' :
+                    page.data.length === 5 ? 'grid-cols-2 grid-rows-3' :
+                    page.data.length === 6 ? 'grid-cols-2 grid-rows-3' :
+                    page.data.length === 7 ? 'grid-cols-2 grid-rows-4' :
+                    'grid-cols-2 grid-rows-4'
+                  }`}>
+                    {page.data.map((product: any, idx: number) => (
+                      <div key={idx} className={`flex flex-col border rounded-xl overflow-hidden relative group min-h-0 ${isDark ? 'border-white/10' : 'border-black/10'} ${
+                        (page.data.length === 3 && idx === 0) || 
+                        (page.data.length === 5 && idx === 0) || 
+                        (page.data.length === 7 && idx === 0) ? 'col-span-2 row-span-1' : ''
+                      }`}>
+                        <div className="flex-1 w-full relative bg-transparent overflow-hidden min-h-0 flex items-center justify-center cursor-pointer" onClick={() => bookRef.current?.pageFlip().flipNext()}>
+                          <div className="aspect-square h-full max-w-full relative">
+                            <ProductImage 
+                              src={getProductImage(product)} 
+                              className="absolute inset-0 w-full h-full object-cover mix-blend-multiply transition-transform duration-700 group-hover:scale-[1.05]" 
+                              alt={product.title} 
+                            />
+                          </div>
+                        </div>
+                        <div className={`p-3 md:p-4 border-t flex flex-col justify-between ${isDark ? 'bg-[#1a1a1a] border-white/5' : 'bg-gray-50 border-black/5'}`}>
+                           <p className={`text-[8px] md:text-[9px] font-mono tracking-widest ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>{product.designCode}</p>
+                           <h3 className="text-[10px] md:text-xs font-medium truncate mb-1">{product.title}</h3>
+                           <div className="flex justify-between items-center mt-1">
+                             {showPricing && <span className="text-[10px] md:text-xs font-medium text-[#4e080f]">{formatPrice(product.price || product.estimatedPrice || 0)}</span>}
+                             <button
+                              onClick={(e) => handleToggleCart(product.designCode, e)}
+                              className={`px-3 py-1.5 md:py-2 text-[9px] md:text-[10px] font-bold uppercase tracking-wider rounded-lg transition-colors ${selectedItems.includes(product.designCode) ? 'bg-[#4e080f] text-white shadow-md' : 'bg-black/5 hover:bg-black/10 text-gray-700'}`}
+                             >
+                               {selectedItems.includes(product.designCode) ? '✓ In Cart' : '+ Add to Cart'}
+                             </button>
+                           </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
               {page.type === 'BLANK' && <div className={`w-full h-full ${isDark ? 'bg-[#111]' : 'bg-[#fafafa]'}`}></div>}

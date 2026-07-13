@@ -36,10 +36,10 @@ export default async function ImmersiveFlipbookPage({ params }: { params: Promis
       metalPurity: true,
       grossWeight: true,
       pureWeight: true,
+      price: true,
       estimatedPrice: true,
       media: {
-        orderBy: { sequence: 'asc' },
-        take: 1
+        orderBy: { sequence: 'asc' }
       },
       description: true,
       igiCertNumber: true

@@ -44,6 +44,14 @@ export default function AdminSidebar({ isCollapsed = false, setIsCollapsed = () 
       ]
     },
     {
+      title: "Storefront & Builders",
+      roles: ['ADMIN'],
+      links: [
+        { name: "Web Pages Manager", path: "/admin/pages", icon: "M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" },
+        { name: "Mobile App Screens", path: "/admin/app-screens", icon: "M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" }
+      ]
+    },
+    {
       title: "Platform Settings",
       roles: ['ADMIN'],
       links: [

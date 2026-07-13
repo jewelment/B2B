@@ -48,6 +48,7 @@ export default function AdminCatalogsDashboard() {
     orientation: 'PORTRAIT', 
     desktopItemsPerPage: 4,
     mobileItemsPerPage: 1,
+    preferredImageIndex: 0,
     hidePricing: false,
     poMatrix: true,
     password: '',
@@ -235,7 +236,7 @@ export default function AdminCatalogsDashboard() {
     return matchesSearch && matchesPurity;
   });
 
-  const paginatedInventory = filteredInventory.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+  const paginatedInventory = filteredInventory.slice(0, currentPage * ITEMS_PER_PAGE);
   const totalPages = Math.ceil(filteredInventory.length / ITEMS_PER_PAGE);
 
   const getGridClass = () => {
@@ -251,6 +252,21 @@ export default function AdminCatalogsDashboard() {
 
   const activeCatalogs = catalogs.filter(c => c.isActive);
   const totalPipelineValue = activeCatalogs.reduce((acc, cat) => acc + (cat.pipelineValue || 0), 0);
+
+  // Infinite Scroll Observer
+  const observerTarget = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0].isIntersecting && currentPage < totalPages) {
+          setCurrentPage(prev => prev + 1);
+        }
+      },
+      { threshold: 0.1 }
+    );
+    if (observerTarget.current) observer.observe(observerTarget.current);
+    return () => observer.disconnect();
+  }, [currentPage, totalPages]);
 
   if (loading) return (<div className="flex justify-center py-32 text-[var(--brand-primary)]"><svg className="animate-spin w-8 h-8" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg></div>);
 
@@ -381,8 +397,9 @@ export default function AdminCatalogsDashboard() {
                             setConfig({
                               theme: cat.configuration.theme || 'LIGHT',
                               orientation: cat.configuration.orientation || 'PORTRAIT',
-                              desktopItemsPerPage: cat.configuration.desktopItemsPerPage || 4,
-                              mobileItemsPerPage: cat.configuration.mobileItemsPerPage || 1,
+                              desktopItemsPerPage: cat.configuration.desktopItemsPerPage !== undefined ? cat.configuration.desktopItemsPerPage : 4,
+                              mobileItemsPerPage: cat.configuration.mobileItemsPerPage !== undefined ? cat.configuration.mobileItemsPerPage : 1,
+                              preferredImageIndex: cat.configuration.preferredImageIndex || 0,
                               hidePricing: cat.configuration.hidePricing || false,
                               poMatrix: cat.configuration.poMatrix !== false,
                               password: cat.configuration.password || '',
@@ -466,6 +483,10 @@ export default function AdminCatalogsDashboard() {
                     ) : (
                       paginatedInventory.map((item, i) => {
                         const isSelected = selectedVisualItems.includes(item.designCode);
+                        const hasImage = item.media && item.media.length > 0;
+                        const primaryImg = hasImage ? item.media[0].url : null;
+                        const hoverImg = item.media && item.media.length > 1 ? item.media[1].url : null;
+
                         return (
                           <div key={i} onClick={() => toggleVisualSelection(item.designCode)} className={`relative group rounded-xl border-2 cursor-pointer transition-all overflow-hidden ${isSelected ? 'border-[var(--brand-primary)] ring-2 ring-[var(--brand-primary)]/30 shadow-lg scale-[1.02]' : 'border-[var(--border-color)] hover:border-[var(--brand-primary)]/50'}`}>
                             {isSelected && (
@@ -473,8 +494,20 @@ export default function AdminCatalogsDashboard() {
                                 <IconCheck />
                               </div>
                             )}
-                            <div className="aspect-square bg-white relative">
-                              <img src={item.mainImage || item.render8k || item.description || 'https://via.placeholder.com/400?text=No+Image'} alt={item.title} className="w-full h-full object-cover mix-blend-multiply transition-transform duration-500 group-hover:scale-110" />
+                            <div className="aspect-square bg-[var(--text-muted)]/5 flex items-center justify-center relative overflow-hidden">
+                              {hasImage ? (
+                                <>
+                                  <img src={primaryImg} alt={item.title} className={`absolute inset-0 w-full h-full object-cover mix-blend-multiply transition-opacity duration-700 ${hoverImg ? 'group-hover:opacity-0' : 'group-hover:scale-105'}`} />
+                                  {hoverImg && (
+                                    <img src={hoverImg} alt={item.title + ' alternate'} className="absolute inset-0 w-full h-full object-cover mix-blend-multiply opacity-0 transition-opacity duration-700 group-hover:opacity-100 group-hover:scale-105" />
+                                  )}
+                                </>
+                              ) : (
+                                <div className="flex flex-col items-center justify-center opacity-30 group-hover:opacity-50 transition-opacity">
+                                  <svg className="w-12 h-12 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                                  <span className="text-[10px] font-bold tracking-[0.2em] uppercase">No Image</span>
+                                </div>
+                              )}
                             </div>
                             <div className="p-3 bg-[var(--bg-surface)] border-t border-[var(--border-color)] relative z-10">
                               <div className="flex justify-between items-center mb-1">
@@ -487,17 +520,21 @@ export default function AdminCatalogsDashboard() {
                         );
                       })
                     )}
+                    {/* Infinite Scroll Trigger */}
+                    {currentPage < totalPages && (
+                      <div ref={observerTarget} className="col-span-full h-20 flex items-center justify-center text-[var(--text-muted)] opacity-50">
+                        <svg className="animate-spin w-6 h-6" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                      </div>
+                    )}
                   </div>
                 </div>
 
-                {/* DOCKED PAGINATION */}
-                {totalPages > 1 && (
-                  <div className="p-4 border-t border-[var(--border-color)] flex justify-between items-center bg-[var(--bg-base)] z-20 shadow-[0_-10px_20px_rgba(0,0,0,0.02)]">
-                    <button disabled={currentPage === 1} onClick={() => handlePageChange(currentPage - 1)} className="px-6 py-2 border border-[var(--border-color)] rounded-lg text-xs font-bold uppercase tracking-widest disabled:opacity-50 hover:bg-[var(--bg-surface)] transition-colors">Previous Page</button>
-                    <span className="text-xs font-bold text-[var(--brand-primary)] tracking-widest bg-[var(--brand-primary)]/10 px-4 py-1.5 rounded-full">Page {currentPage} of {totalPages}</span>
-                    <button disabled={currentPage === totalPages} onClick={() => handlePageChange(currentPage + 1)} className="px-6 py-2 border border-[var(--border-color)] rounded-lg text-xs font-bold uppercase tracking-widest disabled:opacity-50 hover:bg-[var(--bg-surface)] transition-colors">Load Next 120</button>
-                  </div>
-                )}
+                {/* DOCKED PAGINATION REMOVED, USING INFINITE SCROLL */}
+                <div className="p-3 border-t border-[var(--border-color)] text-center bg-[var(--bg-base)] z-20 shadow-[0_-10px_20px_rgba(0,0,0,0.02)]">
+                  <span className="text-xs font-bold text-[var(--text-muted)] tracking-widest">
+                    Showing {paginatedInventory.length} of {filteredInventory.length} Items (Page {currentPage} of {totalPages || 1})
+                  </span>
+                </div>
               </div>
             )}
 
@@ -558,9 +595,8 @@ export default function AdminCatalogsDashboard() {
                           <label className="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Desktop & Tablet (Products Per Page)</label>
                           <select value={config.desktopItemsPerPage} onChange={(e) => setConfig({...config, desktopItemsPerPage: Number(e.target.value)})} className="w-full bg-[var(--bg-base)] border border-[var(--border-color)] text-xs py-3 px-4 rounded-xl focus:ring-1 focus:ring-[var(--brand-primary)] outline-none cursor-pointer text-[var(--text-main)]">
                             <option value={1}>1 Item Per Page (Hero View)</option>
-                            <option value={2}>2 Items Per Page (Large Imagery)</option>
                             <option value={4}>4 Items Per Page (Lookbook Style)</option>
-                            <option value={8}>8 Items Per Page (Dense Wholesale Grid)</option>
+                            <option value={0}>0 - Smart Auto-Align (Dynamic Layouts)</option>
                           </select>
                         </div>
 
@@ -570,6 +606,16 @@ export default function AdminCatalogsDashboard() {
                             <option value={1}>1 Item Per Page (Swipe Vertical)</option>
                             <option value={2}>2 Items Per Page (Standard E-com)</option>
                             <option value={4}>4 Items Per Page (Dense Grid)</option>
+                            <option value={0}>0 - Smart Auto-Align (Dynamic Layouts)</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Preferred Product Image</label>
+                          <select value={config.preferredImageIndex || 0} onChange={(e) => setConfig({...config, preferredImageIndex: Number(e.target.value)})} className="w-full bg-[var(--bg-base)] border border-[var(--border-color)] text-xs py-3 px-4 rounded-xl focus:ring-1 focus:ring-[var(--brand-primary)] outline-none cursor-pointer text-[var(--text-main)]">
+                            <option value={0}>Image 1 (Default / Studio)</option>
+                            <option value={1}>Image 2 (Alternative / Lifestyle)</option>
+                            <option value={2}>Image 3 (Contextual)</option>
                           </select>
                         </div>
 

@@ -9,7 +9,7 @@ export async function middleware(req: NextRequest) {
 
   // Define route scopes
   const isAuthRoute = pathname.startsWith('/login') || pathname.startsWith('/request-access');
-  const isProtectedRoute = pathname.startsWith('/dashboard') || pathname.startsWith('/catalog');
+  const isProtectedRoute = pathname.startsWith('/dashboard') || (pathname.startsWith('/catalog') && !pathname.startsWith('/catalog/flipbook'));
   const isAdminRoute = pathname.startsWith('/admin');
 
   // 1. Kick unauthenticated traffic out of protected B2B routes

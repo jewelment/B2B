@@ -3,7 +3,6 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]/route';
 import { prisma } from '@/lib/prisma';
 
-
 // Your original mock data, kept here just for the initial database seed
 const MOCK_INVENTORY = [
   {
@@ -117,6 +116,9 @@ export async function GET() {
       where: { tenantId },
       include: {
         components: true,
+        media: {
+          orderBy: { sequence: 'asc' }
+        }
       },
       orderBy: {
         createdAt: 'asc' // Keeps them in consistent order
@@ -133,6 +135,6 @@ export async function GET() {
       { status: 500 }
     );
   } finally {
-    // Prevent connection exhaustion
+    // Prevent connection exhaustion (forced recompile)
   }
 }
