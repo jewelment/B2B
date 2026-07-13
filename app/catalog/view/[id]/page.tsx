@@ -1,8 +1,44 @@
 import { notFound } from 'next/navigation';
 import { PrismaClient } from '@prisma/client';
 import GridClient from './GridClient';
+import type { Metadata } from 'next';
 
 const prisma = new PrismaClient();
+
+// Dynamic Metadata Generation for public catalog views
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params;
+  
+  const catalog = await prisma.catalog.findUnique({
+    where: { id },
+    select: { tenantId: true, name: true }
+  });
+
+  if (!catalog) return { title: 'Not Found' };
+
+  const settings = await prisma.storeSettings.findUnique({
+    where: { tenantId: catalog.tenantId }
+  });
+
+  return {
+    title: `${catalog.name} | ${settings?.brandName || 'Private Showcase'}`,
+    description: settings?.brandDescription || 'Exclusive B2B Catalog',
+    icons: {
+      icon: [
+        {
+          media: '(prefers-color-scheme: light)',
+          url: settings?.faviconLight || '/brand/favicon-maroon.png',
+          href: settings?.faviconLight || '/brand/favicon-maroon.png',
+        },
+        {
+          media: '(prefers-color-scheme: dark)',
+          url: settings?.faviconDark || '/brand/favicon-gold.png',
+          href: settings?.faviconDark || '/brand/favicon-gold.png',
+        },
+      ],
+    },
+  };
+}
 
 // Server Component for the Grid View
 export default async function GridViewPage({ params }: { params: Promise<{ id: string }> }) {
@@ -21,6 +57,11 @@ export default async function GridViewPage({ params }: { params: Promise<{ id: s
   if (!catalog || !catalog.isActive) {
     notFound();
   }
+
+  // Fetch StoreSettings to pass down to BrandLogo
+  const storeSettings = await prisma.storeSettings.findUnique({
+    where: { tenantId: catalog.tenantId }
+  });
 
   // 2. Fetch all corresponding Master Inventory SKUs
   const designCodes = catalog.items.map(item => item.designCode);
@@ -66,8 +107,10 @@ export default async function GridViewPage({ params }: { params: Promise<{ id: s
         name: catalog.name,
         theme: catalog.theme,
         clientId: catalog.clientId,
+        tenantId: catalog.tenantId,
         configuration: parsedConfig,
-        items: enrichedItems
+        items: enrichedItems,
+        storeSettings: storeSettings
       }} 
     />
   );

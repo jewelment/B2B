@@ -2,17 +2,34 @@ import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import React from 'react';
 import { renderToStream } from '@react-pdf/renderer';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { PurchaseOrderPDF } from '@/components/PurchaseOrderPDF';
 
 const prisma = new PrismaClient();
 
 export async function GET(req: Request, { params }: { params: Promise<{ poNumber: string }> }) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user) {
+      return new NextResponse("Unauthorized", { status: 401 });
+    }
+
+    let tenantId = (session.user as any).tenantId;
+    if (!tenantId && session.user.email) {
+      const dbUser = await prisma.user.findFirst({ where: { email: session.user.email } });
+      if (dbUser) tenantId = dbUser.tenantId;
+    }
+
+    if (!tenantId) {
+      return new NextResponse("Unauthorized. Missing tenant context.", { status: 401 });
+    }
+
     const { poNumber } = await params;
     
     // 1. Fetch Purchase Order from Database
-    const purchaseOrder = await prisma.purchaseOrder.findUnique({
-      where: { poNumber },
+    const purchaseOrder = await prisma.purchaseOrder.findFirst({
+      where: { tenantId, poNumber },
       include: {
         items: true
       }
@@ -25,7 +42,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ poNumber
     // 2. Fetch live product data (to get images and descriptions for the PDF)
     const designCodes = purchaseOrder.items.map(item => item.designCode);
     const products = await prisma.product.findMany({
-      where: { designCode: { in: designCodes } },
+      where: { tenantId, designCode: { in: designCodes } },
       include: { media: { orderBy: { sequence: 'asc' }, take: 1 } }
     });
 

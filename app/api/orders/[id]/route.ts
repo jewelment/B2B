@@ -16,6 +16,16 @@ export async function PATCH(
       return NextResponse.json({ error: 'Unauthorized access.' }, { status: 401 });
     }
 
+    let tenantId = (session.user as any).tenantId;
+    if (!tenantId && session.user.email) {
+      const dbUser = await prisma.user.findFirst({ where: { email: session.user.email } });
+      if (dbUser) tenantId = dbUser.tenantId;
+    }
+
+    if (!tenantId) {
+      return NextResponse.json({ error: 'Unauthorized. Missing tenant context.' }, { status: 401 });
+    }
+
     // 2. Unwrap Params (Next.js 16 requirement)
     const { id } = await params;
     
@@ -27,16 +37,19 @@ export async function PATCH(
       return NextResponse.json({ error: 'Invalid status provided.' }, { status: 400 });
     }
 
-    // 4. Execute Atomic Update
-    const updatedOrder = await prisma.purchaseOrder.update({
-      where: { id },
+    // 4. Execute Atomic Update with Tenant Ownership Verification
+    const updatedOrder = await prisma.purchaseOrder.updateMany({
+      where: { id, tenantId },
       data: { status }
     });
 
+    if (updatedOrder.count === 0) {
+       return NextResponse.json({ error: 'Order not found or unauthorized.' }, { status: 404 });
+    }
+
     return NextResponse.json({ 
       success: true, 
-      message: `PO updated to ${status}`, 
-      poNumber: updatedOrder.poNumber 
+      message: `PO updated to ${status}`
     }, { status: 200 });
 
   } catch (error: any) {

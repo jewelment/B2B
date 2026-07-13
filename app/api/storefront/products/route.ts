@@ -9,13 +9,23 @@ export async function GET() {
   try {
     // 1. Strict B2B Gatekeeper: Only logged-in, approved clients can view the catalog
     const session = await getServerSession(authOptions);
-    if (!session) {
+    if (!session || !session.user) {
       return NextResponse.json({ error: 'Unauthorized Access' }, { status: 401 });
     }
 
-    // 2. Fetch only ACTIVE products, including ordered local media and dynamic attributes
+    let tenantId = (session.user as any).tenantId;
+    if (!tenantId && session.user.email) {
+      const dbUser = await prisma.user.findFirst({ where: { email: session.user.email } });
+      if (dbUser) tenantId = dbUser.tenantId;
+    }
+
+    if (!tenantId) {
+      return NextResponse.json({ error: 'Unauthorized. Missing tenant context.' }, { status: 401 });
+    }
+
+    // 2. Fetch only ACTIVE products for THIS tenant, including ordered local media and dynamic attributes
     const products = await prisma.product.findMany({
-      where: { status: 'ACTIVE' },
+      where: { tenantId, status: 'ACTIVE' },
       orderBy: { createdAt: 'desc' },
       include: {
         media: {

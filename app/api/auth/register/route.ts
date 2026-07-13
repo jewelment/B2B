@@ -23,8 +23,8 @@ export async function POST(req: Request) {
     // Email Normalization to prevent duplicate/case-sensitive accounts
     const normalizedEmail = email.toLowerCase().trim();
 
-    const existingUser = await prisma.user.findUnique({
-      where: { email: normalizedEmail }
+    const existingUser = await prisma.user.findFirst({
+      where: { email: email.toLowerCase() }
     });
 
     if (existingUser) {

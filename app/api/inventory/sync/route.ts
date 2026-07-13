@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '../../auth/[...nextauth]/route';
 
 const prisma = new PrismaClient();
 
@@ -10,6 +12,21 @@ const MAKING_CHARGE_PER_GRAM = 850;
 
 export async function POST(req: Request) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user) {
+      return NextResponse.json({ success: false, error: 'Unauthorized.' }, { status: 401 });
+    }
+
+    let tenantId = (session.user as any).tenantId;
+    if (!tenantId && session.user.email) {
+      const dbUser = await prisma.user.findFirst({ where: { email: session.user.email } });
+      if (dbUser) tenantId = dbUser.tenantId;
+    }
+
+    if (!tenantId) {
+      return NextResponse.json({ success: false, error: 'Unauthorized. Missing tenant context.' }, { status: 401 });
+    }
+
     const body = await req.json();
     const { products } = body;
 
@@ -51,15 +68,15 @@ export async function POST(req: Request) {
         };
 
         // 2. Transactional Upsert
-        const existingProduct = await prisma.product.findUnique({
-          where: { designCode: item.designCode }
+        const existingProduct = await prisma.product.findFirst({
+          where: { tenantId, designCode: item.designCode }
         });
 
         let productId;
 
         if (existingProduct) {
           const updatedProduct = await prisma.product.update({
-            where: { designCode: item.designCode },
+            where: { id: existingProduct.id },
             data: productData
           });
           productId = updatedProduct.id;
@@ -67,6 +84,7 @@ export async function POST(req: Request) {
         } else {
           const newProduct = await prisma.product.create({
             data: {
+              tenantId,
               handle: handle,
               designCode: item.designCode,
               ...productData

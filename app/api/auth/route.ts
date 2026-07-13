@@ -14,7 +14,7 @@ export async function POST(req: Request) {
 
     // 1. HANDLE REGISTRATION (Partner Application)
     if (action === 'request_access') {
-      const existingUser = await prisma.user.findUnique({ where: { email } });
+      const existingUser = await prisma.user.findFirst({ where: { email } });
       if (existingUser) {
         return NextResponse.json({ error: 'Email already registered.' }, { status: 400 });
       }
@@ -45,7 +45,7 @@ export async function POST(req: Request) {
 
     // 2. HANDLE LOGIN
     if (action === 'login') {
-      const user = await prisma.user.findUnique({ where: { email } });
+      const user = await prisma.user.findFirst({ where: { email } });
       
       if (!user || user.passwordHash !== password) {
         return NextResponse.json({ error: 'Invalid credentials.' }, { status: 401 });

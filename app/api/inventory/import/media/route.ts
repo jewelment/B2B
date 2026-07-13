@@ -2,11 +2,28 @@ import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import fs from 'fs/promises';
 import path from 'path';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '../../../auth/[...nextauth]/route';
 
 const prisma = new PrismaClient();
 
 export async function POST(req: Request) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user) {
+      return NextResponse.json({ success: false, message: 'Unauthorized.' }, { status: 401 });
+    }
+
+    let tenantId = (session.user as any).tenantId;
+    if (!tenantId && session.user.email) {
+      const dbUser = await prisma.user.findFirst({ where: { email: session.user.email } });
+      if (dbUser) tenantId = dbUser.tenantId;
+    }
+
+    if (!tenantId) {
+      return NextResponse.json({ success: false, message: 'Unauthorized. Missing tenant context.' }, { status: 401 });
+    }
+
     const formData = await req.formData();
     const syncMode = formData.get('syncMode') as string || 'APPEND';
     const files = formData.getAll('files') as File[];
@@ -40,9 +57,9 @@ export async function POST(req: Request) {
       const designCode = match[1].toUpperCase();
 
       try {
-        // Find the corresponding product in the database
-        const product = await prisma.product.findUnique({
-          where: { designCode },
+        // Find the corresponding product in the database for THIS tenant
+        const product = await prisma.product.findFirst({
+          where: { tenantId, designCode },
         });
 
         // QC Gate: If product doesn't exist, skip the image to prevent "orphaned" media

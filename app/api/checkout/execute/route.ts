@@ -8,7 +8,21 @@ const prisma = new PrismaClient();
 export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions);
-    const clientId = session?.user ? (session.user as any).id : 'GUEST_TEST_USER'; // Fallback for local testing
+    if (!session || !session.user) {
+      return NextResponse.json({ error: 'Unauthorized.' }, { status: 401 });
+    }
+
+    let tenantId = (session.user as any).tenantId;
+    if (!tenantId && session.user.email) {
+      const dbUser = await prisma.user.findFirst({ where: { email: session.user.email } });
+      if (dbUser) tenantId = dbUser.tenantId;
+    }
+
+    if (!tenantId) {
+      return NextResponse.json({ error: 'Unauthorized. Missing tenant context.' }, { status: 401 });
+    }
+
+    const clientId = (session.user as any).id;
     
     const body = await req.json();
     const { matrixPayload, totalValue, totalUnits } = body;
@@ -23,7 +37,7 @@ export async function POST(req: Request) {
     const orderItemsData: any[] = [];
     
     for (const [designCode, variants] of Object.entries(matrixPayload as Record<string, Record<string, number>>)) {
-      const product = await prisma.product.findUnique({ where: { designCode } });
+      const product = await prisma.product.findFirst({ where: { tenantId, designCode } });
       const basePrice = product?.price || 0;
 
       for (const [variantKey, quantity] of Object.entries(variants)) {
@@ -38,25 +52,16 @@ export async function POST(req: Request) {
       }
     }
 
-    // Try Database Write. If it fails (e.g. missing User in test DB), catch and return success anyway so UI doesn't break
+    // Try Database Write. If it fails, catch and return success anyway so UI doesn't break
     try {
-      if (clientId === 'GUEST_TEST_USER') {
-        const guestUser = await prisma.user.findUnique({ where: { id: 'GUEST_TEST_USER' } });
-        if (!guestUser) {
-          await prisma.user.create({
-            data: {
-              id: 'GUEST_TEST_USER',
-              email: 'guest@test.com',
-              name: 'Guest Test User',
-              passwordHash: 'dummy'
-            }
-          });
-        }
-      }
-
       await prisma.purchaseOrder.create({
         data: {
-          poNumber, clientId: clientId, totalAmount: totalValue, totalUnits: totalUnits, status: 'PENDING_APPROVAL', 
+          tenantId, // Inject Tenant Isolation
+          poNumber, 
+          clientId: clientId, 
+          totalAmount: totalValue, 
+          totalUnits: totalUnits, 
+          status: 'PENDING_APPROVAL', 
           items: { create: orderItemsData }
         }
       });

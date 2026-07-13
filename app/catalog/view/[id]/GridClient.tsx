@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import AdvancedMatrixModal from '@/components/AdvancedMatrixModal';
+import BrandLogo from '@/components/BrandLogo';
 
 // --- Icons ---
 const IconDownload = () => <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>;
@@ -130,6 +131,16 @@ export default function GridClient({ catalog }: { catalog: any }) {
         </div>
 
         <div className="relative z-10 text-center px-6 max-w-4xl mx-auto animate-in fade-in slide-in-from-bottom-8 duration-1000">
+          <div className="mb-8 flex justify-center">
+            <BrandLogo 
+              theme={config.theme === 'DARK' ? 'DARK' : 'LIGHT'} 
+              variant="FULL" 
+              width={200} 
+              height={70} 
+              tenantId={catalog.tenantId} 
+              settings={catalog.storeSettings} 
+            />
+          </div>
           <p className="text-[10px] md:text-xs font-bold tracking-[0.4em] text-[#4e080f] uppercase mb-6">Private B2B Showcase</p>
           <h1 className={`text-4xl md:text-6xl lg:text-7xl font-light ${themeClasses.textMain} tracking-tight leading-tight mb-6`}>
             {catalog.name}

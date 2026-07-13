@@ -49,19 +49,6 @@ When executing tasks or interacting within this project workspace, you must adhe
 - Read tasks strictly from the designated development roadmap documentation file. 
 - You are granted explicit permission to improvise code implementation paths or UI architecture layout nuances mid-task if technical hurdles emerge, provided the improvisation elevates code performance, satisfies the styling guardrails in Part 1, or enhances usability.
 
-### 2. Mandatory Progress & Quality Control (QC) Tracking
-- Every time a task code modifications occur, you must comprehensively update the roadmap file to accurately reflect project status.
-- Update layouts or tables to itemize: **Pending Tasks**, **Task Status (Not Started, In Progress, Complete)**, **Implementation Notes**, and **Testing Outcomes**. 
-- Accompany updates with rich progress demonstrations using Antigravity's Walkthrough or Artifact snapshot states.
-
-### 3. Transparent Command-Line Summaries & Testing Credentials
-- In your final generation output logs or conversational responses, you must explicitly declare exactly what code steps were taken, followed by detailed testing points.
-- You must always format and expose your verification endpoints clearly at the base of your completion text block using the following structure:
-  - **Testing URL:** `http://localhost:<port>/<test-route>` or active sandbox endpoint.
-  - **Testing Profiles:** Assigned QA Role (e.g., Brand Admin, Global Procurement Buyer).
-  - **Testing Credentials:** Explicit test usernames and pass keys needed to instantly run cross-check validations.
-- Ensure all created workflows map directly back to global enterprise engineering standards.
-
 ---
 
 ## Part 4: Continuous Roadmap Syncing & UI Trends
@@ -73,6 +60,9 @@ When executing tasks or interacting within this project workspace, you must adhe
 ### 2. Live Roadmap Updating
 - Every time you perform Quality Control (QC) or complete a major project phase, you MUST update the roadmap page.
 - Log your review of pending tasks, current task statuses, implementation strategies, and testing results directly into the roadmap.
+- Every time a task code modifications occur, you must comprehensively update the roadmap file to accurately reflect project status.
+- Update layouts or tables to itemize: **Pending Tasks**, **Task Status (Not Started, In Progress, Complete)**, **Implementation Notes**, and **Testing Outcomes**. 
+- Accompany updates with rich progress demonstrations using Antigravity's Walkthrough or Artifact snapshot states.
 
 ### 3. Default Progress Reporting
 - By default, accompany your final output with a comprehensive project Progress Demonstration.

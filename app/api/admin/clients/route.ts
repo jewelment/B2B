@@ -15,9 +15,19 @@ export async function GET(req: Request) {
       return NextResponse.json({ success: false, message: 'Unauthorized access' }, { status: 403 });
     }
 
-    // Fetch Clients with required commercial and compliance fields
+    let tenantId = (session.user as any).tenantId;
+    if (!tenantId && session.user.email) {
+      const dbUser = await prisma.user.findFirst({ where: { email: session.user.email } });
+      if (dbUser) tenantId = dbUser.tenantId;
+    }
+
+    if (!tenantId) {
+      return NextResponse.json({ success: false, message: 'Unauthorized. Missing tenant context.' }, { status: 401 });
+    }
+
+    // Fetch Clients with required commercial and compliance fields FOR THIS TENANT
     const clients = await prisma.user.findMany({
-      where: { role: 'CLIENT' },
+      where: { tenantId, role: 'CLIENT' },
       orderBy: { createdAt: 'desc' },
       select: {
         id: true,
@@ -35,9 +45,9 @@ export async function GET(req: Request) {
       }
     });
 
-    // Fetch active Sales Representatives for the assignment dropdown
+    // Fetch active Sales Representatives for the assignment dropdown FOR THIS TENANT
     const salesReps = await prisma.user.findMany({
-      where: { role: 'SALES' },
+      where: { tenantId, role: 'SALES' },
       select: { id: true, name: true, email: true }
     });
 
@@ -56,6 +66,16 @@ export async function PATCH(req: Request) {
     
     if (!session || !session.user || (session.user as any).role !== 'ADMIN') {
       return NextResponse.json({ success: false, message: 'Unauthorized access' }, { status: 403 });
+    }
+
+    let tenantId = (session.user as any).tenantId;
+    if (!tenantId && session.user.email) {
+      const dbUser = await prisma.user.findFirst({ where: { email: session.user.email } });
+      if (dbUser) tenantId = dbUser.tenantId;
+    }
+
+    if (!tenantId) {
+      return NextResponse.json({ success: false, message: 'Unauthorized. Missing tenant context.' }, { status: 401 });
     }
 
     const body = await req.json();
@@ -83,12 +103,12 @@ export async function PATCH(req: Request) {
       updateData.assignedSalesmanId = assignedSalesmanId === 'UNASSIGNED' ? null : assignedSalesmanId;
     }
 
-    const updatedClient = await prisma.user.update({
-      where: { id: targetId },
+    const updatedClient = await prisma.user.updateMany({
+      where: { id: targetId, tenantId },
       data: updateData,
     });
 
-    return NextResponse.json({ success: true, client: updatedClient }, { status: 200 });
+    return NextResponse.json({ success: true, count: updatedClient.count }, { status: 200 });
   } catch (error) {
     console.error('Admin CRM Update Error:', error);
     return NextResponse.json({ success: false, message: 'Internal server error' }, { status: 500 });

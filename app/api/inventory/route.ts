@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '../auth/[...nextauth]/route';
 
 const prisma = new PrismaClient();
 
@@ -61,8 +63,23 @@ const MOCK_INVENTORY = [
 
 export async function GET() {
   try {
-    // 1. Check if the database has any products
-    const productCount = await prisma.product.count();
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user) {
+      return NextResponse.json({ success: false, error: 'Unauthorized.' }, { status: 401 });
+    }
+
+    let tenantId = (session.user as any).tenantId;
+    if (!tenantId && session.user.email) {
+      const dbUser = await prisma.user.findFirst({ where: { email: session.user.email } });
+      if (dbUser) tenantId = dbUser.tenantId;
+    }
+
+    if (!tenantId) {
+      return NextResponse.json({ success: false, error: 'Unauthorized. Missing tenant context.' }, { status: 401 });
+    }
+
+    // 1. Check if the database has any products for this tenant
+    const productCount = await prisma.product.count({ where: { tenantId } });
 
     // 2. AUTO-SEEDING: If empty, inject the mock data into the database
     if (productCount === 0) {
@@ -71,6 +88,7 @@ export async function GET() {
       for (const item of MOCK_INVENTORY) {
         await prisma.product.create({
           data: {
+            tenantId, // Inject tenant isolation
             handle: item.designCode.toLowerCase(),
             designCode: item.designCode,
             title: item.title,
@@ -95,8 +113,9 @@ export async function GET() {
       console.log('Auto-seeding complete.');
     }
 
-    // 3. Fetch the LIVE inventory directly from the database
+    // 3. Fetch the LIVE inventory directly from the database for this specific tenant
     const liveInventory = await prisma.product.findMany({
+      where: { tenantId },
       include: {
         components: true,
       },

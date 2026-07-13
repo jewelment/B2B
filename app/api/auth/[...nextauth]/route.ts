@@ -22,7 +22,7 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Missing credentials.");
         }
 
-        const user = await prisma.user.findUnique({
+        const user = await prisma.user.findFirst({
           where: { email: credentials.email.toLowerCase() }
         });
 
@@ -49,6 +49,7 @@ export const authOptions: NextAuthOptions = {
           id: user.id,
           email: user.email,
           role: user.role,
+          tenantId: user.tenantId,
           assignedSalesmanId: user.assignedSalesmanId || undefined // FIXED SCHEMA REFERENCE
         };
       }
@@ -60,6 +61,7 @@ export const authOptions: NextAuthOptions = {
         token.id = user.id;
         token.role = (user as any).role;
         // Map custom properties to the JWT token
+        token.tenantId = (user as any).tenantId;
         token.assignedSalesmanId = (user as any).assignedSalesmanId; 
       }
       return token;
@@ -68,6 +70,7 @@ export const authOptions: NextAuthOptions = {
       if (token && session.user) {
         (session.user as any).id = token.id;
         (session.user as any).role = token.role;
+        (session.user as any).tenantId = token.tenantId;
         (session.user as any).assignedSalesmanId = token.assignedSalesmanId;
       }
       return session;

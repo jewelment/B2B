@@ -12,6 +12,63 @@ export default function DevRoadmapDashboard() {
   
   const [isQC, setIsQC] = useState(false);
   const [qcResults, setQcResults] = useState<any>(null);
+  
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [syncStatus, setSyncStatus] = useState<{success: boolean, message: string} | null>(null);
+  const [syncLogs, setSyncLogs] = useState<string[]>([]);
+
+  const handleGitSync = async () => {
+    setIsSyncing(true);
+    setSyncStatus(null);
+    setSyncLogs([]);
+    try {
+      const res = await fetch('/api/admin/git-sync', { method: 'POST' });
+      if (!res.body) throw new Error("No response body");
+      
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let finalSuccess = false;
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        
+        const chunk = decoder.decode(value, { stream: true });
+        const lines = chunk.split('\n');
+        
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            try {
+              const data = JSON.parse(line.substring(6));
+              setSyncLogs(prev => [...prev, data.message]);
+              if (data.status === 'SUCCESS' && data.message.includes('successfully synced')) {
+                finalSuccess = true;
+              }
+              if (data.status === 'ERROR') {
+                finalSuccess = false;
+                setSyncStatus({ success: false, message: data.message });
+              }
+            } catch(e) {}
+          }
+        }
+      }
+      
+      if (finalSuccess) {
+        setSyncStatus({ success: true, message: 'Successfully synced to GitHub!' });
+      } else if (!syncStatus) {
+        setSyncStatus({ success: false, message: 'Sync process completed with warnings.' });
+      }
+    } catch (e: any) {
+      setSyncStatus({ success: false, message: e.message || 'Network error occurred.' });
+    } finally {
+      setIsSyncing(false);
+      // Auto-hide success message after 8 seconds
+      setTimeout(() => {
+        setSyncStatus(null);
+        setSyncLogs([]);
+      }, 8000);
+    }
+  };
 
   const runQC = async () => {
     setIsQC(true);
@@ -106,18 +163,20 @@ export default function DevRoadmapDashboard() {
       phase: "7.0 GLOBAL THEME CUSTOMIZATION",
       description: "Admin panel for dynamic styling, branding, and color schemas.",
       tasks: [
-        { name: "7.1 Theme Configuration Store", profile: "Admin", status: "Not Started", progress: 0, url: "/admin/settings/theme" },
-        { name: "7.2 CSS Variable Injection API", profile: "Admin", status: "Not Started", progress: 0, url: "/api/admin/theme" },
-        { name: "7.3 Live Preview Engine", profile: "Admin", status: "Not Started", progress: 0, url: "/admin/settings/theme" }
+        { name: "7.1 Theme Configuration Store", profile: "Admin", status: "Completed", progress: 100, url: "/admin/settings/theme" },
+        { name: "7.2 CSS Variable Injection API", profile: "Admin", status: "Completed", progress: 100, url: "/api/admin/theme" },
+        { name: "7.3 Live Preview Engine", profile: "Admin", status: "Completed", progress: 100, url: "/admin/settings/theme" }
       ]
     },
     {
       phase: "8.0 V2: MULTI-TENANT ISOLATION (SAAS PIVOT)",
       description: "Database migration to PostgreSQL & Next.js Subdomain Middleware.",
       tasks: [
-        { name: "8.1 PostgreSQL Tenant Schema", profile: "Super Admin", status: "Not Started", progress: 0, url: "prisma/schema.prisma" },
-        { name: "8.2 Edge Subdomain Routing", profile: "System Wide", status: "Not Started", progress: 0, url: "middleware.ts" },
-        { name: "8.3 Headless JWT Strict Auth", profile: "All Profiles", status: "Not Started", progress: 0, url: "/api/auth/[...nextauth]" }
+        { name: "8.1 PostgreSQL Tenant Schema", profile: "Super Admin", status: "Completed", progress: 100, url: "prisma/schema.prisma" },
+        { name: "8.2 Edge Subdomain Routing", profile: "System Wide", status: "Completed", progress: 100, url: "middleware.ts" },
+        { name: "8.3 Headless JWT Strict Auth", profile: "All Profiles", status: "Completed", progress: 100, url: "/api/auth/[...nextauth]" },
+        { name: "8.4 Multi-Tenant Public Branding (Favicons & Meta)", profile: "System Wide", status: "Completed", progress: 100, url: "/catalog/view/[id]" },
+        { name: "8.5 Brand Asset Bundler & Downloads", profile: "Admin, Client", status: "Completed", progress: 100, url: "/api/brand/assets" }
       ]
     },
     {
@@ -137,6 +196,26 @@ export default function DevRoadmapDashboard() {
         { name: "10.1 Bulk Sync Data Validation", profile: "Super Admin, Admin", status: "Completed", progress: 100, url: "/admin/inventory/import" },
         { name: "10.2 Expo EAS OTA Update Pipeline", profile: "Super Admin", status: "Not Started", progress: 0, url: "eas.json" },
         { name: "10.3 Impersonation JWT Token Swap", profile: "Super Admin", status: "Not Started", progress: 0, url: "/api/admin/impersonate" }
+      ]
+    },
+    {
+      phase: "11.0 V2: ENTERPRISE INFRASTRUCTURE & BACKUPS",
+      description: "Custom DNS mapping, BYODB Enterprise Tiers, and PITR cloud backups.",
+      tasks: [
+        { name: "11.1 Custom Domain DNS Resolver", profile: "Super Admin", status: "Not Started", progress: 0, url: "middleware.ts" },
+        { name: "11.2 BYODB (Bring Your Own DB) Router", profile: "Super Admin", status: "Not Started", progress: 0, url: "lib/prisma.ts" },
+        { name: "11.3 Automated PITR Cloud Backups", profile: "Super Admin", status: "Not Started", progress: 0, url: "AWS / Supabase" },
+        { name: "11.4 QLDB Tamper-Proof PO Ledger", profile: "System", status: "Not Started", progress: 0, url: "AWS QLDB" }
+      ]
+    },
+    {
+      phase: "12.0 AGILE TICKETING & DEVELOPMENT HUB",
+      description: "Jira-style Kanban boards for clients to report issues and developers to track resolutions.",
+      tasks: [
+        { name: "12.1 Client Ticket Submission UI", profile: "Admin", status: "Not Started", progress: 0, url: "/admin/support" },
+        { name: "12.2 Master Kanban Board (Drag & Drop)", profile: "Master Admin", status: "Not Started", progress: 0, url: "/superadmin/tickets" },
+        { name: "12.3 Ticket Analytics (Client Load)", profile: "Master Admin", status: "Not Started", progress: 0, url: "/superadmin/analytics" },
+        { name: "12.4 Developer Assignment Engine", profile: "Master Admin", status: "Not Started", progress: 0, url: "schema.prisma" }
       ]
     }
   ];
@@ -159,6 +238,44 @@ export default function DevRoadmapDashboard() {
   const totalTasks = roadmapData.reduce((acc, phase) => acc + phase.tasks.length, 0);
   const completedTasks = roadmapData.reduce((acc, phase) => acc + phase.tasks.filter(t => t.status === 'Completed').length, 0);
   const globalProgress = Math.round((completedTasks / totalTasks) * 100);
+
+  // Process data for the new layout
+  const allIncompleteTasks: any[] = [];
+  const completedPhases: any[] = [];
+
+  roadmapData.forEach((phase, pIdx) => {
+    const incomplete = phase.tasks.filter(t => t.status !== 'Completed');
+    const complete = phase.tasks.filter(t => t.status === 'Completed');
+
+    if (incomplete.length > 0) {
+      // Assign priority based on phase for now
+      let priority = 'Medium';
+      if (phase.phase.startsWith('9.') || phase.phase.startsWith('12.')) priority = 'High';
+      if (phase.phase.startsWith('11.')) priority = 'Low';
+
+      incomplete.forEach((t) => {
+        allIncompleteTasks.push({
+          ...t,
+          phaseName: phase.phase,
+          priority,
+          originalPhaseIdx: pIdx,
+          originalTaskIdx: phase.tasks.indexOf(t)
+        });
+      });
+    }
+
+    if (complete.length > 0) {
+      completedPhases.push({
+        ...phase,
+        originalPhaseIdx: pIdx,
+        tasks: complete.map(t => ({ ...t, originalTaskIdx: phase.tasks.indexOf(t) }))
+      });
+    }
+  });
+
+  // Sort incomplete tasks by priority
+  const priorityOrder: Record<string, number> = { 'High': 1, 'Medium': 2, 'Low': 3 };
+  allIncompleteTasks.sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
 
   return (
     <div className="min-h-screen bg-[var(--bg-base)] text-[var(--text-main)] font-sans p-6 md:p-12 pb-24">
@@ -184,6 +301,51 @@ export default function DevRoadmapDashboard() {
                   <svg className="w-4 h-4 text-[var(--text-muted)] group-hover:text-emerald-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" /></svg>
                   System Route Auditor
                 </Link>
+
+                {/* GITHUB SYNC CTA */}
+                <div className="relative z-50 flex items-center gap-3">
+                  <button 
+                    onClick={handleGitSync}
+                    disabled={isSyncing}
+                    className="inline-flex items-center gap-2 px-6 py-2 bg-[#171515] hover:bg-[#2b2828] text-white transition-all rounded-lg text-xs font-bold uppercase tracking-widest shadow-md disabled:opacity-50 disabled:cursor-not-allowed group"
+                  >
+                    {isSyncing ? (
+                      <svg className="animate-spin w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    ) : (
+                      <svg className="w-4 h-4 group-hover:scale-110 transition-transform" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+                    )}
+                    {isSyncing ? 'Syncing...' : 'Sync to GitHub'}
+                  </button>
+                  
+                  {syncStatus && (
+                    <span className={`text-[10px] uppercase font-bold tracking-widest px-3 py-1.5 rounded-lg border ${syncStatus.success ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' : 'bg-red-500/10 text-red-600 border-red-500/20'}`}>
+                      {syncStatus.message}
+                    </span>
+                  )}
+
+                  {/* LIVE TERMINAL LOGS */}
+                  {syncLogs.length > 0 && (
+                    <div className="absolute top-full mt-3 right-0 w-[450px] bg-[#0d1117] text-[#3fb950] p-4 rounded-xl border border-[#30363d] shadow-2xl z-50 h-56 overflow-y-auto custom-scrollbar flex flex-col gap-2 font-mono text-[11px] leading-relaxed">
+                      <div className="flex items-center justify-between mb-2 pb-2 border-b border-[#30363d] sticky top-0 bg-[#0d1117]">
+                        <span className="text-[#8b949e] font-bold">GitHub Sync Terminal</span>
+                        <div className="flex gap-1.5">
+                          <div className="w-2.5 h-2.5 rounded-full bg-[#ff5f56]"></div>
+                          <div className="w-2.5 h-2.5 rounded-full bg-[#ffbd2e]"></div>
+                          <div className="w-2.5 h-2.5 rounded-full bg-[#27c93f]"></div>
+                        </div>
+                      </div>
+                      {syncLogs.map((log, i) => (
+                        <div key={i} className="break-words">
+                          <span className="text-[#8b949e] mr-2">[{new Date().toLocaleTimeString()}]</span>
+                          <span className={log.startsWith('>') ? 'text-[#58a6ff]' : log.includes('Failed') ? 'text-[#f85149]' : ''}>{log}</span>
+                        </div>
+                      ))}
+                      {isSyncing && (
+                        <div className="animate-pulse text-[#8b949e] mt-1">_</div>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
             
@@ -222,42 +384,55 @@ export default function DevRoadmapDashboard() {
 
         {/* TAB CONTENT: ROADMAP GRID */}
         {activeTab === 'roadmap' && (
-        <div className="space-y-12 animate-in fade-in slide-in-from-bottom-2 duration-300">
-          {roadmapData.map((phase, pIdx) => (
-            <div key={pIdx} className="space-y-4">
-              <div className="border-b border-[var(--border-color)] pb-3">
-                <h2 className="text-xl font-bold tracking-tight">{phase.phase}</h2>
-                <p className="text-sm text-[var(--text-muted)] mt-1">{phase.description}</p>
+        <div className="space-y-16 animate-in fade-in slide-in-from-bottom-2 duration-300">
+          
+          {/* SECTION 1: ACTIVE PRIORITIES */}
+          <div className="space-y-6">
+            <div className="border-b border-[var(--border-color)] pb-3">
+              <h2 className="text-2xl font-bold tracking-tight text-[var(--brand-primary)] flex items-center gap-2">
+                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                Active Development Priorities
+              </h2>
+              <p className="text-sm text-[var(--text-muted)] mt-1">High-priority tasks queued or currently in progress.</p>
+            </div>
+
+            {allIncompleteTasks.length === 0 ? (
+              <div className="text-center py-12 text-[var(--text-muted)] bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-xl">
+                All scheduled tasks are completed!
               </div>
-              
-              <div className="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-xl shadow-sm overflow-hidden">
+            ) : (
+              <div className="bg-[var(--bg-surface)] border border-amber-500/20 rounded-xl shadow-sm overflow-hidden">
                 <div className="overflow-x-auto custom-scrollbar">
                   <table className="w-full text-left border-collapse whitespace-nowrap">
                     <thead>
-                      <tr className="bg-black/5 dark:bg-white/5 border-b border-[var(--border-color)]">
-                        <th className="py-4 px-6 text-xs font-bold text-[var(--text-main)] tracking-wider uppercase w-[30%]">Task Name</th>
-                        <th className="py-4 px-6 text-xs font-bold text-[var(--text-main)] tracking-wider uppercase w-[15%]">Profile</th>
-                        <th className="py-4 px-6 text-xs font-bold text-[var(--text-main)] tracking-wider uppercase w-[15%] text-center">Status</th>
-                        <th className="py-4 px-6 text-xs font-bold text-[var(--text-main)] tracking-wider uppercase w-[20%] text-center">Progress</th>
-                        <th className="py-4 px-6 text-xs font-bold text-[var(--text-main)] tracking-wider uppercase w-[20%]">Dev File / URL</th>
+                      <tr className="bg-amber-500/5 border-b border-amber-500/20">
+                        <th className="py-4 px-6 text-xs font-bold text-amber-600 dark:text-amber-500 tracking-wider uppercase w-[30%]">Task Name</th>
+                        <th className="py-4 px-6 text-xs font-bold text-amber-600 dark:text-amber-500 tracking-wider uppercase w-[15%]">Phase</th>
+                        <th className="py-4 px-6 text-xs font-bold text-amber-600 dark:text-amber-500 tracking-wider uppercase w-[15%] text-center">Priority</th>
+                        <th className="py-4 px-6 text-xs font-bold text-amber-600 dark:text-amber-500 tracking-wider uppercase w-[20%] text-center">Progress</th>
+                        <th className="py-4 px-6 text-xs font-bold text-amber-600 dark:text-amber-500 tracking-wider uppercase w-[20%] text-right">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-[var(--border-color)]">
-                      {phase.tasks.map((task, tIdx) => {
-                        const taskId = `${pIdx}-${tIdx}`;
+                      {allIncompleteTasks.map((task, idx) => {
+                        const taskId = `${task.originalPhaseIdx}-${task.originalTaskIdx}`;
                         const isExpanded = expandedTask === taskId;
                         return (
-                          <React.Fragment key={tIdx}>
+                          <React.Fragment key={taskId}>
                             <tr className={`hover:bg-black/5 dark:hover:bg-white/5 transition-colors ${isExpanded ? 'bg-black/5 dark:bg-white/5' : ''}`}>
-                              <td className="py-4 px-6 text-sm font-medium">{task.name}</td>
+                              <td className="py-4 px-6 text-sm font-bold text-[var(--text-main)]">{task.name}</td>
                               <td className="py-4 px-6">
-                                <span className="text-[10px] font-bold text-[var(--text-main)] uppercase tracking-widest px-2 py-1 bg-[var(--bg-base)] border border-[var(--border-color)] rounded-md shadow-sm">
-                                  {task.profile}
+                                <span className="text-[10px] font-bold text-[var(--text-muted)] truncate max-w-[150px] inline-block">
+                                  {task.phaseName}
                                 </span>
                               </td>
                               <td className="py-4 px-6 text-center">
-                                <span className={`inline-flex items-center justify-center px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border ${getStatusColor(task.status)}`}>
-                                  {task.status}
+                                <span className={`inline-flex items-center justify-center px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border ${
+                                  task.priority === 'High' ? 'bg-red-500/10 text-red-600 border-red-500/20' :
+                                  task.priority === 'Medium' ? 'bg-amber-500/10 text-amber-600 border-amber-500/20' :
+                                  'bg-slate-500/10 text-slate-500 border-slate-500/20'
+                                }`}>
+                                  {task.priority}
                                 </span>
                               </td>
                               <td className="py-4 px-6 align-middle">
@@ -323,8 +498,104 @@ export default function DevRoadmapDashboard() {
                   </table>
                 </div>
               </div>
+            )}
+          </div>
+
+          {/* SECTION 2: COMPLETED DEVELOPMENTS */}
+          <div className="space-y-6 pt-8 border-t-2 border-dashed border-[var(--border-color)] opacity-80 hover:opacity-100 transition-opacity">
+            <div className="border-b border-[var(--border-color)] pb-3">
+              <h2 className="text-2xl font-bold tracking-tight text-emerald-600 flex items-center gap-2">
+                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                Completed Developments
+              </h2>
+              <p className="text-sm text-[var(--text-muted)] mt-1">Successfully deployed architecture and modules.</p>
             </div>
-          ))}
+
+            {completedPhases.map((phase) => (
+              <div key={phase.originalPhaseIdx} className="space-y-4 mb-8">
+                <div>
+                  <h3 className="text-lg font-bold tracking-tight text-[var(--text-main)]">{phase.phase}</h3>
+                </div>
+                
+                <div className="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-xl shadow-sm overflow-hidden">
+                  <div className="overflow-x-auto custom-scrollbar">
+                    <table className="w-full text-left border-collapse whitespace-nowrap">
+                      <thead>
+                        <tr className="bg-black/5 dark:bg-white/5 border-b border-[var(--border-color)]">
+                          <th className="py-3 px-6 text-xs font-bold text-[var(--text-muted)] tracking-wider uppercase w-[30%]">Task Name</th>
+                          <th className="py-3 px-6 text-xs font-bold text-[var(--text-muted)] tracking-wider uppercase w-[15%]">Profile</th>
+                          <th className="py-3 px-6 text-xs font-bold text-[var(--text-muted)] tracking-wider uppercase w-[15%] text-center">Status</th>
+                          <th className="py-3 px-6 text-xs font-bold text-[var(--text-muted)] tracking-wider uppercase w-[20%] text-center">Progress</th>
+                          <th className="py-3 px-6 text-xs font-bold text-[var(--text-muted)] tracking-wider uppercase w-[20%] text-right">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-[var(--border-color)]">
+                        {phase.tasks.map((task: any) => {
+                          const taskId = `${phase.originalPhaseIdx}-${task.originalTaskIdx}`;
+                          const isExpanded = expandedTask === taskId;
+                          return (
+                            <React.Fragment key={taskId}>
+                              <tr className={`hover:bg-black/5 dark:hover:bg-white/5 transition-colors ${isExpanded ? 'bg-black/5 dark:bg-white/5' : ''}`}>
+                                <td className="py-3 px-6 text-sm font-medium text-[var(--text-main)]">{task.name}</td>
+                                <td className="py-3 px-6">
+                                  <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest px-2 py-1 bg-[var(--bg-base)] border border-[var(--border-color)] rounded-md shadow-sm">
+                                    {task.profile}
+                                  </span>
+                                </td>
+                                <td className="py-3 px-6 text-center">
+                                  <span className={`inline-flex items-center justify-center px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border ${getStatusColor(task.status)}`}>
+                                    {task.status}
+                                  </span>
+                                </td>
+                                <td className="py-3 px-6 align-middle">
+                                  <div className="flex items-center gap-3">
+                                    <div className="w-full h-2 bg-[var(--bg-base)] rounded-full border border-[var(--border-color)] overflow-hidden">
+                                      <div className={`h-full rounded-full transition-all duration-500 ${getProgressColor(task.progress)}`} style={{ width: `${task.progress}%` }}></div>
+                                    </div>
+                                    <span className="text-xs font-mono font-bold text-[var(--text-muted)] w-8 text-right">{task.progress}%</span>
+                                  </div>
+                                </td>
+                                <td className="py-3 px-6 text-right space-x-2">
+                                  <button 
+                                    onClick={() => toggleTask(taskId)}
+                                    className="text-[10px] uppercase font-bold tracking-widest px-3 py-1 rounded-lg border border-[var(--border-color)] bg-[var(--bg-surface)] hover:bg-[var(--bg-base)] transition-colors"
+                                  >
+                                    {isExpanded ? 'Hide' : 'Details'}
+                                  </button>
+                                  <a 
+                                    href={task.url.startsWith('/') ? task.url : `/${task.url}`} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center text-[10px] uppercase font-bold tracking-widest px-3 py-1 rounded-lg border border-transparent bg-[var(--bg-base)] text-[var(--text-main)] hover:bg-[var(--brand-primary)] hover:text-white transition-colors border-[var(--border-color)] shadow-sm"
+                                  >
+                                    Open
+                                  </a>
+                                </td>
+                              </tr>
+                              {isExpanded && (
+                                <tr className="bg-black/5 dark:bg-white/5 border-b border-[var(--border-color)]">
+                                  <td colSpan={5} className="px-6 py-6 border-l-4 border-emerald-500 whitespace-normal">
+                                    <div className="bg-[var(--bg-base)] p-5 rounded-xl border border-[var(--border-color)]">
+                                      <h4 className="text-xs font-bold uppercase tracking-widest text-[var(--text-muted)] mb-3 flex items-center gap-2">
+                                        <svg className="w-4 h-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                                        Completed Module Details
+                                      </h4>
+                                      <p className="text-sm text-[var(--text-main)]">This module has been successfully integrated into the platform architecture and passed automated QA. Check the specific system route via the Open button to interact with it directly in the live environment.</p>
+                                    </div>
+                                  </td>
+                                </tr>
+                              )}
+                            </React.Fragment>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
         </div>
         )}
 

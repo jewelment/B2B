@@ -1,11 +1,28 @@
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import Papa from 'papaparse';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '../../../auth/[...nextauth]/route';
 
 const prisma = new PrismaClient();
 
 export async function POST(req: Request) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user) {
+      return NextResponse.json({ success: false, message: 'Unauthorized.' }, { status: 401 });
+    }
+
+    let tenantId = (session.user as any).tenantId;
+    if (!tenantId && session.user.email) {
+      const dbUser = await prisma.user.findFirst({ where: { email: session.user.email } });
+      if (dbUser) tenantId = dbUser.tenantId;
+    }
+
+    if (!tenantId) {
+      return NextResponse.json({ success: false, message: 'Unauthorized. Missing tenant context.' }, { status: 401 });
+    }
+
     const formData = await req.formData();
     const file = formData.get('file') as File;
     const overwriteData = formData.get('overwriteData') === 'true';
@@ -38,24 +55,24 @@ export async function POST(req: Request) {
 
         if (overwriteData) {
           await prisma.product.upsert({
-            where: { handle }, 
+            where: { tenantId_handle: { tenantId, handle } }, 
             update: {
               designCode, title, description, metalPurity, grossWeight, pureWeight, igiCertNumber, estimatedPrice,
               ...(imageSrc && { description: imageSrc }), 
             },
             create: {
-              handle, designCode, title, description, metalPurity, grossWeight, pureWeight, igiCertNumber, estimatedPrice
+              tenantId, handle, designCode, title, description, metalPurity, grossWeight, pureWeight, igiCertNumber, estimatedPrice
             }
           });
           processedCount++;
         } else {
-          const existingProduct = await prisma.product.findUnique({ where: { handle } });
+          const existingProduct = await prisma.product.findUnique({ where: { tenantId_handle: { tenantId, handle } } });
           if (existingProduct) {
             skippedCount++;
             continue; 
           }
           await prisma.product.create({
-            data: { handle, designCode, title, description, metalPurity, grossWeight, pureWeight, igiCertNumber, estimatedPrice }
+            data: { tenantId, handle, designCode, title, description, metalPurity, grossWeight, pureWeight, igiCertNumber, estimatedPrice }
           });
           processedCount++;
         }

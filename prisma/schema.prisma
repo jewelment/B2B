@@ -6,8 +6,29 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+// ======================================================
+// MULTI-TENANT ISOLATION (SAAS)
+// ======================================================
+model Tenant {
+  id              String   @id @default(cuid())
+  domain          String   @unique
+  name            String
+  brandPrimary    String   @default("#000000")
+  viewerBackground String  @default("WHITE")
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  
+  // Relations to isolated data
+  products        Product[]
+  catalogs        Catalog[]
+  users           User[]
+  orders          PurchaseOrder[]
+  accessRequests  AccessRequest[]
+  storeSettings   StoreSettings?
 }
 
 // ======================================================
@@ -16,6 +37,9 @@ datasource db {
 
 model AccessRequest {
   id        String   @id @default(cuid())
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
   gstin     String
   salesCode String?
   status    String   @default("PENDING") // PENDING, APPROVED, REJECTED
@@ -24,8 +48,11 @@ model AccessRequest {
 
 model Product {
   id             String  @id @default(cuid())
-  handle         String  @unique
-  designCode     String  @unique
+  tenantId       String
+  tenant         Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  handle         String  
+  designCode     String  
   title          String
   description    String?
   category       String? // Core field for template generation
@@ -51,6 +78,9 @@ model Product {
   components        Component[]
   customFieldValues ProductFieldValue[] // Links to dynamic custom attributes
   media             ProductMedia[]      // The localized Asset Pipeline
+
+  @@unique([tenantId, handle])
+  @@unique([tenantId, designCode])
 }
 
 model Component {
@@ -108,6 +138,9 @@ model ProductMedia {
 
 model Catalog {
   id            String    @id @default(cuid())
+  tenantId      String
+  tenant        Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
   name          String
   clientId      String?
   validUntil    DateTime?
@@ -142,8 +175,11 @@ model CatalogItem {
 
 model User {
   id              String  @id @default(cuid())
+  tenantId        String
+  tenant          Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
   name            String? // Added for UI/CRM mapping
-  email           String  @unique
+  email           String  
   passwordHash    String
   companyName     String?
 
@@ -172,6 +208,8 @@ model User {
   orders    PurchaseOrder[]
   contacts  ContactPerson[]
   addresses Address[]
+
+  @@unique([tenantId, email])
 }
 
 model ContactPerson {
@@ -212,7 +250,10 @@ model Address {
 
 model PurchaseOrder {
   id          String   @id @default(cuid())
-  poNumber    String   @unique
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  poNumber    String   
   catalogId   String?  // Maps to the Flipbook they ordered from
   
   clientId    String
@@ -229,6 +270,8 @@ model PurchaseOrder {
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  @@unique([tenantId, poNumber])
 }
 
 model OrderItem {
@@ -250,8 +293,27 @@ model OrderItem {
 
 model StoreSettings {
   id                String   @id @default(cuid())
+  tenantId          String   @unique
+  tenant            Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
   pricingMode       String   @default("MANUAL")
   manualGoldRate24K Float    @default(7250.0)
   manualSilverRate  Float    @default(88.0)
+  
+  // Branding Assets
+  logoLight         String?
+  logoDark          String?
+  faviconLight      String?
+  faviconDark       String?
+
+  // SEO Text Branding
+  brandName         String?
+  brandDescription  String?
+  brandSubheading   String?
+
+  // Typography
+  primaryFont       String   @default("Inter")
+  secondaryFont     String   @default("Inter")
+  
   updatedAt         DateTime @updatedAt
 }
