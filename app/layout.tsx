@@ -5,23 +5,33 @@ import SessionProviderWrapper from '@/components/auth/SessionProviderWrapper';
 
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 
-const prisma = new PrismaClient();
+import { headers } from 'next/headers';
 
 export async function generateMetadata(): Promise<Metadata> {
+  const headersList = await headers();
+  const host = headersList.get('host');
+  const enterpriseTenantId = headersList.get('x-enterprise-tenant-id');
+
   let tenantId = null;
-  const session = await getServerSession(authOptions);
-  
-  if (session && session.user) {
-    tenantId = (session.user as any).tenantId;
-    if (!tenantId && session.user.email) {
-      const dbUser = await prisma.user.findFirst({ where: { email: session.user.email } });
-      if (dbUser) tenantId = dbUser.tenantId;
+
+  // 1. Prioritize Enterprise Tenant ID from Middleware
+  if (enterpriseTenantId) {
+    tenantId = enterpriseTenantId;
+  } 
+  // 2. Resolve by mapping the domain name
+  else if (host) {
+    const domainOnly = host.split(':')[0]; // Remove port (e.g., localhost:3000 -> localhost)
+    const tenant = await prisma.tenant.findUnique({
+      where: { domain: domainOnly }
+    });
+    if (tenant) {
+      tenantId = tenant.id;
     }
   }
 
-  // Fallback to the first available settings if not logged in (e.g., login page)
+  // Fallback to the first available settings if we still don't have a tenant (e.g. fresh DB)
   let settings = tenantId 
     ? await prisma.storeSettings.findUnique({ where: { tenantId } }) 
     : await prisma.storeSettings.findFirst();

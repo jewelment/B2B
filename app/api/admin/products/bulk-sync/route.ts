@@ -1,9 +1,8 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
 import { writeFile, mkdir } from 'fs/promises';
 import path from 'path';
+import { prisma } from '@/lib/prisma';
 
-const prisma = new PrismaClient();
 
 export async function POST(req: Request) {
   try {
@@ -87,6 +86,5 @@ export async function POST(req: Request) {
     const errorMessage = error.meta?.cause || error.message || 'Database transaction failed.';
     return NextResponse.json({ success: false, error: errorMessage }, { status: 500 });
   } finally {
-    await prisma.$disconnect();
   }
 }

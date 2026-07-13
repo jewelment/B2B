@@ -1,13 +1,12 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
 import { renderToBuffer } from '@react-pdf/renderer';
 import { ProformaInvoicePDF } from '@/components/ProformaInvoicePDF';
 import React from 'react';
+import { prisma } from '@/lib/prisma';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-const prisma = new PrismaClient();
 
 export async function POST(request: Request) {
   try {
@@ -54,6 +53,5 @@ export async function POST(request: Request) {
     console.error('Invoice Generation Error:', error);
     return NextResponse.json({ error: 'Failed to generate PDF document.' }, { status: 500 });
   } finally {
-    await prisma.$disconnect();
   }
 }

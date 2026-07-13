@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-
+import { taskDetailsMap } from '@/lib/roadmapDetails';
 // --- Dev Security Check ---
 const isDev = process.env.NODE_ENV === 'development';
 
@@ -183,9 +183,9 @@ export default function DevRoadmapDashboard() {
       phase: "9.0 V2: SERVER-DRIVEN UI & NATIVE APP",
       description: "Decoupling API for React Native Expo App & Dynamic Builders.",
       tasks: [
-        { name: "9.1 Admin SDUI Layout Builder", profile: "Super Admin, Admin", status: "Not Started", progress: 0, url: "/admin/layout-builder" },
-        { name: "9.2 Native Mobile Auth (Expo)", profile: "Client, Sales", status: "Not Started", progress: 0, url: "/api/mobile/auth" },
-        { name: "9.3 Headless PO Matrix Checkout", profile: "Client, Sales", status: "Not Started", progress: 0, url: "/api/checkout/execute" },
+        { name: "9.1 Admin SDUI Layout Builder", profile: "Super Admin, Admin", status: "Completed", progress: 100, url: "/admin/layout-builder" },
+        { name: "9.2 Native Mobile Auth (Expo)", profile: "Client, Sales", status: "Completed", progress: 100, url: "/api/mobile/auth" },
+        { name: "9.3 Headless PO Matrix Checkout", profile: "Client, Sales", status: "In Progress", progress: 15, url: "/api/checkout/execute" },
         { name: "9.4 Mobile Responsive Flipbook", profile: "Client, Sales", status: "Completed", progress: 100, url: "/catalog/flipbook/[id]" }
       ]
     },
@@ -194,28 +194,38 @@ export default function DevRoadmapDashboard() {
       description: "Automated scaling, APK deployment, and multi-tenant troubleshooting.",
       tasks: [
         { name: "10.1 Bulk Sync Data Validation", profile: "Super Admin, Admin", status: "Completed", progress: 100, url: "/admin/inventory/import" },
-        { name: "10.2 Expo EAS OTA Update Pipeline", profile: "Super Admin", status: "Not Started", progress: 0, url: "eas.json" },
-        { name: "10.3 Impersonation JWT Token Swap", profile: "Super Admin", status: "Not Started", progress: 0, url: "/api/admin/impersonate" }
+        { name: "10.2 Expo EAS OTA Update Pipeline", profile: "Super Admin", status: "Completed", progress: 100, url: "eas.json" },
+        { name: "10.3 Impersonation JWT Token Swap", profile: "Super Admin", status: "Completed", progress: 100, url: "/api/admin/impersonate" }
       ]
     },
     {
       phase: "11.0 V2: ENTERPRISE INFRASTRUCTURE & BACKUPS",
       description: "Custom DNS mapping, BYODB Enterprise Tiers, and PITR cloud backups.",
       tasks: [
-        { name: "11.1 Custom Domain DNS Resolver", profile: "Super Admin", status: "Not Started", progress: 0, url: "middleware.ts" },
-        { name: "11.2 BYODB (Bring Your Own DB) Router", profile: "Super Admin", status: "Not Started", progress: 0, url: "lib/prisma.ts" },
-        { name: "11.3 Automated PITR Cloud Backups", profile: "Super Admin", status: "Not Started", progress: 0, url: "AWS / Supabase" },
-        { name: "11.4 QLDB Tamper-Proof PO Ledger", profile: "System", status: "Not Started", progress: 0, url: "AWS QLDB" }
+        { name: "11.1 Custom Domain DNS Resolver", profile: "Super Admin", status: "Completed", progress: 100, url: "middleware.ts" },
+        { name: "11.2 BYODB (Bring Your Own DB) Router", profile: "Super Admin", status: "Completed", progress: 100, url: "lib/prisma.ts" },
+        { name: "11.3 Automated PITR Cloud Backups", profile: "Super Admin", status: "Completed", progress: 100, url: "AWS / Supabase" },
+        { name: "11.4 QLDB Tamper-Proof PO Ledger", profile: "System", status: "Completed", progress: 100, url: "AWS QLDB" }
       ]
     },
     {
       phase: "12.0 AGILE TICKETING & DEVELOPMENT HUB",
       description: "Jira-style Kanban boards for clients to report issues and developers to track resolutions.",
       tasks: [
-        { name: "12.1 Client Ticket Submission UI", profile: "Admin", status: "Not Started", progress: 0, url: "/admin/support" },
-        { name: "12.2 Master Kanban Board (Drag & Drop)", profile: "Master Admin", status: "Not Started", progress: 0, url: "/superadmin/tickets" },
-        { name: "12.3 Ticket Analytics (Client Load)", profile: "Master Admin", status: "Not Started", progress: 0, url: "/superadmin/analytics" },
-        { name: "12.4 Developer Assignment Engine", profile: "Master Admin", status: "Not Started", progress: 0, url: "schema.prisma" }
+        { name: "12.1 Client Ticket Submission UI", profile: "Admin", status: "Completed", progress: 100, url: "/dashboard/support" },
+        { name: "12.2 Master Kanban Board (Drag & Drop)", profile: "Master Admin", status: "Completed", progress: 100, url: "/admin/tickets" },
+        { name: "12.3 Ticket Analytics (Client Load)", profile: "Master Admin", status: "Completed", progress: 100, url: "/admin/analytics" },
+        { name: "12.4 Developer Assignment Engine", profile: "Master Admin", status: "Completed", progress: 100, url: "schema.prisma" }
+      ]
+    },
+    {
+      phase: "13.0 V3: ELEMENTOR-STYLE SDUI THEME BUILDER",
+      description: "Advanced drag-and-drop template builder with liquidity forms (Shopify/Elementor style).",
+      tasks: [
+        { name: "13.1 Dynamic Component Engine", profile: "Admin", status: "Completed", progress: 100, url: "/admin/theme-builder" },
+        { name: "13.2 Visual Property Editor (Liquidity Form)", profile: "Admin", status: "Completed", progress: 100, url: "/admin/theme-builder" },
+        { name: "13.3 Banner Module (Image, Video, Live Text)", profile: "Admin", status: "Completed", progress: 100, url: "/admin/theme-builder" },
+        { name: "13.4 Advanced Styling Controls (Colors, Layout)", profile: "Admin", status: "In Progress", progress: 25, url: "/admin/theme-builder" }
       ]
     }
   ];
@@ -283,7 +293,7 @@ export default function DevRoadmapDashboard() {
         
         <div className="relative bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-2xl p-8 md:p-10 shadow-sm flex flex-col xl:flex-row xl:items-center justify-between gap-10">
           {/* BACKGROUND GLOW WRAPPER */}
-          <div className="absolute inset-0 overflow-hidden rounded-2xl pointer-events-none">
+          <div className="absolute inset-0 overflow-hidden rounded-2xl pointer-events-none z-0">
             <div className="absolute top-0 right-0 w-96 h-96 bg-[var(--brand-primary)] opacity-5 blur-[100px] rounded-full"></div>
           </div>
 
@@ -363,51 +373,76 @@ export default function DevRoadmapDashboard() {
           {/* RIGHT: DASHBOARD METRICS */}
           <div className="relative z-10 w-full xl:w-1/2 grid grid-cols-2 gap-4">
             
-            {/* Metric 1: Global Completion */}
-            <div className="bg-[var(--bg-base)] border border-[var(--border-color)] p-5 rounded-xl shadow-sm flex flex-col justify-between group hover:border-[var(--brand-primary)] transition-colors">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] group-hover:text-[var(--brand-primary)] transition-colors">Global Progress</p>
-              <div className="mt-4 flex items-end justify-between">
-                <div className="text-3xl lg:text-4xl font-bold text-[var(--text-main)] font-mono">{globalProgress}%</div>
-                <div className="relative w-12 h-12 flex items-center justify-center">
-                  <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
-                    <path className="text-[var(--bg-surface)]" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="4" />
-                    <path className="text-[var(--brand-primary)] transition-all duration-1000 ease-out" strokeDasharray={`${globalProgress}, 100`} d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="4" />
+            {/* Metric 1: Global Completion (Brand Primary Tinted Glass) */}
+            <div className="relative overflow-hidden bg-gradient-to-br from-[var(--brand-primary)]/10 to-[var(--brand-primary)]/5 backdrop-blur-2xl border border-[var(--brand-primary)]/20 p-5 rounded-2xl shadow-sm flex flex-col justify-between group transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:border-[var(--brand-primary)]/40">
+              <div className="absolute -right-10 -top-10 w-32 h-32 bg-[var(--brand-primary)] opacity-10 rounded-full blur-2xl group-hover:opacity-20 transition-opacity"></div>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--brand-primary)]">Global Progress</p>
+              <div className="mt-4 flex items-end justify-between relative z-10">
+                <div className="text-3xl lg:text-4xl font-bold text-[var(--text-main)] font-mono tracking-tighter">{globalProgress}%</div>
+                <div className="relative w-12 h-12 flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
+                  <div className="absolute inset-2 bg-[var(--brand-primary)] opacity-20 blur-md rounded-full group-hover:opacity-40 transition-opacity duration-500 animate-pulse"></div>
+                  <svg className="w-full h-full transform -rotate-90 overflow-visible relative z-10" viewBox="0 0 36 36">
+                    <path className="text-[var(--brand-primary)] opacity-20" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="3" />
+                    <path className="text-[var(--brand-primary)] transition-all duration-1500 ease-out" strokeDasharray={`${globalProgress}, 100`} d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
                   </svg>
                 </div>
               </div>
             </div>
 
-            {/* Metric 2: Completed Modules */}
-            <div className="bg-[var(--bg-base)] border border-[var(--border-color)] p-5 rounded-xl shadow-sm flex flex-col justify-between group hover:border-emerald-500/50 transition-colors">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] group-hover:text-emerald-500 transition-colors">Deployed Tasks</p>
-              <div className="mt-4 flex items-end justify-between">
-                <div className="text-3xl lg:text-4xl font-bold text-emerald-500 font-mono">{completedTasks}<span className="text-sm text-[var(--text-muted)]">/{totalTasks}</span></div>
-                <svg className="w-8 h-8 text-emerald-500/30 group-hover:text-emerald-500/80 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 13l4 4L19 7" /></svg>
+            {/* Metric 2: Completed Modules (Emerald Tinted Glass) */}
+            <div className="relative overflow-hidden bg-gradient-to-br from-emerald-500/10 to-emerald-500/5 backdrop-blur-2xl border border-emerald-500/20 p-5 rounded-2xl shadow-sm flex flex-col justify-between group transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:border-emerald-500/40">
+              <div className="absolute -left-10 -bottom-10 w-32 h-32 bg-emerald-500 opacity-10 rounded-full blur-2xl group-hover:opacity-20 transition-opacity"></div>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-600 dark:text-emerald-500">Deployed Tasks</p>
+              <div className="mt-4 flex items-end justify-between relative z-10">
+                <div className="text-3xl lg:text-4xl font-bold text-emerald-600 dark:text-emerald-500 font-mono tracking-tighter drop-shadow-sm">{completedTasks}<span className="text-sm text-emerald-600/50 dark:text-emerald-500/50">/{totalTasks}</span></div>
+                
+                {/* Mini Bar Chart Graph */}
+                <div className="flex items-end gap-1 h-8 opacity-70 group-hover:opacity-100 transition-opacity">
+                  <div className="w-1.5 h-3 bg-emerald-500/40 rounded-t-sm"></div>
+                  <div className="w-1.5 h-4 bg-emerald-500/50 rounded-t-sm"></div>
+                  <div className="w-1.5 h-2 bg-emerald-500/60 rounded-t-sm"></div>
+                  <div className="w-1.5 h-6 bg-emerald-500/70 rounded-t-sm"></div>
+                  <div className="w-1.5 h-4 bg-emerald-500/80 rounded-t-sm group-hover:h-7 transition-all duration-300"></div>
+                  <div className="w-1.5 h-8 bg-emerald-500 rounded-t-sm shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
+                </div>
               </div>
             </div>
 
-            {/* Metric 3: Active Priorities */}
-            <div className="bg-amber-500/5 border border-amber-500/20 p-5 rounded-xl shadow-sm flex flex-col justify-between group hover:bg-amber-500/10 transition-colors">
+            {/* Metric 3: Active Priorities (Amber Tinted Glass) */}
+            <div className="relative overflow-hidden bg-gradient-to-br from-amber-500/10 to-amber-500/5 backdrop-blur-2xl border border-amber-500/20 p-5 rounded-2xl shadow-sm flex flex-col justify-between group transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:border-amber-500/40">
+              <div className="absolute -right-5 -bottom-5 w-24 h-24 bg-amber-500 opacity-10 rounded-full blur-xl group-hover:opacity-20 transition-opacity"></div>
               <p className="text-[10px] font-bold uppercase tracking-widest text-amber-600 dark:text-amber-500">Active Queue</p>
-              <div className="mt-4 flex items-end justify-between">
-                <div className="text-3xl lg:text-4xl font-bold text-amber-600 dark:text-amber-500 font-mono">{allIncompleteTasks.length}</div>
-                <svg className="w-8 h-8 text-amber-500/30 group-hover:text-amber-500/80 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+              <div className="mt-4 flex items-end justify-between relative z-10">
+                <div className="text-3xl lg:text-4xl font-bold text-amber-600 dark:text-amber-500 font-mono tracking-tighter drop-shadow-sm">{allIncompleteTasks.length}</div>
+                
+                {/* Descending Mini Graph */}
+                <div className="flex items-end gap-1 h-8 opacity-70 group-hover:opacity-100 transition-opacity">
+                  <div className="w-1.5 h-8 bg-amber-500 rounded-t-sm shadow-[0_0_8px_rgba(245,158,11,0.5)]"></div>
+                  <div className="w-1.5 h-6 bg-amber-500/80 rounded-t-sm"></div>
+                  <div className="w-1.5 h-4 bg-amber-500/60 rounded-t-sm"></div>
+                  <div className="w-1.5 h-3 bg-amber-500/50 rounded-t-sm group-hover:h-2 transition-all duration-300"></div>
+                  <div className="w-1.5 h-2 bg-amber-500/40 rounded-t-sm"></div>
+                  <div className="w-1.5 h-1 bg-amber-500/30 rounded-t-sm"></div>
+                </div>
               </div>
             </div>
 
-            {/* Metric 4: Dev Phase */}
-            <div className="bg-[var(--bg-base)] border border-[var(--border-color)] p-5 rounded-xl shadow-sm flex flex-col justify-between">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">Current Phase</p>
-              <div className="mt-4 flex items-end justify-between">
-                <div className="text-3xl lg:text-4xl font-bold text-[var(--text-main)]">v2.0</div>
-                <div className="text-[10px] uppercase font-bold text-[var(--text-muted)] text-right leading-tight tracking-widest">Multi-Tenant<br/>SaaS Pivot</div>
+            {/* Metric 4: Dev Phase (Purple Tinted Glass) */}
+            <div className="relative overflow-hidden bg-gradient-to-br from-purple-500/10 to-purple-500/5 backdrop-blur-2xl border border-purple-500/20 p-5 rounded-2xl shadow-sm flex flex-col justify-between group transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:border-purple-500/40">
+              <div className="absolute -top-10 -left-10 w-32 h-32 bg-purple-500 opacity-10 rounded-full blur-xl group-hover:opacity-20 transition-opacity"></div>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-purple-600 dark:text-purple-400">Current Phase</p>
+              <div className="mt-4 flex items-end justify-between relative z-10">
+                <div className="flex items-center gap-3">
+                  <div className="text-3xl lg:text-4xl font-bold text-purple-600 dark:text-purple-400 tracking-tighter">v2.0</div>
+                  <div className="relative flex h-3 w-3 -mt-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-500 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.8)]"></span>
+                  </div>
+                </div>
+                <div className="text-[9px] uppercase font-bold text-purple-600/70 dark:text-purple-400/70 text-right leading-tight tracking-widest">Multi-Tenant<br/>SaaS Pivot</div>
               </div>
             </div>
 
-          </div>
-          
-          <div className="absolute -top-3 -right-3 bg-amber-500 text-white text-[9px] font-black uppercase tracking-widest px-8 py-1.5 transform rotate-45 shadow-md">
-            Temporary Dev Mode
           </div>
         </div>
 
@@ -517,21 +552,17 @@ export default function DevRoadmapDashboard() {
                                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                                         Implementation Details
                                       </h4>
-                                      <ul className="list-disc pl-5 text-sm space-y-2 text-[var(--text-main)]">
-                                        <li>Architectural specification and pseudo-code definition based on roadmap guidelines.</li>
-                                        <li>Ensuring full isolation and non-breaking implementations relative to existing legacy cord.</li>
-                                        <li>Deploying necessary database updates, routing configurations, and NextAuth wrappers for this module.</li>
-                                      </ul>
+                                      <p className="text-sm text-[var(--text-main)] mb-3 leading-relaxed">
+                                        {taskDetailsMap[task.name]?.description || "Architectural specification and pseudo-code definition based on roadmap guidelines."}
+                                      </p>
                                     </div>
-                                    <div className="bg-emerald-500/5 p-5 rounded-xl border border-emerald-500/20">
-                                      <h4 className="text-xs font-bold uppercase tracking-widest text-emerald-600 mb-3 flex items-center gap-2">
+                                    <div className="bg-amber-500/5 p-5 rounded-xl border border-amber-500/20">
+                                      <h4 className="text-xs font-bold uppercase tracking-widest text-amber-600 mb-3 flex items-center gap-2">
                                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                                         QA & Testing Pointers
                                       </h4>
-                                      <ul className="list-disc pl-5 text-sm space-y-2 text-emerald-700/80 dark:text-emerald-400/80">
-                                        <li>Verify route guards block unauthorized profile access (e.g., Salesman vs Super Admin).</li>
-                                        <li>Execute boundary tests on edge cases (e.g., invalid tokens, malformed POST payloads).</li>
-                                        <li>Confirm global styling consistency and contrast visibility in dark/light modes.</li>
+                                      <ul className="list-disc pl-5 text-sm space-y-2 text-amber-700/80 dark:text-amber-400/80">
+                                        <li>{taskDetailsMap[task.name]?.howToTest || "Execute boundary tests on edge cases (e.g., invalid tokens, malformed POST payloads)."}</li>
                                       </ul>
                                     </div>
                                   </div>
@@ -622,12 +653,25 @@ export default function DevRoadmapDashboard() {
                               {isExpanded && (
                                 <tr className="bg-black/5 dark:bg-white/5 border-b border-[var(--border-color)]">
                                   <td colSpan={5} className="px-6 py-6 border-l-4 border-emerald-500 whitespace-normal">
-                                    <div className="bg-[var(--bg-base)] p-5 rounded-xl border border-[var(--border-color)]">
-                                      <h4 className="text-xs font-bold uppercase tracking-widest text-[var(--text-muted)] mb-3 flex items-center gap-2">
-                                        <svg className="w-4 h-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-                                        Completed Module Details
-                                      </h4>
-                                      <p className="text-sm text-[var(--text-main)]">This module has been successfully integrated into the platform architecture and passed automated QA. Check the specific system route via the Open button to interact with it directly in the live environment.</p>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                      <div className="bg-[var(--bg-base)] p-5 rounded-xl border border-[var(--border-color)]">
+                                        <h4 className="text-xs font-bold uppercase tracking-widest text-[var(--text-muted)] mb-3 flex items-center gap-2">
+                                          <svg className="w-4 h-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                                          Completed Module Details
+                                        </h4>
+                                        <p className="text-sm text-[var(--text-main)] mb-3 leading-relaxed">
+                                          {taskDetailsMap[task.name]?.description || "This module has been successfully integrated into the platform architecture and passed automated QA."}
+                                        </p>
+                                      </div>
+                                      <div className="bg-emerald-500/5 p-5 rounded-xl border border-emerald-500/20">
+                                        <h4 className="text-xs font-bold uppercase tracking-widest text-emerald-600 mb-3 flex items-center gap-2">
+                                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                          Testing Instructions
+                                        </h4>
+                                        <ul className="list-disc pl-5 text-sm space-y-2 text-emerald-700/80 dark:text-emerald-400/80">
+                                          <li>{taskDetailsMap[task.name]?.howToTest || "Check the specific system route via the Open button to interact with it directly in the live environment."}</li>
+                                        </ul>
+                                      </div>
                                     </div>
                                   </td>
                                 </tr>
@@ -758,6 +802,59 @@ export function middleware(req) {
 }`}</pre>
                 </div>
               </div>
+              <div>
+                <h3 className="text-sm font-bold uppercase tracking-widest text-[var(--text-muted)] mb-3">4. Dynamic BYODB (Bring Your Own DB) Router</h3>
+                <div className="bg-black/80 text-purple-400 p-5 rounded-xl font-mono text-xs overflow-x-auto">
+<pre>{`// Pseudo-code for lib/prisma.ts
+function getTenantPrisma(tenantId) {
+    // 1. Check if we already have a cached Prisma Client for this tenant
+    if (global.prismaClients[tenantId]) return global.prismaClients[tenantId];
+
+    // 2. Fetch the Enterprise Tenant's specific Database URL
+    const tenantConfig = db.Tenant.findById(tenantId);
+    
+    // 3. Fallback to default DB if no custom URL is provided
+    const connectionUrl = tenantConfig.customDbUrl || process.env.DATABASE_URL;
+
+    // 4. Instantiate a new Prisma Client specifically for this database
+    const newPrisma = new PrismaClient({
+        datasources: { db: { url: connectionUrl } }
+    });
+
+    // 5. Cache and return
+    global.prismaClients[tenantId] = newPrisma;
+    return newPrisma;
+}`}</pre>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-sm font-bold uppercase tracking-widest text-[var(--text-muted)] mb-3">5. Agile Support Kanban (Optimistic UI)</h3>
+                <div className="bg-black/80 text-pink-400 p-5 rounded-xl font-mono text-xs overflow-x-auto">
+<pre>{`// Pseudo-code for /admin/tickets Kanban Drag & Drop
+async function handleDragEnd(event) {
+    const { activeTicketId, newStatusColumn } = event;
+
+    // 1. Optimistic UI Update (Instant visual feedback)
+    setLocalTickets(prev => prev.map(ticket => 
+        ticket.id === activeTicketId ? { ...ticket, status: newStatusColumn } : ticket
+    ));
+
+    try {
+        // 2. Background Database Sync
+        await fetch(\`/api/tickets/\${activeTicketId}\`, {
+            method: 'PATCH',
+            body: JSON.stringify({ status: newStatusColumn })
+        });
+    } catch (error) {
+        // 3. Revert UI if the server request fails
+        toast.error("Failed to sync status");
+        revertLocalTickets();
+    }
+}`}</pre>
+                </div>
+              </div>
+
             </div>
           </div>
         )}
@@ -775,68 +872,126 @@ export function middleware(req) {
             
             {/* INDEX */}
             <div className="bg-[var(--bg-base)] p-6 rounded-xl border border-[var(--border-color)] mb-8">
-              <h3 className="text-sm font-bold uppercase tracking-widest text-[var(--text-main)] mb-4">Manual Index</h3>
+              <h3 className="text-sm font-bold uppercase tracking-widest text-[var(--text-main)] mb-4 flex items-center gap-2">
+                <svg className="w-5 h-5 text-[var(--brand-primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" /></svg>
+                Table of Contents
+              </h3>
               <ul className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-[var(--brand-primary)] font-medium">
-                <li><a href="#section-1" className="hover:underline">1. Getting Started & Secure Access</a></li>
-                <li><a href="#section-2" className="hover:underline">2. The Immersive 3D Flipbook</a></li>
-                <li><a href="#section-3" className="hover:underline">3. Ordering via the Wholesale Matrix Cart</a></li>
-                <li><a href="#section-4" className="hover:underline">4. Tracking Purchase Orders & History</a></li>
+                <li><a href="#section-1" className="hover:underline flex items-center gap-2"><span className="text-[var(--text-muted)]">01.</span> Getting Started & Secure Access</a></li>
+                <li><a href="#section-2" className="hover:underline flex items-center gap-2"><span className="text-[var(--text-muted)]">02.</span> The Immersive 3D Flipbook</a></li>
+                <li><a href="#section-3" className="hover:underline flex items-center gap-2"><span className="text-[var(--text-muted)]">03.</span> Ordering via Wholesale Matrix Cart</a></li>
+                <li><a href="#section-4" className="hover:underline flex items-center gap-2"><span className="text-[var(--text-muted)]">04.</span> Tracking Purchase Orders & History</a></li>
+                <li><a href="#section-5" className="hover:underline flex items-center gap-2"><span className="text-[var(--text-muted)]">05.</span> Client Support & Ticketing</a></li>
               </ul>
             </div>
 
-            <div className="space-y-8">
+            <div className="space-y-12">
               
               {/* SECTION 1 */}
-              <div id="section-1" className="space-y-3 pt-4">
-                <h3 className="text-lg font-bold flex items-center gap-2"><span className="w-6 h-6 rounded bg-[var(--text-main)] text-[var(--bg-base)] flex items-center justify-center text-xs">1</span> Getting Started & Secure Access</h3>
-                <p className="text-sm leading-relaxed text-[var(--text-muted)]">
-                  The B2B Portal is strictly invitation-only. To gain access, you must first be approved by an administrator. Once approved, you will log in using your registered email and a secure PIN/Password.
-                </p>
-                <ul className="list-disc pl-5 text-sm space-y-2 text-[var(--text-muted)] mt-2">
-                  <li>Navigate to the <code>/login</code> portal.</li>
-                  <li>Enter your verified email address and secure password.</li>
-                  <li>If accessing a strictly confidential collection, a secondary 4-digit PIN may be required.</li>
-                </ul>
+              <div id="section-1" className="space-y-4 pt-4 scroll-mt-20">
+                <h3 className="text-xl font-bold flex items-center gap-3"><span className="w-8 h-8 rounded-lg bg-[var(--brand-primary)] text-white flex items-center justify-center text-sm shadow-sm">1</span> Getting Started & Secure Access</h3>
+                <div className="bg-[var(--bg-base)] border border-[var(--border-color)] rounded-xl p-6 shadow-sm">
+                  <p className="text-sm leading-relaxed text-[var(--text-main)] mb-4">
+                    The B2B Portal is strictly invitation-only. To gain access, you must first be approved by an administrator. Once approved, you will log in using your registered email and a secure PIN/Password.
+                  </p>
+                  <ul className="space-y-3 text-sm text-[var(--text-muted)]">
+                    <li className="flex gap-3"><svg className="w-5 h-5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> Navigate to the <code>/login</code> portal.</li>
+                    <li className="flex gap-3"><svg className="w-5 h-5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> Enter your verified email address and secure password.</li>
+                    <li className="flex gap-3"><svg className="w-5 h-5 text-amber-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg> If accessing a strictly confidential collection, a secondary 4-digit PIN may be required.</li>
+                  </ul>
+                  <div className="mt-6 p-4 bg-slate-100 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 text-xs">
+                    [Screenshot: B2B Login & Registration Gateway]
+                  </div>
+                </div>
               </div>
 
               {/* SECTION 2 */}
-              <div id="section-2" className="space-y-3 pt-4 border-t border-[var(--border-color)]">
-                <h3 className="text-lg font-bold flex items-center gap-2"><span className="w-6 h-6 rounded bg-[var(--text-main)] text-[var(--bg-base)] flex items-center justify-center text-xs">2</span> The Immersive 3D Flipbook</h3>
-                <p className="text-sm leading-relaxed text-[var(--text-muted)]">
-                  Instead of static PDFs, we use a fully interactive 3D digital lookbook that adapts to your device.
-                </p>
-                <ul className="list-disc pl-5 text-sm space-y-2 text-[var(--text-muted)] mt-2">
-                  <li><strong>Navigation:</strong> Click the corners of the book or swipe on touchscreens to turn the page.</li>
-                  <li><strong>Device Orientation:</strong> On mobile phones held vertically (portrait), the book will display one maximized page at a time for better readability. Turn your phone horizontally (landscape) to view the luxurious two-page spread.</li>
-                  <li><strong>Quick Add:</strong> Click any product image inside the book to instantly open its purchasing grid.</li>
-                </ul>
+              <div id="section-2" className="space-y-4 pt-4 border-t border-[var(--border-color)] scroll-mt-20">
+                <h3 className="text-xl font-bold flex items-center gap-3"><span className="w-8 h-8 rounded-lg bg-[var(--brand-primary)] text-white flex items-center justify-center text-sm shadow-sm">2</span> The Immersive 3D Flipbook</h3>
+                <div className="bg-[var(--bg-base)] border border-[var(--border-color)] rounded-xl p-6 shadow-sm">
+                  <p className="text-sm leading-relaxed text-[var(--text-main)] mb-4">
+                    Instead of static PDFs, we use a fully interactive 3D digital lookbook that adapts to your device.
+                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <ul className="space-y-4 text-sm text-[var(--text-muted)]">
+                      <li className="bg-[var(--bg-surface)] p-3 rounded border border-[var(--border-color)]"><strong>Navigation:</strong> Click the corners of the book or swipe on touchscreens to turn the page.</li>
+                      <li className="bg-[var(--bg-surface)] p-3 rounded border border-[var(--border-color)]"><strong>Device Orientation:</strong> On mobile phones held vertically (portrait), the book will display one maximized page at a time. Turn horizontally (landscape) to view the two-page spread.</li>
+                      <li className="bg-[var(--bg-surface)] p-3 rounded border border-[var(--border-color)]"><strong>Quick Add:</strong> Click any product image inside the book to instantly open its purchasing grid.</li>
+                    </ul>
+                    <div className="flex flex-col gap-2">
+                      <div className="h-full p-4 bg-slate-100 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 flex flex-col items-center justify-center text-slate-400 text-xs text-center">
+                        <svg className="w-8 h-8 mb-2 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
+                        [Screenshot: 3D Flipbook Interface]
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               {/* SECTION 3 */}
-              <div id="section-3" className="space-y-3 pt-4 border-t border-[var(--border-color)]">
-                <h3 className="text-lg font-bold flex items-center gap-2"><span className="w-6 h-6 rounded bg-[var(--text-main)] text-[var(--bg-base)] flex items-center justify-center text-xs">3</span> Ordering via the Wholesale Matrix Cart</h3>
-                <p className="text-sm leading-relaxed text-[var(--text-muted)]">
-                  As a wholesale buyer, you often need to order multiple variants of a single design simultaneously. We built the Matrix Cart specifically for this.
-                </p>
-                <ul className="list-disc pl-5 text-sm space-y-2 text-[var(--text-muted)] mt-2">
-                  <li><strong>The Grid:</strong> When you select a product, a spreadsheet-like grid will appear showing all available Metals (14K, 18K) and Sizes.</li>
-                  <li><strong>Bulk Entry:</strong> Simply type the quantity you want for each specific combination (e.g., 5 quantities of 14K Gold in Size 6).</li>
-                  <li><strong>Live Estimation:</strong> The system automatically calculates your Purchase Order (PO) total based on today's live metal rates and your account's specific discount tier.</li>
-                  <li><strong>Checkout:</strong> Review your matrix cart and click "Generate PO" to send the order directly to manufacturing.</li>
-                </ul>
+              <div id="section-3" className="space-y-4 pt-4 border-t border-[var(--border-color)] scroll-mt-20">
+                <h3 className="text-xl font-bold flex items-center gap-3"><span className="w-8 h-8 rounded-lg bg-[var(--brand-primary)] text-white flex items-center justify-center text-sm shadow-sm">3</span> Ordering via the Wholesale Matrix Cart</h3>
+                <div className="bg-[var(--bg-base)] border border-[var(--border-color)] rounded-xl p-6 shadow-sm">
+                  <p className="text-sm leading-relaxed text-[var(--text-main)] mb-4">
+                    As a wholesale buyer, you often need to order multiple variants of a single design simultaneously. We built the Matrix Cart specifically for this.
+                  </p>
+                  <ul className="list-decimal pl-5 text-sm space-y-3 text-[var(--text-muted)] font-medium">
+                    <li><strong className="text-[var(--text-main)]">The Grid:</strong> When you select a product, a spreadsheet-like grid will appear showing all available Metals (14K, 18K) and Sizes.</li>
+                    <li><strong className="text-[var(--text-main)]">Bulk Entry:</strong> Simply type the quantity you want for each specific combination.</li>
+                    <li><strong className="text-[var(--text-main)]">Live Estimation:</strong> The system automatically calculates your Purchase Order (PO) total based on today's live metal rates and your discount tier.</li>
+                    <li><strong className="text-[var(--text-main)]">Checkout:</strong> Review your cart and click "Generate PO" to send the order to manufacturing.</li>
+                  </ul>
+                  <div className="mt-6 p-4 h-32 bg-slate-100 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 text-xs">
+                    [Screenshot: Matrix Cart Slide-Out]
+                  </div>
+                </div>
               </div>
 
               {/* SECTION 4 */}
-              <div id="section-4" className="space-y-3 pt-4 border-t border-[var(--border-color)]">
-                <h3 className="text-lg font-bold flex items-center gap-2"><span className="w-6 h-6 rounded bg-[var(--text-main)] text-[var(--bg-base)] flex items-center justify-center text-xs">4</span> Tracking Purchase Orders & History</h3>
-                <p className="text-sm leading-relaxed text-[var(--text-muted)]">
-                  Your Client Dashboard serves as your historical ledger.
-                </p>
-                <ul className="list-disc pl-5 text-sm space-y-2 text-[var(--text-muted)] mt-2">
-                  <li>Navigate to the <code>/dashboard/history</code> tab.</li>
-                  <li>Here you can view the live status of all your Purchase Orders (Pending, Processing in Manufacturing, Shipped).</li>
-                  <li>You can instantly download a Proforma PDF invoice for any past order for your accounting records.</li>
-                </ul>
+              <div id="section-4" className="space-y-4 pt-4 border-t border-[var(--border-color)] scroll-mt-20">
+                <h3 className="text-xl font-bold flex items-center gap-3"><span className="w-8 h-8 rounded-lg bg-[var(--brand-primary)] text-white flex items-center justify-center text-sm shadow-sm">4</span> Tracking Purchase Orders & History</h3>
+                <div className="bg-[var(--bg-base)] border border-[var(--border-color)] rounded-xl p-6 shadow-sm">
+                  <p className="text-sm leading-relaxed text-[var(--text-main)] mb-4">
+                    Your Client Dashboard serves as your historical ledger for tracking active fulfillment.
+                  </p>
+                  <div className="flex flex-col md:flex-row gap-6">
+                    <div className="flex-1 space-y-3">
+                      <div className="flex items-start gap-3 p-3 bg-amber-500/10 rounded-lg border border-amber-500/20">
+                        <span className="w-2 h-2 mt-1.5 rounded-full bg-amber-500 shrink-0"></span>
+                        <p className="text-sm text-[var(--text-main)]"><strong>Pending:</strong> Order received, awaiting manufacturing approval.</p>
+                      </div>
+                      <div className="flex items-start gap-3 p-3 bg-blue-500/10 rounded-lg border border-blue-500/20">
+                        <span className="w-2 h-2 mt-1.5 rounded-full bg-blue-500 shrink-0"></span>
+                        <p className="text-sm text-[var(--text-main)]"><strong>Processing:</strong> Currently in the production cycle.</p>
+                      </div>
+                      <div className="flex items-start gap-3 p-3 bg-emerald-500/10 rounded-lg border border-emerald-500/20">
+                        <span className="w-2 h-2 mt-1.5 rounded-full bg-emerald-500 shrink-0"></span>
+                        <p className="text-sm text-[var(--text-main)]"><strong>Shipped:</strong> Dispatched. You can download the Proforma PDF.</p>
+                      </div>
+                    </div>
+                    <div className="flex-1 p-4 bg-slate-100 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 text-xs text-center">
+                      [Screenshot: History Ledger & Status Tags]
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* SECTION 5 */}
+              <div id="section-5" className="space-y-4 pt-4 border-t border-[var(--border-color)] scroll-mt-20">
+                <h3 className="text-xl font-bold flex items-center gap-3"><span className="w-8 h-8 rounded-lg bg-[var(--brand-primary)] text-white flex items-center justify-center text-sm shadow-sm">5</span> Client Support & Ticketing</h3>
+                <div className="bg-[var(--bg-base)] border border-[var(--border-color)] rounded-xl p-6 shadow-sm">
+                  <p className="text-sm leading-relaxed text-[var(--text-main)] mb-4">
+                    If you experience any issues, require new features, or have general questions, you can use our built-in Jira-style Agile Ticketing System.
+                  </p>
+                  <ul className="list-disc pl-5 text-sm space-y-2 text-[var(--text-muted)] mt-2">
+                    <li>Navigate to the <code>/dashboard/support</code> tab.</li>
+                    <li>Fill out the form, categorizing your issue (Bug, Feature Request, Question) and Priority (Low, Normal, High, Urgent).</li>
+                    <li>You will be able to track your ticket's progress (Open, In Progress, Resolved) directly from this page in real-time as admins work on it.</li>
+                  </ul>
+                  <div className="mt-6 p-4 h-32 bg-slate-100 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 text-xs">
+                    [Screenshot: Support Ticketing Interface]
+                  </div>
+                </div>
               </div>
 
             </div>

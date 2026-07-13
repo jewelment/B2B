@@ -1,11 +1,10 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../../auth/[...nextauth]/route';
 import { writeFile, mkdir } from 'fs/promises';
 import path from 'path';
+import { prisma } from '@/lib/prisma';
 
-const prisma = new PrismaClient();
 
 // Ensure directory exists
 async function ensureDir(dirPath: string) {
@@ -45,7 +44,6 @@ export async function GET() {
     console.error("Theme Settings GET Error:", error);
     return NextResponse.json({ success: false, error: 'Failed to fetch theme settings' }, { status: 500 });
   } finally {
-    await prisma.$disconnect();
   }
 }
 
@@ -85,7 +83,7 @@ export async function POST(request: Request) {
     if (contentType.includes('multipart/form-data')) {
       const formData = await request.formData();
       
-      const assetType = formData.get('assetType') as string; // 'logoLight', 'logoDark', 'faviconLight', 'faviconDark'
+      const assetType = formData.get('assetType') as string; // 'logoLight', 'logoDark', 'faviconLight', 'faviconDark', 'componentAsset'
       const file = formData.get('file') as File;
 
       if (!assetType || !file) {
@@ -106,6 +104,10 @@ export async function POST(request: Request) {
 
       await writeFile(filePath, buffer);
 
+      if (assetType === 'componentAsset') {
+        return NextResponse.json({ success: true, url: publicUrl });
+      }
+
       // Update Database
       const updateData: any = {};
       updateData[assetType] = publicUrl;
@@ -125,6 +127,5 @@ export async function POST(request: Request) {
     console.error("Theme Settings POST Error:", error);
     return NextResponse.json({ success: false, error: 'Failed to process theme update' }, { status: 500 });
   } finally {
-    await prisma.$disconnect();
   }
 }

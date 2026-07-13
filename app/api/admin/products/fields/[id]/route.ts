@@ -1,9 +1,8 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
 import { getServerSession } from 'next-auth';
+import { prisma } from '@/lib/prisma';
 import { authOptions } from '../../../../auth/[...nextauth]/route'; 
 
-const prisma = new PrismaClient();
 
 export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -22,6 +21,5 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
   } catch (error: any) {
     return NextResponse.json({ error: 'Failed to delete field. It may be linked to active products.' }, { status: 500 });
   } finally {
-    await prisma.$disconnect();
   }
 }

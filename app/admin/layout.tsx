@@ -5,6 +5,7 @@ import AdminSidebar from '@/components/AdminSidebar';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   // Sync with document class (persisted from dashboard if user navigated via SPA, but we manage local state here)
   useEffect(() => {
@@ -25,10 +26,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <div className="flex h-screen bg-[var(--bg-base)] transition-colors duration-300 font-sans overflow-hidden">
       {/* Sidebar Navigation */}
-      <AdminSidebar isDarkMode={isDarkMode} setIsDarkMode={setIsDarkMode} />
+      <AdminSidebar 
+        isDarkMode={isDarkMode} 
+        setIsDarkMode={setIsDarkMode} 
+        isCollapsed={isSidebarCollapsed}
+        setIsCollapsed={setIsSidebarCollapsed}
+      />
 
       {/* Main Content Area */}
-      <div className="flex flex-col flex-1 overflow-hidden relative bg-[var(--bg-base)] ml-64 p-8">
+      <div className={`flex flex-col flex-1 overflow-hidden relative bg-[var(--bg-base)] transition-all duration-300 p-8 ${isSidebarCollapsed ? 'ml-20' : 'ml-64'}`}>
         <main className="flex-1 overflow-y-auto">
           {children}
         </main>

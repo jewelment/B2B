@@ -1,9 +1,8 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]/route';
+import { prisma } from '@/lib/prisma';
 
-const prisma = new PrismaClient();
 
 // Your original mock data, kept here just for the initial database seed
 const MOCK_INVENTORY = [
@@ -135,6 +134,5 @@ export async function GET() {
     );
   } finally {
     // Prevent connection exhaustion
-    await prisma.$disconnect();
   }
 }

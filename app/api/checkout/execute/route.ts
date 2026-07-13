@@ -1,28 +1,54 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { jwtVerify } from 'jose';
+import { prisma } from '@/lib/prisma';
 
-const prisma = new PrismaClient();
 
 export async function POST(req: Request) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session || !session.user) {
-      return NextResponse.json({ error: 'Unauthorized.' }, { status: 401 });
+    let tenantId: string | null = null;
+    let clientId: string | null = null;
+    let authSource = 'UNKNOWN';
+
+    // 1. Try Mobile Bearer Token Authentication
+    const authHeader = req.headers.get('authorization');
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.split(' ')[1];
+      const secretKey = process.env.NEXTAUTH_SECRET || 'fallback-secret-for-development';
+      const secret = new TextEncoder().encode(secretKey);
+      
+      try {
+        const { payload } = await jwtVerify(token, secret);
+        if (payload && payload.id) {
+          clientId = payload.id as string;
+          tenantId = payload.tenantId as string;
+          authSource = 'MOBILE_APP';
+        }
+      } catch (err) {
+        console.warn('Checkout API: Invalid Bearer token.');
+      }
     }
 
-    let tenantId = (session.user as any).tenantId;
-    if (!tenantId && session.user.email) {
-      const dbUser = await prisma.user.findFirst({ where: { email: session.user.email } });
-      if (dbUser) tenantId = dbUser.tenantId;
+    // 2. Fallback to Web Portal Session (NextAuth)
+    if (!clientId) {
+      const session = await getServerSession(authOptions);
+      if (session && session.user) {
+        clientId = (session.user as any).id;
+        tenantId = (session.user as any).tenantId;
+        authSource = 'WEB_PORTAL';
+        
+        if (!tenantId && session.user.email) {
+          const dbUser = await prisma.user.findFirst({ where: { email: session.user.email } });
+          if (dbUser) tenantId = dbUser.tenantId;
+        }
+      }
     }
 
-    if (!tenantId) {
-      return NextResponse.json({ error: 'Unauthorized. Missing tenant context.' }, { status: 401 });
+    if (!clientId || !tenantId) {
+      return NextResponse.json({ error: 'Unauthorized. Missing valid authentication or tenant context.' }, { status: 401 });
     }
 
-    const clientId = (session.user as any).id;
     
     const body = await req.json();
     const { matrixPayload, totalValue, totalUnits } = body;
@@ -75,6 +101,5 @@ export async function POST(req: Request) {
     console.error('PO Transmission Pipeline Crash:', error);
     return NextResponse.json({ error: 'Failed to process Purchase Order.' }, { status: 500 });
   } finally {
-    await prisma.$disconnect();
   }
 }

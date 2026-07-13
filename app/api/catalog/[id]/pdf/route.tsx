@@ -1,9 +1,8 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
 import React from 'react';
 import { renderToStream, Document, Page, Text, View, StyleSheet, Image as PdfImage } from '@react-pdf/renderer';
+import { prisma } from '@/lib/prisma';
 
-const prisma = new PrismaClient();
 
 // Create styles for the PDF
 const styles = StyleSheet.create({

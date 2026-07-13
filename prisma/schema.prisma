@@ -29,6 +29,7 @@ model Tenant {
   orders          PurchaseOrder[]
   accessRequests  AccessRequest[]
   storeSettings   StoreSettings?
+  tickets         Ticket[]
 }
 
 // ======================================================
@@ -208,6 +209,10 @@ model User {
   orders    PurchaseOrder[]
   contacts  ContactPerson[]
   addresses Address[]
+  
+  reportedTickets Ticket[] @relation("ReportedTickets")
+  assignedTickets Ticket[] @relation("AssignedTickets")
+  ticketMessages  TicketMessage[]
 
   @@unique([tenantId, email])
 }
@@ -315,5 +320,68 @@ model StoreSettings {
   primaryFont       String   @default("Inter")
   secondaryFont     String   @default("Inter")
   
+  // V3 Theme Builder JSON (SDUI)
+  layoutData        String?  @db.Text
+  
   updatedAt         DateTime @updatedAt
+}
+
+// ======================================================
+// 7. AGILE TICKETING & DEVELOPMENT HUB (PHASE 12)
+// ======================================================
+
+model Ticket {
+  id          String   @id @default(cuid())
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  title       String
+  description String
+  status      String   @default("OPEN") // OPEN, IN_PROGRESS, RESOLVED, CLOSED
+  priority    String   @default("NORMAL") // LOW, NORMAL, HIGH, URGENT
+  type        String   @default("BUG") // BUG, FEATURE, QUESTION
+
+  // Trello Cross-Channel Features
+  dueDate     DateTime?
+  labels      String?  // Will store JSON array of selected tags/labels
+  attachments TicketAttachment[]
+  messages    TicketMessage[]
+
+  // Reporter
+  clientId    String
+  client      User     @relation("ReportedTickets", fields: [clientId], references: [id], onDelete: Cascade)
+
+  // Assigned Developer / Admin
+  assigneeId  String?
+  assignee    User?    @relation("AssignedTickets", fields: [assigneeId], references: [id])
+
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model TicketAttachment {
+  id        String   @id @default(cuid())
+  ticketId  String
+  ticket    Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  
+  url       String
+  filename  String
+  fileSize  Int?
+
+  createdAt DateTime @default(now())
+}
+
+model TicketMessage {
+  id        String   @id @default(cuid())
+  ticketId  String
+  ticket    Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  senderId  String
+  sender    User     @relation(fields: [senderId], references: [id], onDelete: Cascade)
+
+  content   String
+  isInternal Boolean @default(false) // If true, only admins can see this message
+
+  createdAt DateTime @default(now())
 }

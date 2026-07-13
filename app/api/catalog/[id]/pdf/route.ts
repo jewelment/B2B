@@ -1,10 +1,9 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
 import React from 'react';
 import { renderToStream } from '@react-pdf/renderer';
 import { CatalogDocument } from './PdfTemplate';
+import { prisma } from '@/lib/prisma';
 
-const prisma = new PrismaClient();
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {

@@ -76,20 +76,22 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, isDarkMode, setIs
       <div className="h-20 flex items-center justify-center px-4 border-b border-[var(--border-color)] relative overflow-hidden">
         {isCollapsed ? (
           <div className="animate-in zoom-in duration-300">
-            <Image 
+            <img 
               src={isDarkMode ? "/brand/favicon-gold.png" : "/brand/favicon-maroon.png"} 
-              alt="Ashok Jewels" width={32} height={32} className="object-contain" 
+              alt="Ashok Jewels" 
+              width={32} 
+              height={32} 
+              className="object-contain pointer-events-auto cursor-pointer" 
             />
           </div>
         ) : (
           <div className="animate-in fade-in duration-300 w-full flex justify-center">
-            <Image 
+            <img 
               src={isDarkMode ? "/brand/logo-gold.png" : "/logo.png"} 
               alt="Ashok Jewels" 
               width={160} 
               height={40} 
-              className="object-contain" 
-              priority
+              className="object-contain pointer-events-auto cursor-pointer" 
             />
           </div>
         )}

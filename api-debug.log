@@ -1,0 +1,74 @@
+2026-07-13T12:31:44.184Z - [PATCH /api/tickets/undefined] Started
+2026-07-13T12:31:44.344Z - [PATCH] User role: ADMIN, tenantId: cmribdv8h000013rvd0844ep5, isSuperUser: true
+2026-07-13T12:31:44.345Z - [PATCH] Body: {"status":"IN_PROGRESS"}
+2026-07-13T12:31:44.415Z - [PATCH] ERROR: 
+Invalid `__TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$prisma$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["prisma"].ticket.findUnique()` invocation in
+D:\Google AJ Drive - home\Maste B2B Jewelement Project\Jewelment B2B Dev V1\b2b-portal\.next\dev\server\chunks\[root-of-the-server]__02p51rw._.js:344:167
+
+  341     });
+  342 }
+  343 const ticketId = params.id;
+→ 344 const existingTicket = await __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$prisma$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["prisma"].ticket.findUnique({
+        where: {
+          id: undefined,
+      ?   AND?: TicketWhereInput | TicketWhereInput[],
+      ?   OR?: TicketWhereInput[],
+      ?   NOT?: TicketWhereInput | TicketWhereInput[],
+      ?   tenantId?: StringFilter | String,
+      ?   title?: StringFilter | String,
+      ?   description?: StringFilter | String,
+      ?   status?: StringFilter | String,
+      ?   priority?: StringFilter | String,
+      ?   type?: StringFilter | String,
+      ?   dueDate?: DateTimeNullableFilter | DateTime | Null,
+      ?   labels?: StringNullableFilter | String | Null,
+      ?   clientId?: StringFilter | String,
+      ?   assigneeId?: StringNullableFilter | String | Null,
+      ?   createdAt?: DateTimeFilter | DateTime,
+      ?   updatedAt?: DateTimeFilter | DateTime,
+      ?   tenant?: TenantRelationFilter | TenantWhereInput,
+      ?   attachments?: TicketAttachmentListRelationFilter,
+      ?   messages?: TicketMessageListRelationFilter,
+      ?   client?: UserRelationFilter | UserWhereInput,
+      ?   assignee?: UserNullableRelationFilter | UserWhereInput | Null
+        }
+      })
+
+Argument `where` of type TicketWhereUniqueInput needs at least one of `id` arguments. Available options are marked with ?.
+2026-07-13T12:42:58.731Z - [PATCH /api/tickets/undefined] Started
+2026-07-13T12:42:58.739Z - [PATCH] User role: ADMIN, tenantId: cmribdv8h000013rvd0844ep5, isSuperUser: true
+2026-07-13T12:42:58.740Z - [PATCH] Body: {"status":"IN_PROGRESS"}
+2026-07-13T12:42:58.808Z - [PATCH] ERROR: 
+Invalid `__TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$prisma$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["prisma"].ticket.findUnique()` invocation in
+D:\Google AJ Drive - home\Maste B2B Jewelement Project\Jewelment B2B Dev V1\b2b-portal\.next\dev\server\chunks\[root-of-the-server]__02p51rw._.js:344:167
+
+  341     });
+  342 }
+  343 const ticketId = params.id;
+→ 344 const existingTicket = await __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$prisma$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["prisma"].ticket.findUnique({
+        where: {
+          id: undefined,
+      ?   AND?: TicketWhereInput | TicketWhereInput[],
+      ?   OR?: TicketWhereInput[],
+      ?   NOT?: TicketWhereInput | TicketWhereInput[],
+      ?   tenantId?: StringFilter | String,
+      ?   title?: StringFilter | String,
+      ?   description?: StringFilter | String,
+      ?   status?: StringFilter | String,
+      ?   priority?: StringFilter | String,
+      ?   type?: StringFilter | String,
+      ?   dueDate?: DateTimeNullableFilter | DateTime | Null,
+      ?   labels?: StringNullableFilter | String | Null,
+      ?   clientId?: StringFilter | String,
+      ?   assigneeId?: StringNullableFilter | String | Null,
+      ?   createdAt?: DateTimeFilter | DateTime,
+      ?   updatedAt?: DateTimeFilter | DateTime,
+      ?   tenant?: TenantRelationFilter | TenantWhereInput,
+      ?   attachments?: TicketAttachmentListRelationFilter,
+      ?   messages?: TicketMessageListRelationFilter,
+      ?   client?: UserRelationFilter | UserWhereInput,
+      ?   assignee?: UserNullableRelationFilter | UserWhereInput | Null
+        }
+      })
+
+Argument `where` of type TicketWhereUniqueInput needs at least one of `id` arguments. Available options are marked with ?.

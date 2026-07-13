@@ -1,9 +1,8 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { prisma } from '@/lib/prisma';
 
-const prisma = new PrismaClient();
 
 export async function PATCH(
   req: Request, 
@@ -56,6 +55,5 @@ export async function PATCH(
     console.error('Status Mutation Error:', error);
     return NextResponse.json({ error: 'Failed to update the ledger.' }, { status: 500 });
   } finally {
-    await prisma.$disconnect();
   }
 }

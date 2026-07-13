@@ -30,6 +30,29 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL('/dashboard', req.url));
   }
 
+  // --- 4. Custom Domain DNS Resolver (Enterprise) ---
+  const hostname = req.headers.get('host');
+  
+  // Prototype Dictionary mapping custom Vanity Domains to internal Tenant IDs
+  const domainToTenantMap: Record<string, string> = {
+    'wholesale.tiffany.com': 'tenant-tiffany',
+    'b2b.cartier.com': 'tenant-cartier'
+  };
+
+  if (hostname && domainToTenantMap[hostname]) {
+    const mappedTenantId = domainToTenantMap[hostname];
+    
+    // Inject the mapped tenant ID into the headers so the App Router knows which tenant data to load
+    const requestHeaders = new Headers(req.headers);
+    requestHeaders.set('x-enterprise-tenant-id', mappedTenantId);
+    
+    return NextResponse.next({
+      request: {
+        headers: requestHeaders,
+      },
+    });
+  }
+
   return NextResponse.next();
 }
 

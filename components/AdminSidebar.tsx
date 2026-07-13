@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation';
 import { signOut, useSession } from 'next-auth/react';
 import BrandLogo from './BrandLogo';
 
-export default function AdminSidebar({ isDarkMode = false, setIsDarkMode = () => {} }: { isDarkMode?: boolean, setIsDarkMode?: (val: boolean) => void }) {
+export default function AdminSidebar({ isCollapsed = false, setIsCollapsed = () => {}, isDarkMode = false, setIsDarkMode = () => {} }: { isCollapsed?: boolean, setIsCollapsed?: (val: boolean) => void, isDarkMode?: boolean, setIsDarkMode?: (val: boolean) => void }) {
   const pathname = usePathname();
   const { data: session } = useSession();
   const user = session?.user as any;
@@ -62,19 +62,35 @@ export default function AdminSidebar({ isDarkMode = false, setIsDarkMode = () =>
   ];
 
   return (
-    <div className="w-64 min-h-screen bg-[var(--bg-surface)] border-r border-[var(--border-color)] flex flex-col fixed left-0 top-0 overflow-y-auto z-[100] transition-colors duration-300">
-      <div className="p-8 pb-4">
+    <div className={`${isCollapsed ? 'w-20' : 'w-64'} min-h-screen bg-[var(--bg-surface)] border-r border-[var(--border-color)] flex flex-col fixed left-0 top-0 z-[100] transition-all duration-300`}>
+      
+      {/* GEMINI-STYLE COLLAPSE BUTTON */}
+      <button 
+        onClick={() => setIsCollapsed(!isCollapsed)}
+        className="absolute -right-3 top-8 w-6 h-6 bg-[var(--bg-base)] border border-[var(--border-color)] rounded-full flex items-center justify-center shadow-sm hover:bg-[var(--text-muted)]/10 transition-all z-[110] text-[var(--text-muted)]"
+      >
+        <svg className={`w-3 h-3 transition-transform duration-300 ${isCollapsed ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
+        </svg>
+      </button>
+      <div className={`p-8 pb-4 flex justify-center ${isCollapsed ? 'px-4' : ''}`}>
         <Link href="/admin">
-          <BrandLogo theme={isDarkMode ? "DARK" : "LIGHT"} width={180} height={60} className="mb-1 cursor-pointer hover:opacity-80 transition-opacity" />
+          {isCollapsed ? (
+            <img src={isDarkMode ? "/brand/favicon-gold.png" : "/brand/favicon-maroon.png"} alt="Ashok Jewels" width={32} height={32} className="object-contain cursor-pointer" />
+          ) : (
+            <BrandLogo theme={isDarkMode ? "DARK" : "LIGHT"} width={180} height={60} className="mb-1 cursor-pointer hover:opacity-80 transition-opacity" />
+          )}
         </Link>
       </div>
 
-      <div className="flex-1 px-4 py-6 space-y-8">
+      <div className={`flex-1 py-6 space-y-8 ${isCollapsed ? 'px-2' : 'px-4'} overflow-y-auto overflow-x-hidden`}>
         {navGroups.filter(group => !group.roles || group.roles.includes(user?.role)).map((group, idx) => (
           <div key={idx}>
-            <h3 className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)] mb-3 px-4">
-              {group.title}
-            </h3>
+            {!isCollapsed && (
+              <h3 className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)] mb-3 px-4">
+                {group.title}
+              </h3>
+            )}
             <div className="space-y-1">
               {group.links.map((link: any, lIdx) => {
                 const isActive = pathname?.startsWith(link.path);
@@ -84,13 +100,13 @@ export default function AdminSidebar({ isDarkMode = false, setIsDarkMode = () =>
 
                 return (
                   <div key={lIdx} className="flex flex-col">
-                    <Link href={link.subLinks ? link.subLinks[0].path : link.path} className={`flex items-center px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group ${isBgActive ? 'bg-[var(--brand-primary)]/10 text-[var(--brand-primary)] shadow-sm border border-[var(--brand-primary)]/10' : 'text-[var(--text-muted)] hover:bg-[var(--text-muted)]/10 hover:text-[var(--brand-primary)] hover:translate-x-1 border border-transparent'} ${isActive && link.subLinks ? 'text-[var(--brand-primary)] font-bold' : ''}`}>
-                      <svg className={`w-4 h-4 mr-3 transition-colors ${isActive ? 'text-[var(--brand-primary)]' : 'text-[var(--text-muted)] group-hover:text-[var(--brand-primary)]'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <Link href={link.subLinks ? link.subLinks[0].path : link.path} title={isCollapsed ? link.name : ''} className={`flex items-center rounded-xl text-sm font-medium transition-all duration-200 group ${isCollapsed ? 'justify-center p-3 mb-2' : 'px-4 py-2.5'} ${isBgActive ? 'bg-[var(--brand-primary)]/10 text-[var(--brand-primary)] shadow-sm border border-[var(--brand-primary)]/10' : 'text-[var(--text-muted)] hover:bg-[var(--text-muted)]/10 hover:text-[var(--brand-primary)] hover:translate-x-1 border border-transparent'} ${isActive && link.subLinks ? 'text-[var(--brand-primary)] font-bold' : ''}`}>
+                      <svg className={`w-5 h-5 transition-colors ${isActive ? 'text-[var(--brand-primary)]' : 'text-[var(--text-muted)] group-hover:text-[var(--brand-primary)]'} ${!isCollapsed && 'mr-3'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={link.icon} />
                       </svg>
-                      {link.name}
+                      {!isCollapsed && link.name}
                     </Link>
-                    {link.subLinks && isActive && (
+                    {link.subLinks && isActive && !isCollapsed && (
                       <div className="pl-11 pr-4 py-2 space-y-1">
                         {link.subLinks.map((sub: any, sIdx: number) => {
                           const isSubActive = pathname === sub.path;
@@ -110,28 +126,30 @@ export default function AdminSidebar({ isDarkMode = false, setIsDarkMode = () =>
         ))}
       </div>
       
-      <div className="p-4 border-t border-[var(--border-color)] space-y-4">
+      <div className={`p-4 border-t border-[var(--border-color)] flex flex-col gap-4 ${isCollapsed ? 'items-center' : ''}`}>
         {/* Theme Switcher */}
-        <button onClick={() => setIsDarkMode(!isDarkMode)} className="flex items-center text-[var(--text-muted)] bg-[var(--text-muted)]/5 hover:bg-[var(--text-muted)]/10 rounded-xl transition-colors px-4 py-3 justify-between w-full">
-          <span className="text-xs font-bold tracking-wide">{isDarkMode ? 'Light Mode' : 'Dark Mode'}</span>
+        <button onClick={() => setIsDarkMode(!isDarkMode)} title={isCollapsed ? (isDarkMode ? "Light Mode" : "Dark Mode") : ""} className={`flex items-center text-[var(--text-muted)] bg-[var(--text-muted)]/5 hover:bg-[var(--text-muted)]/10 rounded-xl transition-colors ${isCollapsed ? 'p-3 justify-center' : 'px-4 py-3 justify-between w-full'}`}>
+          {!isCollapsed && <span className="text-xs font-bold tracking-wide">{isDarkMode ? 'Light Mode' : 'Dark Mode'}</span>}
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             {isDarkMode ? <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /> : <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />}
           </svg>
         </button>
 
-        <div className="flex items-center justify-between p-3 rounded-xl bg-[var(--bg-base)] border border-[var(--border-color)] transition-colors">
-          <div className="flex items-center">
-            <div className="w-8 h-8 rounded-full bg-[#4e080f] text-white flex items-center justify-center font-serif text-sm mr-3">
-              {user?.name ? user.name.charAt(0).toUpperCase() : 'A'}
+        <div className={`pt-4 border-t border-[var(--border-color)] flex items-center ${isCollapsed ? 'justify-center flex-col gap-4' : 'justify-between'}`}>
+          {!isCollapsed && (
+            <div className="flex items-center overflow-hidden">
+              <div className="w-8 h-8 rounded-full bg-[#4e080f] text-white flex items-center justify-center font-serif text-sm mr-3 shrink-0">
+                {user?.name ? user.name.charAt(0).toUpperCase() : 'A'}
+              </div>
+              <div className="truncate pr-2">
+                <p className="text-xs font-bold text-[var(--text-main)] truncate max-w-[100px]">{user?.name || 'Partner Admin'}</p>
+                <p className="text-[10px] text-[var(--text-muted)] truncate">{user?.role === 'ADMIN' ? 'Super Admin' : user?.role === 'SALES' ? 'Sales Rep' : 'Admin Portal'}</p>
+              </div>
             </div>
-            <div className="truncate pr-2">
-              <p className="text-xs font-bold text-[var(--text-main)] truncate max-w-[100px]">{user?.name || 'Partner Admin'}</p>
-              <p className="text-[10px] text-[var(--text-muted)] truncate">{user?.role === 'ADMIN' ? 'Super Admin' : user?.role === 'SALES' ? 'Sales Rep' : 'Admin Portal'}</p>
-            </div>
-          </div>
+          )}
           <button 
             onClick={() => signOut({ callbackUrl: '/login' })}
-            className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+            className={`text-[var(--text-muted)] hover:text-red-600 transition-colors ${isCollapsed ? 'p-2' : 'p-2 bg-[var(--text-muted)]/5 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg'}`}
             title="Secure Logout"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

@@ -1,9 +1,8 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
 import { getServerSession } from 'next-auth';
+import { prisma } from '@/lib/prisma';
 import { authOptions } from '../../auth/[...nextauth]/route'; 
 
-const prisma = new PrismaClient();
 
 // GET: Fetch all clients AND the sales roster for the CRM dashboard
 export async function GET(req: Request) {
@@ -51,8 +50,14 @@ export async function GET(req: Request) {
       select: { id: true, name: true, email: true }
     });
 
+    // Fetch active Admins/Developers for Ticket assignments
+    const admins = await prisma.user.findMany({
+      where: { tenantId, role: 'ADMIN' },
+      select: { id: true, name: true, email: true }
+    });
+
     // Standardized response contract matching the frontend expectations
-    return NextResponse.json({ success: true, clients, salesReps }, { status: 200 });
+    return NextResponse.json({ success: true, clients, salesReps, admins }, { status: 200 });
   } catch (error) {
     console.error('Admin CRM Fetch Error:', error);
     return NextResponse.json({ success: false, message: 'Internal server error' }, { status: 500 });

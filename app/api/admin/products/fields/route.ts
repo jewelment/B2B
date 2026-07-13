@@ -1,9 +1,8 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
 import { getServerSession } from 'next-auth';
+import { prisma } from '@/lib/prisma';
 import { authOptions } from '../../../auth/[...nextauth]/route'; // Adjust relative path if needed
 
-const prisma = new PrismaClient();
 
 export async function GET() {
   try {
@@ -20,7 +19,6 @@ export async function GET() {
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   } finally {
-    await prisma.$disconnect();
   }
 }
 
@@ -53,6 +51,5 @@ export async function POST(req: Request) {
     }
     return NextResponse.json({ error: error.message }, { status: 500 });
   } finally {
-    await prisma.$disconnect();
   }
 }

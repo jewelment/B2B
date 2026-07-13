@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+/* Force Tailwind v4 to use class-based dark mode instead of OS media queries */
+@custom-variant dark (&:is(.dark *));
 :root {
   /* LIGHT MODE: Crisp White & Ashok Maroon */
   --brand-primary: #4e080f;

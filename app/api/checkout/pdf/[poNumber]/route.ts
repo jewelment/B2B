@@ -1,12 +1,11 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
 import React from 'react';
 import { renderToStream } from '@react-pdf/renderer';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { PurchaseOrderPDF } from '@/components/PurchaseOrderPDF';
+import { prisma } from '@/lib/prisma';
 
-const prisma = new PrismaClient();
 
 export async function GET(req: Request, { params }: { params: Promise<{ poNumber: string }> }) {
   try {

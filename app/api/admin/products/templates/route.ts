@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
 import { getServerSession } from 'next-auth';
+import { prisma } from '@/lib/prisma';
 import { authOptions } from '../../../auth/[...nextauth]/route'; 
 
-const prisma = new PrismaClient();
 
 export async function GET(req: NextRequest) {
   try {
@@ -79,6 +78,5 @@ export async function GET(req: NextRequest) {
       stack: error.stack 
     }, { status: 500 });
   } finally {
-    await prisma.$disconnect();
   }
 }

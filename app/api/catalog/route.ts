@@ -1,9 +1,8 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '../auth/[...nextauth]/route';
+import { prisma } from '@/lib/prisma';
 
-const prisma = new PrismaClient();
 
 // 1. GET: Fetch all catalogs for the dashboard
 export async function GET() {

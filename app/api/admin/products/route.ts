@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
-const prisma = new PrismaClient();
+import { prisma } from '@/lib/prisma';
 
 export async function GET() {
   try {
@@ -53,7 +52,6 @@ export async function GET() {
     console.error('Failed to fetch products:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   } finally {
-    await prisma.$disconnect();
   }
 }
 
@@ -114,6 +112,5 @@ export async function PATCH(req: Request) {
     console.error('Failed to patch product:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   } finally {
-    await prisma.$disconnect();
   }
 }

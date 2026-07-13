@@ -1,10 +1,9 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
 import { createSession } from '@/lib/session';
 import { parsePhoneNumberFromString } from 'libphonenumber-js';
+import { prisma } from '@/lib/prisma';
 
 export const dynamic = 'force-dynamic';
-const prisma = new PrismaClient();
 
 export async function POST(req: Request) {
   try {

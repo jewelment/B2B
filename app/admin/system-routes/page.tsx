@@ -17,6 +17,7 @@ export default function SystemRoutesAuditor() {
     { path: '/dashboard/cart', label: 'PO Matrix Checkout', type: 'Protected', status: 'Active' },
     { path: '/dashboard/history', label: 'Order History & Ledger', type: 'Protected', status: 'Active' },
     { path: '/dashboard/settings', label: 'Client Profile Hub', type: 'Protected', status: 'Active' },
+    { path: '/dashboard/support', label: 'Client Support Ticketing', type: 'Protected', status: 'Active' },
     { path: '/inventory', label: 'Global Inventory Explorer', type: 'Protected', status: 'Active' },
     { path: '/catalog/view/[id]', label: 'Dynamic Catalog View', type: 'Protected', status: 'Active' },
     { path: '/catalog/flipbook/[id]', label: 'Dynamic Flipbook View', type: 'Protected', status: 'Active' },
@@ -32,16 +33,22 @@ export default function SystemRoutesAuditor() {
     { path: '/admin/clients', label: 'Partner Network (CRM)', type: 'Admin', status: 'Active' },
     { path: '/admin/orders', label: 'PO Inbox & Kanban', type: 'Admin', status: 'Active' },
     { path: '/admin/assets', label: 'Asset Library / CDN', type: 'Admin', status: 'Active' },
+    { path: '/admin/layout-builder', label: 'SDUI Layout Builder', type: 'Admin', status: 'Active' },
+    { path: '/admin/theme-builder', label: 'Elementor Theme Builder', type: 'Admin', status: 'Active' },
+    { path: '/admin/tickets', label: 'Master Kanban Board', type: 'Admin', status: 'Active' },
+    { path: '/admin/analytics', label: 'Ticket Analytics Dashboard', type: 'Admin', status: 'Active' },
     
     // --- Core API & Engine Subsystems ---
     { path: '/api/auth/[...nextauth]', label: 'NextAuth Security Gateway', type: 'API', status: 'Active' },
-    { path: '/api/checkout/execute', label: 'PO Generation Engine', type: 'API', status: 'Active' },
+    { path: '/api/checkout/execute', label: 'Headless PO Checkout API', type: 'API', status: 'Active' },
     { path: '/api/catalog/mirror-cdn', label: 'CDN Image Mirroring', type: 'API', status: 'Active' },
     { path: '/api/pricing/mcx', label: 'MCX Live Bullion Sync', type: 'API', status: 'Active' },
     { path: '/api/admin/products/bulk-sync', label: 'Products Bulk Sync API', type: 'API', status: 'Active' },
     { path: '/api/catalog/generate', label: 'Catalog Generation API', type: 'API', status: 'Active' },
     { path: '/api/catalog/[id]/pdf', label: 'PDF Generation Engine', type: 'API', status: 'Active' },
     { path: '/api/inventory/sync', label: 'Inventory Sync Webhook', type: 'API', status: 'Active' },
+    { path: '/api/mobile/auth', label: 'Native Mobile Auth (Expo)', type: 'API', status: 'Active' },
+    { path: '/api/admin/impersonate', label: 'Admin Impersonation API', type: 'API', status: 'Active' },
     
     // --- Dev & Tracking ---
     { path: '/admin/system-routes', label: 'System Route Auditor', type: 'Dev Only', status: 'Active' },
@@ -78,6 +85,7 @@ export default function SystemRoutesAuditor() {
             <table className="w-full text-left">
               <thead className="bg-[var(--bg-base)] border-b border-[var(--border-color)]">
                 <tr>
+                  <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-[var(--text-muted)] w-16">S.No.</th>
                   <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">Path</th>
                   <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">Component / API Engine</th>
                   <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">Access Tier</th>
@@ -87,6 +95,7 @@ export default function SystemRoutesAuditor() {
               <tbody className="divide-y divide-[var(--border-color)]">
                 {routes.map((route, i) => (
                   <tr key={i} className="hover:bg-[var(--bg-base)] transition-colors group">
+                    <td className="px-6 py-4 font-mono text-xs text-[var(--text-muted)]">{i + 1}</td>
                     <td className="px-6 py-4 font-mono text-sm text-[var(--text-main)] group-hover:text-[var(--brand-primary)] transition-colors">
                       {route.path}
                     </td>
