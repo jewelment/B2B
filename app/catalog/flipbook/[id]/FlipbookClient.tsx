@@ -133,6 +133,28 @@ export default function FlipbookClient({ catalog }: { catalog: any }) {
     }
   }, [activeMatrixSku]);
 
+  useEffect(() => {
+    const onFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    document.addEventListener('fullscreenchange', onFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', onFullscreenChange);
+  }, []);
+
+  // Keyboard Shortcuts for page flipping
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!bookRef.current) return;
+      if (e.key === 'ArrowRight') {
+        bookRef.current.pageFlip().flipNext();
+      } else if (e.key === 'ArrowLeft') {
+        bookRef.current.pageFlip().flipPrev();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   const handleToggleCart = (code: string, e: React.MouseEvent) => {
     e.stopPropagation();
     setSelectedItems(prev => prev.includes(code) ? prev.filter(c => c !== code) : [...prev, code]);
@@ -283,28 +305,6 @@ export default function FlipbookClient({ catalog }: { catalog: any }) {
       document.exitFullscreen();
     }
   };
-
-  useEffect(() => {
-    const onFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
-    };
-    document.addEventListener('fullscreenchange', onFullscreenChange);
-    return () => document.removeEventListener('fullscreenchange', onFullscreenChange);
-  }, []);
-
-  // Keyboard Shortcuts for page flipping
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (!bookRef.current) return;
-      if (e.key === 'ArrowRight') {
-        bookRef.current.pageFlip().flipNext();
-      } else if (e.key === 'ArrowLeft') {
-        bookRef.current.pageFlip().flipPrev();
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
 
   const getBackgroundStyle = () => {
     switch (previewConfig.viewerBackground) {
