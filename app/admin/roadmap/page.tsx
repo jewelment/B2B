@@ -281,86 +281,133 @@ export default function DevRoadmapDashboard() {
     <div className="min-h-screen bg-[var(--bg-base)] text-[var(--text-main)] font-sans p-6 md:p-12 pb-24">
       <div className="max-w-[1400px] mx-auto space-y-8">
         
-        {/* HEADER BENTO */}
-        <div className="bg-[var(--bg-surface)] border border-[var(--border-color)] shadow-sm rounded-2xl p-8 relative overflow-hidden">
-          <div className="absolute top-0 right-0 bg-amber-500 text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg tracking-widest uppercase shadow-sm">
-            Temporary Dev Mode
+        <div className="relative bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-2xl p-8 md:p-10 shadow-sm flex flex-col xl:flex-row xl:items-center justify-between gap-10">
+          {/* BACKGROUND GLOW WRAPPER */}
+          <div className="absolute inset-0 overflow-hidden rounded-2xl pointer-events-none">
+            <div className="absolute top-0 right-0 w-96 h-96 bg-[var(--brand-primary)] opacity-5 blur-[100px] rounded-full"></div>
           </div>
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+
+          {/* LEFT: TITLE & CTA */}
+          <div className="relative z-10 space-y-6">
             <div>
-              <h1 className="text-3xl font-normal tracking-tight">Project Master Ledger</h1>
-              <p className="text-sm text-[var(--text-muted)] mt-2 font-mono">Ashok Jewels B2B Architecture</p>
-              
-              {/* NEW: QUICK ACCESS TABS */}
-              <div className="mt-5 flex items-center gap-3">
-                <Link 
-                  href="/admin/system-routes" 
-                  target="_blank"
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-[var(--bg-base)] border border-[var(--border-color)] text-[var(--text-main)] hover:border-emerald-500 hover:text-emerald-600 transition-all rounded-lg text-xs font-bold uppercase tracking-widest shadow-sm group"
+              <h1 className="text-4xl md:text-5xl font-light tracking-tight text-[var(--text-main)] mb-2 flex items-center gap-4">
+                Project <strong className="font-bold bg-[var(--brand-primary)] text-white px-3 py-1 rounded-lg shadow-sm">Master</strong> Ledger
+              </h1>
+              <p className="text-[var(--text-muted)] font-mono text-sm">Ashok Jewels B2B Architecture</p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3">
+              <Link 
+                href="/admin/system-routes" 
+                target="_blank"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-[var(--bg-base)] border border-[var(--border-color)] text-[var(--text-main)] hover:border-emerald-500 hover:text-emerald-600 transition-all rounded-lg text-xs font-bold uppercase tracking-widest shadow-sm group"
+              >
+                <svg className="w-4 h-4 text-[var(--text-muted)] group-hover:text-emerald-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" /></svg>
+                System Route Auditor
+              </Link>
+
+              {/* GITHUB SYNC CTA */}
+              <div className="relative z-50 flex items-center gap-3">
+                <button 
+                  onClick={handleGitSync}
+                  disabled={isSyncing}
+                  className="inline-flex items-center gap-2 px-6 py-2 bg-[#171515] hover:bg-[#2b2828] text-white transition-all rounded-lg text-xs font-bold uppercase tracking-widest shadow-md disabled:opacity-50 disabled:cursor-not-allowed group"
                 >
-                  <svg className="w-4 h-4 text-[var(--text-muted)] group-hover:text-emerald-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" /></svg>
-                  System Route Auditor
-                </Link>
-
-                {/* GITHUB SYNC CTA */}
-                <div className="relative z-50 flex items-center gap-3">
-                  <button 
-                    onClick={handleGitSync}
-                    disabled={isSyncing}
-                    className="inline-flex items-center gap-2 px-6 py-2 bg-[#171515] hover:bg-[#2b2828] text-white transition-all rounded-lg text-xs font-bold uppercase tracking-widest shadow-md disabled:opacity-50 disabled:cursor-not-allowed group"
-                  >
-                    {isSyncing ? (
-                      <svg className="animate-spin w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                    ) : (
-                      <svg className="w-4 h-4 group-hover:scale-110 transition-transform" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
-                    )}
-                    {isSyncing ? 'Syncing...' : 'Sync to GitHub'}
-                  </button>
-                  
-                  {syncStatus && (
-                    <span className={`text-[10px] uppercase font-bold tracking-widest px-3 py-1.5 rounded-lg border ${syncStatus.success ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' : 'bg-red-500/10 text-red-600 border-red-500/20'}`}>
-                      {syncStatus.message}
-                    </span>
+                  {isSyncing ? (
+                    <svg className="animate-spin w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                  ) : (
+                    <svg className="w-4 h-4 group-hover:scale-110 transition-transform" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
                   )}
-
-                  {/* LIVE TERMINAL LOGS */}
-                  {syncLogs.length > 0 && (
-                    <div className="absolute top-full mt-3 right-0 w-[450px] bg-[#0d1117] text-[#3fb950] p-4 rounded-xl border border-[#30363d] shadow-2xl z-50 h-56 overflow-y-auto custom-scrollbar flex flex-col gap-2 font-mono text-[11px] leading-relaxed">
-                      <div className="flex items-center justify-between mb-2 pb-2 border-b border-[#30363d] sticky top-0 bg-[#0d1117]">
-                        <span className="text-[#8b949e] font-bold">GitHub Sync Terminal</span>
-                        <div className="flex gap-1.5">
-                          <div className="w-2.5 h-2.5 rounded-full bg-[#ff5f56]"></div>
-                          <div className="w-2.5 h-2.5 rounded-full bg-[#ffbd2e]"></div>
-                          <div className="w-2.5 h-2.5 rounded-full bg-[#27c93f]"></div>
-                        </div>
-                      </div>
-                      {syncLogs.map((log, i) => (
-                        <div key={i} className="break-words">
-                          <span className="text-[#8b949e] mr-2">[{new Date().toLocaleTimeString()}]</span>
-                          <span className={log.startsWith('>') ? 'text-[#58a6ff]' : log.includes('Failed') ? 'text-[#f85149]' : ''}>{log}</span>
-                        </div>
-                      ))}
-                      {isSyncing && (
-                        <div className="animate-pulse text-[#8b949e] mt-1">_</div>
+                  {isSyncing ? 'Syncing...' : 'Sync to GitHub'}
+                </button>
+                
+                {syncStatus && (
+                  <div className={`absolute top-full mt-3 left-0 whitespace-nowrap text-[11px] uppercase font-bold tracking-widest px-4 py-2 rounded-lg border shadow-lg z-50 animate-in fade-in slide-in-from-top-2 ${syncStatus.success ? 'bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20' : 'bg-red-50 text-red-600 border-red-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20'}`}>
+                    <div className="flex items-center gap-2">
+                      {syncStatus.success ? (
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                      ) : (
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
                       )}
+                      {syncStatus.message}
                     </div>
-                  )}
+                  </div>
+                )}
+
+                {/* LIVE TERMINAL LOGS */}
+                {syncLogs.length > 0 && !syncStatus && (
+                  <div className="absolute top-full mt-3 left-0 w-[450px] bg-[#0d1117] text-[#3fb950] p-4 rounded-xl border border-[#30363d] shadow-2xl z-50 h-56 overflow-y-auto custom-scrollbar flex flex-col gap-2 font-mono text-[11px] leading-relaxed animate-in fade-in slide-in-from-top-2">
+                    <div className="flex items-center justify-between mb-2 pb-2 border-b border-[#30363d] sticky top-0 bg-[#0d1117]">
+                      <span className="text-[#8b949e] font-bold">GitHub Sync Terminal</span>
+                      <div className="flex gap-1.5">
+                        <div className="w-2.5 h-2.5 rounded-full bg-[#ff5f56]"></div>
+                        <div className="w-2.5 h-2.5 rounded-full bg-[#ffbd2e]"></div>
+                        <div className="w-2.5 h-2.5 rounded-full bg-[#27c93f]"></div>
+                      </div>
+                    </div>
+                    {syncLogs.map((log, i) => (
+                      <div key={i} className="break-words">
+                        <span className="text-[#8b949e] mr-2">[{new Date().toLocaleTimeString()}]</span>
+                        <span className={log.startsWith('>') ? 'text-[#58a6ff]' : log.includes('Failed') ? 'text-[#f85149]' : ''}>{log}</span>
+                      </div>
+                    ))}
+                    {isSyncing && (
+                      <div className="animate-pulse text-[#8b949e] mt-1">_</div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* RIGHT: DASHBOARD METRICS */}
+          <div className="relative z-10 w-full xl:w-1/2 grid grid-cols-2 gap-4">
+            
+            {/* Metric 1: Global Completion */}
+            <div className="bg-[var(--bg-base)] border border-[var(--border-color)] p-5 rounded-xl shadow-sm flex flex-col justify-between group hover:border-[var(--brand-primary)] transition-colors">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] group-hover:text-[var(--brand-primary)] transition-colors">Global Progress</p>
+              <div className="mt-4 flex items-end justify-between">
+                <div className="text-3xl lg:text-4xl font-bold text-[var(--text-main)] font-mono">{globalProgress}%</div>
+                <div className="relative w-12 h-12 flex items-center justify-center">
+                  <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                    <path className="text-[var(--bg-surface)]" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="4" />
+                    <path className="text-[var(--brand-primary)] transition-all duration-1000 ease-out" strokeDasharray={`${globalProgress}, 100`} d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="4" />
+                  </svg>
                 </div>
               </div>
             </div>
-            
-            <div className="flex items-center gap-4 bg-[var(--bg-base)] border border-[var(--border-color)] px-6 py-4 rounded-xl shadow-sm">
-              <div className="text-right">
-                <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">Global Completion</p>
-                <p className="text-2xl font-bold text-[var(--text-main)]">{globalProgress}%</p>
-              </div>
-              <div className="w-16 h-16 flex items-center justify-center relative bg-[var(--bg-base)] rounded-full p-1 border border-[var(--border-color)]">
-                <svg viewBox="0 0 60 60" className="absolute inset-1 w-full h-full -rotate-90">
-                  <circle cx="30" cy="30" r="26" stroke="currentColor" strokeWidth="4" fill="transparent" className="text-[var(--border-color)]" />
-                  <circle cx="30" cy="30" r="26" stroke="currentColor" strokeWidth="4" fill="transparent" strokeDasharray="163" strokeDashoffset={163 - (163 * globalProgress) / 100} className="text-emerald-500 transition-all duration-1000" />
-                </svg>
+
+            {/* Metric 2: Completed Modules */}
+            <div className="bg-[var(--bg-base)] border border-[var(--border-color)] p-5 rounded-xl shadow-sm flex flex-col justify-between group hover:border-emerald-500/50 transition-colors">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] group-hover:text-emerald-500 transition-colors">Deployed Tasks</p>
+              <div className="mt-4 flex items-end justify-between">
+                <div className="text-3xl lg:text-4xl font-bold text-emerald-500 font-mono">{completedTasks}<span className="text-sm text-[var(--text-muted)]">/{totalTasks}</span></div>
+                <svg className="w-8 h-8 text-emerald-500/30 group-hover:text-emerald-500/80 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 13l4 4L19 7" /></svg>
               </div>
             </div>
+
+            {/* Metric 3: Active Priorities */}
+            <div className="bg-amber-500/5 border border-amber-500/20 p-5 rounded-xl shadow-sm flex flex-col justify-between group hover:bg-amber-500/10 transition-colors">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-amber-600 dark:text-amber-500">Active Queue</p>
+              <div className="mt-4 flex items-end justify-between">
+                <div className="text-3xl lg:text-4xl font-bold text-amber-600 dark:text-amber-500 font-mono">{allIncompleteTasks.length}</div>
+                <svg className="w-8 h-8 text-amber-500/30 group-hover:text-amber-500/80 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+              </div>
+            </div>
+
+            {/* Metric 4: Dev Phase */}
+            <div className="bg-[var(--bg-base)] border border-[var(--border-color)] p-5 rounded-xl shadow-sm flex flex-col justify-between">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">Current Phase</p>
+              <div className="mt-4 flex items-end justify-between">
+                <div className="text-3xl lg:text-4xl font-bold text-[var(--text-main)]">v2.0</div>
+                <div className="text-[10px] uppercase font-bold text-[var(--text-muted)] text-right leading-tight tracking-widest">Multi-Tenant<br/>SaaS Pivot</div>
+              </div>
+            </div>
+
+          </div>
+          
+          <div className="absolute -top-3 -right-3 bg-amber-500 text-white text-[9px] font-black uppercase tracking-widest px-8 py-1.5 transform rotate-45 shadow-md">
+            Temporary Dev Mode
           </div>
         </div>
 
@@ -401,16 +448,16 @@ export default function DevRoadmapDashboard() {
                 All scheduled tasks are completed!
               </div>
             ) : (
-              <div className="bg-[var(--bg-surface)] border border-amber-500/20 rounded-xl shadow-sm overflow-hidden">
+              <div className="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-xl shadow-sm overflow-hidden">
                 <div className="overflow-x-auto custom-scrollbar">
                   <table className="w-full text-left border-collapse whitespace-nowrap">
                     <thead>
-                      <tr className="bg-amber-500/5 border-b border-amber-500/20">
-                        <th className="py-4 px-6 text-xs font-bold text-amber-600 dark:text-amber-500 tracking-wider uppercase w-[30%]">Task Name</th>
-                        <th className="py-4 px-6 text-xs font-bold text-amber-600 dark:text-amber-500 tracking-wider uppercase w-[15%]">Phase</th>
-                        <th className="py-4 px-6 text-xs font-bold text-amber-600 dark:text-amber-500 tracking-wider uppercase w-[15%] text-center">Priority</th>
-                        <th className="py-4 px-6 text-xs font-bold text-amber-600 dark:text-amber-500 tracking-wider uppercase w-[20%] text-center">Progress</th>
-                        <th className="py-4 px-6 text-xs font-bold text-amber-600 dark:text-amber-500 tracking-wider uppercase w-[20%] text-right">Actions</th>
+                      <tr className="bg-black/5 dark:bg-white/5 border-b border-[var(--border-color)]">
+                        <th className="py-4 px-6 text-xs font-bold text-[var(--brand-primary)] tracking-wider uppercase w-[30%]">Task Name</th>
+                        <th className="py-4 px-6 text-xs font-bold text-[var(--brand-primary)] tracking-wider uppercase w-[15%]">Phase</th>
+                        <th className="py-4 px-6 text-xs font-bold text-[var(--brand-primary)] tracking-wider uppercase w-[15%] text-center">Priority</th>
+                        <th className="py-4 px-6 text-xs font-bold text-[var(--brand-primary)] tracking-wider uppercase w-[20%] text-center">Progress</th>
+                        <th className="py-4 px-6 text-xs font-bold text-[var(--brand-primary)] tracking-wider uppercase w-[20%] text-right">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-[var(--border-color)]">
