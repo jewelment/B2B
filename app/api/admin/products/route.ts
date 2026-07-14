@@ -35,7 +35,7 @@ export async function GET() {
         category: product.category,
         price: product.price,
         status: product.status,
-        image: product.media[0]?.url || null,
+        image: product.media[0] ? `/api/media/${product.media[0].id}` : null,
       };
 
       // Inject custom attributes directly into the row data

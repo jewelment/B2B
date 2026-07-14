@@ -59,7 +59,7 @@ const MOCK_INVENTORY = [
   }
 ];
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const session = await getServerSession(authOptions);
     if (!session || !session.user) {
@@ -75,6 +75,15 @@ export async function GET() {
     if (!tenantId) {
       return NextResponse.json({ success: false, error: 'Unauthorized. Missing tenant context.' }, { status: 401 });
     }
+
+    const { searchParams } = new URL(request.url);
+    const pageParam = searchParams.get('page');
+    const limitParam = searchParams.get('limit');
+    const purityParam = searchParams.get('purity');
+    
+    const page = pageParam ? parseInt(pageParam, 10) : 1;
+    const limit = limitParam ? parseInt(limitParam, 10) : 24;
+    const skip = (page - 1) * limit;
 
     // 1. Check if the database has any products for this tenant
     const productCount = await prisma.product.count({ where: { tenantId } });
@@ -112,21 +121,79 @@ export async function GET() {
     }
 
     // 3. Fetch the LIVE inventory directly from the database for this specific tenant
-    const liveInventory = await prisma.product.findMany({
-      where: { tenantId },
-      include: {
-        components: true,
-        media: {
-          orderBy: { sequence: 'asc' }
+    const whereClause: any = { tenantId };
+    if (purityParam && purityParam !== 'ALL') {
+      whereClause.metalPurity = purityParam;
+    }
+
+    const [liveInventory, totalItems, uniquePuritiesData] = await Promise.all([
+      prisma.product.findMany({
+        where: whereClause,
+        include: {
+          components: true,
+          media: {
+            orderBy: { sequence: 'asc' }
+          }
+        },
+        orderBy: {
+          createdAt: 'asc' // Keeps them in consistent order
+        },
+        skip,
+        take: limit
+      }),
+      prisma.product.count({ where: whereClause }),
+      prisma.product.findMany({
+        where: { tenantId },
+        select: { metalPurity: true },
+        distinct: ['metalPurity']
+      })
+    ]);
+
+    const uniquePurities = uniquePuritiesData
+      .map(p => p.metalPurity)
+      .filter(Boolean);
+
+    const settings = await prisma.storeSettings.findUnique({
+      where: { tenantId }
+    });
+    
+    const useProxy = settings?.enableSecureMediaProxy !== false;
+    const appendWebp = settings?.enableWebpOptimization === true;
+
+    // Transform media URLs to use the secure proxy or apply webp
+    const securedInventory = liveInventory.map(product => {
+      const securedMedia = product.media.map(m => {
+        let finalUrl = m.url;
+        if (m.url) {
+          const originalFilename = m.url.split('/').pop() || 'image.jpg';
+          const baseName = originalFilename.substring(0, originalFilename.lastIndexOf('.')) || originalFilename;
+          
+          if (useProxy) {
+            finalUrl = `/api/media/${m.id}` + (appendWebp ? `/${baseName}.webp` : `/${originalFilename}`);
+          } else if (appendWebp) {
+            finalUrl = m.url.substring(0, m.url.lastIndexOf('.')) + '.webp';
+          }
         }
-      },
-      orderBy: {
-        createdAt: 'asc' // Keeps them in consistent order
-      }
+        return {
+          ...m,
+          url: finalUrl
+        };
+      });
+      return { ...product, media: securedMedia };
     });
 
     // CRITICAL FIX: Wrapped the array in an object so the frontend can destructure `data.products`
-    return NextResponse.json({ success: true, products: liveInventory });
+    return NextResponse.json({ 
+      success: true, 
+      products: securedInventory,
+      pagination: {
+        totalItems,
+        totalPages: Math.ceil(totalItems / limit),
+        currentPage: page,
+        itemsPerPage: limit
+      },
+      uniquePurities
+    });
 
   } catch (error) {
     console.error('Database Fetch Error:', error);

@@ -31,6 +31,7 @@ model Tenant {
   storeSettings   StoreSettings?
   tickets         Ticket[]
   sduiPages       SduiPage[]
+  analyticsEvents AnalyticsEvent[]
 }
 
 // ======================================================
@@ -156,7 +157,8 @@ model Catalog {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  items CatalogItem[]
+  items           CatalogItem[]
+  analyticsEvents AnalyticsEvent[]
 }
 
 model CatalogItem {
@@ -214,6 +216,7 @@ model User {
   reportedTickets Ticket[] @relation("ReportedTickets")
   assignedTickets Ticket[] @relation("AssignedTickets")
   ticketMessages  TicketMessage[]
+  analyticsEvents AnalyticsEvent[]
 
   @@unique([tenantId, email])
 }
@@ -305,6 +308,10 @@ model StoreSettings {
   pricingMode       String   @default("MANUAL")
   manualGoldRate24K Float    @default(7250.0)
   manualSilverRate  Float    @default(88.0)
+  
+  // Media Configuration
+  enableSecureMediaProxy Boolean @default(true)
+  enableWebpOptimization Boolean @default(false)
   
   // Branding Assets
   logoLight         String?
@@ -402,4 +409,25 @@ model TicketMessage {
   isInternal Boolean @default(false) // If true, only admins can see this message
 
   createdAt DateTime @default(now())
+}
+
+// ======================================================
+// 8. V2: FLIPBOOK ANALYTICS & TELEMETRY (PHASE 12)
+// ======================================================
+
+model AnalyticsEvent {
+  id        String   @id @default(cuid())
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  catalogId String?
+  catalog   Catalog? @relation(fields: [catalogId], references: [id], onDelete: Cascade)
+  
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  eventType   String  // e.g., "CATALOG_VIEW", "PAGE_TURN", "ADD_TO_CART", "CHECKOUT"
+  eventData   String? // JSON string for tracking specifics (e.g. pageNumber, designCode)
+  
+  createdAt   DateTime @default(now())
 }

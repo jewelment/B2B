@@ -73,6 +73,7 @@ export default async function GridViewPage({ params }: { params: Promise<{ id: s
       metalPurity: true,
       grossWeight: true,
       pureWeight: true,
+      price: true,
       estimatedPrice: true,
       media: {
         orderBy: { sequence: 'asc' },

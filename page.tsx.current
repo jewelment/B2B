@@ -33,6 +33,7 @@ export default function AdminCatalogsDashboard() {
 
   const [showBuilder, setShowBuilder] = useState(false);
   const [builderTab, setBuilderTab] = useState<'PRODUCTS' | 'APPEARANCE' | 'PREVIEW'>('PRODUCTS');
+  const [settingsTab, setSettingsTab] = useState<'BASICS' | 'THEME' | 'COVERS'>('BASICS');
   const [inventory, setInventory] = useState<any[]>([]); 
   const [selectedVisualItems, setSelectedVisualItems] = useState<string[]>([]);
 
@@ -40,23 +41,22 @@ export default function AdminCatalogsDashboard() {
   const [searchFilter, setSearchFilter] = useState('');
   const [purityFilter, setPurityFilter] = useState('ALL');
   const [currentPage, setCurrentPage] = useState(1);
-  const ITEMS_PER_PAGE = 60;
+  const ITEMS_PER_PAGE = 36;
   
   const gridScrollRef = useRef<HTMLDivElement>(null);
 
   const [config, setConfig] = useState({
     theme: 'LIGHT',
     orientation: 'PORTRAIT', 
-    desktopItemsPerPage: 0,
-    mobileItemsPerPage: 0,
-    preferredImageIndex: 1,
+    desktopItemsPerPage: 4,
+    mobileItemsPerPage: 1,
+    preferredImageIndex: 0,
     hidePricing: false,
     poMatrix: true,
     password: '',
     frontCover: '',
     backCover: '',
-    backCoverText: 'Ashok Jewels Fine Wholesale',
-    viewerBackground: 'UNSPLASH_WHITE_LINES',
+    viewerBackground: 'WOOD',
     lifestyleInserts: [] as Array<{ position: number, image: string }>
   });
 
@@ -234,7 +234,11 @@ export default function AdminCatalogsDashboard() {
 
   const filteredInventory = safeInventory.filter(item => {
     const matchesSearch = item.designCode?.toLowerCase().includes(searchFilter.toLowerCase()) || item.title?.toLowerCase().includes(searchFilter.toLowerCase());
-    const matchesPurity = purityFilter === 'ALL' || item.metalPurity === purityFilter;
+    
+    // Normalize purity by extracting just the digits (e.g. "18K", "18KT", "18 Carat" -> "18")
+    const formatPurity = (p?: string) => (p || '').replace(/[^0-9]/g, '');
+    const matchesPurity = purityFilter === 'ALL' || formatPurity(item.metalPurity) === formatPurity(purityFilter);
+    
     return matchesSearch && matchesPurity;
   });
 
@@ -256,21 +260,19 @@ export default function AdminCatalogsDashboard() {
   const totalPipelineValue = activeCatalogs.reduce((acc, cat) => acc + (cat.pipelineValue || 0), 0);
 
   // Infinite Scroll Observer
-  const observer = useRef<IntersectionObserver | null>(null);
-  const observerTarget = React.useCallback((node: HTMLDivElement | null) => {
-    if (observer.current) observer.current.disconnect();
-    
-    observer.current = new IntersectionObserver(entries => {
-      if (entries[0].isIntersecting) {
-        setCurrentPage(prev => {
-          if (prev < totalPages) return prev + 1;
-          return prev;
-        });
-      }
-    }, { threshold: 0.5 });
-    
-    if (node) observer.current.observe(node);
-  }, [totalPages]);
+  const observerTarget = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0].isIntersecting && currentPage < totalPages) {
+          setCurrentPage(prev => prev + 1);
+        }
+      },
+      { threshold: 0.1 }
+    );
+    if (observerTarget.current) observer.observe(observerTarget.current);
+    return () => observer.disconnect();
+  }, [currentPage, totalPages]);
 
   if (loading) return (<div className="flex justify-center py-32 text-[var(--brand-primary)]"><svg className="animate-spin w-8 h-8" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg></div>);
 
@@ -339,7 +341,6 @@ export default function AdminCatalogsDashboard() {
                 <label className="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Design Payload *</label>
                 <button type="button" onClick={() => {
                   setEditingCatalogId(null);
-                  // Intentionally keeping campaignName and clientSearch so data carries over
                   setShowBuilder(true);
                 }} className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest bg-[var(--brand-primary)]/10 text-[var(--brand-primary)] px-3 py-1.5 rounded-lg hover:bg-[var(--brand-primary)]/20 transition-all active:scale-95">
                   <IconSparkles /> Visual Builder
@@ -498,9 +499,9 @@ export default function AdminCatalogsDashboard() {
                         const hoverImg = item.media && item.media.length > 1 ? item.media[1].url : null;
 
                         return (
-                          <div key={i} onClick={() => toggleVisualSelection(item.designCode)} className={`relative group rounded-xl border-2 cursor-pointer transition-all overflow-hidden ${isSelected ? 'border-blue-500 ring-2 ring-blue-500/30 shadow-lg scale-[1.02]' : 'border-[var(--border-color)] hover:border-blue-500/50'}`}>
+                          <div key={i} onClick={() => toggleVisualSelection(item.designCode)} className={`relative group rounded-xl border-2 cursor-pointer transition-all overflow-hidden ${isSelected ? 'border-emerald-500 ring-2 ring-emerald-500/30 shadow-lg scale-[1.02]' : 'border-[var(--border-color)] hover:border-[var(--brand-primary)]/50'}`}>
                             {isSelected && (
-                              <div className="absolute top-2 right-2 w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center z-10 shadow-lg animate-in zoom-in-90">
+                              <div className="absolute top-2 right-2 w-6 h-6 bg-emerald-500 text-white rounded-full flex items-center justify-center z-10 shadow-lg animate-in zoom-in-90">
                                 <IconCheck />
                               </div>
                             )}
@@ -581,268 +582,128 @@ export default function AdminCatalogsDashboard() {
               </div>
             )}
 
-            {/* TAB: APPEARANCE */}
+            {/* TAB: APPEARANCE (SETTINGS & MEDIA) */}
             {builderTab === 'APPEARANCE' && (
-              <div className="flex-1 overflow-y-auto p-8 bg-[var(--bg-base)]">
-                <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="flex-1 overflow-y-auto p-6 bg-[var(--bg-base)] custom-scrollbar">
+                <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
                   
-                  {/* Left Column: Logic & Theme */}
-                  <div className="space-y-6">
-                    
-                    {/* Metadata Section */}
-                    <div className="bg-[var(--bg-surface)] p-6 rounded-2xl border border-[var(--border-color)]">
-                      <h4 className="text-xs font-bold uppercase tracking-widest text-[var(--text-main)] border-b border-[var(--border-color)] pb-3 mb-5">Catalog Details</h4>
-                      <div className="space-y-5">
+                  {/* LEFT COLUMN: Configuration */}
+                  <div className="space-y-4">
+                    {/* Details */}
+                    <div className="bg-[var(--bg-surface)] p-5 rounded-xl border border-[var(--border-color)] shadow-sm">
+                      <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <label className="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Catalog Title</label>
-                          <input 
-                            type="text" 
-                            value={campaignName} 
-                            onChange={(e) => setCampaignName(e.target.value)} 
-                            placeholder="e.g. Summer Collection 2026"
-                            className="w-full px-4 py-2.5 bg-[var(--bg-base)] border border-[var(--border-color)] rounded-xl text-sm font-semibold text-[var(--text-main)] focus:ring-1 focus:ring-[var(--brand-primary)] outline-none" 
-                          />
+                          <label className="block text-[10px] font-bold text-[var(--text-muted)] uppercase mb-1">Catalog Title</label>
+                          <input type="text" value={campaignName} onChange={(e) => setCampaignName(e.target.value)} placeholder="Title" className="w-full px-3 py-2 bg-[var(--bg-base)] border border-[var(--border-color)] rounded-lg text-xs" />
                         </div>
                         <div>
-                          <label className="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Target Client / Subtitle (Optional)</label>
-                          <input 
-                            type="text" 
-                            value={clientSearch} 
-                            onChange={(e) => setClientSearch(e.target.value)} 
-                            placeholder="e.g. Malabar Gold"
-                            className="w-full px-4 py-2.5 bg-[var(--bg-base)] border border-[var(--border-color)] rounded-xl text-sm font-medium text-[var(--text-main)] focus:ring-1 focus:ring-[var(--brand-primary)] outline-none" 
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Back Cover Content</label>
-                          <input 
-                            type="text" 
-                            value={config.backCoverText || ''} 
-                            onChange={(e) => setConfig({...config, backCoverText: e.target.value})} 
-                            placeholder="e.g. Thank you for your business"
-                            className="w-full px-4 py-2.5 bg-[var(--bg-base)] border border-[var(--border-color)] rounded-xl text-sm font-medium text-[var(--text-main)] focus:ring-1 focus:ring-[var(--brand-primary)] outline-none" 
-                          />
+                          <label className="block text-[10px] font-bold text-[var(--text-muted)] uppercase mb-1">Subtitle (Optional)</label>
+                          <input type="text" value={clientSearch} onChange={(e) => setClientSearch(e.target.value)} placeholder="Subtitle" className="w-full px-3 py-2 bg-[var(--bg-base)] border border-[var(--border-color)] rounded-lg text-xs" />
                         </div>
                       </div>
                     </div>
 
-                    <div className="bg-[var(--bg-surface)] p-6 rounded-2xl border border-[var(--border-color)]">
-                      <h4 className="text-xs font-bold uppercase tracking-widest text-[var(--text-main)] border-b border-[var(--border-color)] pb-3 mb-5">Presentation Engine & Layout</h4>
-                      <div className="space-y-5">
-                        
-                        <div>
-                          <label className="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Device Orientation Preference</label>
-                          <div className="flex gap-3">
-                            <button onClick={() => setConfig({...config, orientation: 'PORTRAIT'})} className={`flex-1 py-2.5 rounded-xl border transition-all ${config.orientation === 'PORTRAIT' ? 'border-[var(--brand-primary)] bg-[var(--brand-primary)]/10 text-[var(--brand-primary)]' : 'border-[var(--border-color)] text-[var(--text-muted)] hover:bg-[var(--bg-base)]'} text-[10px] font-bold uppercase`}>Portrait (Mobile)</button>
-                            <button onClick={() => setConfig({...config, orientation: 'LANDSCAPE'})} className={`flex-1 py-2.5 rounded-xl border transition-all ${config.orientation === 'LANDSCAPE' ? 'border-[var(--brand-primary)] bg-[var(--brand-primary)]/10 text-[var(--brand-primary)]' : 'border-[var(--border-color)] text-[var(--text-muted)] hover:bg-[var(--bg-base)]'} text-[10px] font-bold uppercase`}>Landscape (Tablet)</button>
-                          </div>
+                    {/* Security */}
+                    <div className="bg-[var(--bg-surface)] p-5 rounded-xl border border-[var(--border-color)] shadow-sm">
+                      <div className="flex justify-between items-center mb-4">
+                        <div className="flex items-center gap-2">
+                          <input type="checkbox" checked={config.hidePricing} onChange={() => setConfig({ ...config, hidePricing: !config.hidePricing })} className="w-4 h-4 accent-emerald-500" />
+                          <span className="text-xs font-bold">Hide Pricing</span>
                         </div>
-
-                        <div>
-                          <label className="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Desktop & Tablet (Products Per Page)</label>
-                          <select value={config.desktopItemsPerPage} onChange={(e) => setConfig({...config, desktopItemsPerPage: Number(e.target.value)})} className="w-full bg-[var(--bg-base)] border border-[var(--border-color)] text-xs py-3 px-4 rounded-xl focus:ring-1 focus:ring-[var(--brand-primary)] outline-none cursor-pointer text-[var(--text-main)]">
-                            <option value={1}>1 Item Per Page (Hero View)</option>
-                            <option value={4}>4 Items Per Page (Lookbook Style)</option>
-                            <option value={0}>Smart Auto-Align</option>
-                          </select>
+                        <div className="flex items-center gap-2">
+                          <input type="checkbox" checked={config.poMatrix} onChange={() => setConfig({ ...config, poMatrix: !config.poMatrix })} className="w-4 h-4 accent-emerald-500" />
+                          <span className="text-xs font-bold">Enable PO Matrix</span>
                         </div>
-
-                        <div>
-                          <label className="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Mobile (Products Per Page)</label>
-                          <select value={config.mobileItemsPerPage} onChange={(e) => setConfig({...config, mobileItemsPerPage: Number(e.target.value)})} className="w-full bg-[var(--bg-base)] border border-[var(--border-color)] text-xs py-3 px-4 rounded-xl focus:ring-1 focus:ring-[var(--brand-primary)] outline-none cursor-pointer text-[var(--text-main)]">
-                            <option value={1}>1 Item Per Page (Swipe Vertical)</option>
-                            <option value={2}>2 Items Per Page (Standard E-com)</option>
-                            <option value={4}>4 Items Per Page (Dense Grid)</option>
-                            <option value={0}>Smart Auto-Align</option>
-                          </select>
-                        </div>
-
-                        <div>
-                          <label className="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Preferred Product Image</label>
-                          <select value={config.preferredImageIndex || 0} onChange={(e) => setConfig({...config, preferredImageIndex: Number(e.target.value)})} className="w-full bg-[var(--bg-base)] border border-[var(--border-color)] text-xs py-3 px-4 rounded-xl focus:ring-1 focus:ring-[var(--brand-primary)] outline-none cursor-pointer text-[var(--text-main)]">
-                            <option value={0}>Image 1 (Default / Studio)</option>
-                            <option value={1}>Image 2 (Alternative / Lifestyle)</option>
-                            <option value={2}>Image 3 (Contextual)</option>
-                          </select>
-                        </div>
-
-                        <div>
-                          <label className="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Color Theme</label>
-                          <div className="flex gap-3">
-                            <button onClick={() => setConfig({...config, theme: 'LIGHT'})} className={`flex-1 py-3 rounded-xl border-2 transition-all ${config.theme === 'LIGHT' ? 'border-[var(--brand-primary)] ring-2 ring-[var(--brand-primary)]/20 bg-[var(--brand-primary)]/5' : 'border-[var(--border-color)] bg-white'} text-black text-[10px] font-bold uppercase`}>Classic Light</button>
-                            <button onClick={() => setConfig({...config, theme: 'DARK'})} className={`flex-1 py-3 rounded-xl border-2 transition-all ${config.theme === 'DARK' ? 'border-[var(--brand-primary)] ring-2 ring-[var(--brand-primary)]/20 bg-slate-800' : 'border-[var(--border-color)] bg-slate-900'} text-white text-[10px] font-bold uppercase`}>Slate Dark</button>
-                          </div>
-                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-bold text-[var(--text-muted)] uppercase mb-1 flex items-center gap-1">Gatekeeper PIN <IconLockSmall /></label>
+                        <input type="text" placeholder="Leave blank to disable" value={config.password} onChange={(e) => setConfig({ ...config, password: e.target.value })} className="w-full px-3 py-2 bg-[var(--bg-base)] border border-[var(--border-color)] rounded-lg text-xs" />
                       </div>
                     </div>
 
-                    <div className="bg-[var(--bg-surface)] p-6 rounded-2xl border border-[var(--border-color)]">
-                      <h4 className="text-xs font-bold uppercase tracking-widest text-[var(--text-main)] border-b border-[var(--border-color)] pb-3 mb-5">Business Logic & Security</h4>
-                      <div className="space-y-4">
-                        <div className="flex items-center justify-between p-4 border border-[var(--border-color)] rounded-xl bg-[var(--bg-base)]">
-                          <div>
-                            <span className="block text-[10px] font-bold uppercase text-[var(--text-main)]">Hide Product Pricing</span>
-                            <span className="text-[9px] text-[var(--text-muted)] mt-0.5 block">Remove financial data for distributors.</span>
-                          </div>
-                          <button onClick={() => setConfig({...config, hidePricing: !config.hidePricing})} className={`w-11 h-6 rounded-full relative transition-colors ${config.hidePricing ? 'bg-[var(--brand-primary)]' : 'bg-gray-300'}`}>
-                            <span className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${config.hidePricing ? 'translate-x-5' : ''}`}></span>
-                          </button>
+                    {/* Layout & Theme */}
+                    <div className="bg-[var(--bg-surface)] p-5 rounded-xl border border-[var(--border-color)] shadow-sm">
+                      <div className="grid grid-cols-2 gap-4 mb-4">
+                        <div>
+                          <label className="block text-[10px] font-bold text-[var(--text-muted)] uppercase mb-1">Orientation</label>
+                          <select value={config.orientation} onChange={(e) => setConfig({ ...config, orientation: e.target.value })} className="w-full px-3 py-2 bg-[var(--bg-base)] border border-[var(--border-color)] rounded-lg text-xs">
+                            <option value="PORTRAIT">Portrait</option>
+                            <option value="LANDSCAPE">Landscape</option>
+                          </select>
                         </div>
-
-                        <div className="flex items-center justify-between p-4 border border-[var(--border-color)] rounded-xl bg-[var(--bg-base)]">
-                          <div>
-                            <span className="block text-[10px] font-bold uppercase text-[var(--text-main)]">Purchase Order Matrix</span>
-                            <span className="text-[9px] text-[var(--text-muted)] mt-0.5 block">Enable price breakup popup in viewer.</span>
-                          </div>
-                          <button onClick={() => setConfig({...config, poMatrix: !config.poMatrix})} className={`w-11 h-6 rounded-full relative transition-colors ${config.poMatrix ? 'bg-emerald-500' : 'bg-gray-300'}`}>
-                            <span className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${config.poMatrix ? 'translate-x-5' : ''}`}></span>
-                          </button>
+                        <div>
+                          <label className="block text-[10px] font-bold text-[var(--text-muted)] uppercase mb-1">Theme</label>
+                          <select value={config.theme} onChange={(e) => setConfig({ ...config, theme: e.target.value })} className="w-full px-3 py-2 bg-[var(--bg-base)] border border-[var(--border-color)] rounded-lg text-xs">
+                            <option value="LIGHT">Light</option>
+                            <option value="DARK">Dark</option>
+                          </select>
                         </div>
-
-                        <div className="pt-2">
-                          <label className="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Password Protection (Gatekeeper)</label>
-                          <input type="text" placeholder="Enter secure PIN to lock link..." value={config.password} onChange={(e) => setConfig({...config, password: e.target.value})} className="w-full px-4 py-3 bg-[var(--bg-base)] border border-[var(--border-color)] rounded-xl text-xs font-mono focus:ring-1 focus:ring-[var(--brand-primary)] outline-none" />
+                        <div>
+                          <label className="block text-[10px] font-bold text-[var(--text-muted)] uppercase mb-1">Desktop Grid</label>
+                          <select value={config.desktopItemsPerPage} onChange={(e) => setConfig({ ...config, desktopItemsPerPage: parseInt(e.target.value) })} className="w-full px-3 py-2 bg-[var(--bg-base)] border border-[var(--border-color)] rounded-lg text-xs">
+                            <option value={1}>1 / Page</option>
+                            <option value={2}>2 / Page</option>
+                            <option value={4}>4 / Page</option>
+                            <option value={6}>6 / Page</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-[10px] font-bold text-[var(--text-muted)] uppercase mb-1">Mobile Grid</label>
+                          <select value={config.mobileItemsPerPage} onChange={(e) => setConfig({ ...config, mobileItemsPerPage: parseInt(e.target.value) })} className="w-full px-3 py-2 bg-[var(--bg-base)] border border-[var(--border-color)] rounded-lg text-xs">
+                            <option value={1}>1 / Page</option>
+                            <option value={2}>2 / Page</option>
+                          </select>
                         </div>
                       </div>
                     </div>
-
                   </div>
 
-                  {/* Right Column: Covers & Collateral */}
-                  <div className="space-y-6">
-                    
-                    <div className="bg-[var(--bg-surface)] p-6 rounded-2xl border border-[var(--border-color)]">
-                      <h4 className="text-xs font-bold uppercase tracking-widest text-[var(--text-main)] mb-5 border-b border-[var(--border-color)] pb-3">Flipbook Cover Designs</h4>
-                      <div className="p-4 bg-[var(--brand-primary)]/5 rounded-xl border border-[var(--brand-primary)]/20 mb-6 flex justify-between items-center">
-                        <div>
-                          <p className="text-[10px] font-bold text-[var(--brand-primary)] uppercase tracking-wider">Upload Format: JPG / PNG</p>
-                          <div className="flex items-center gap-2 mt-2">
-                            {config.orientation === 'PORTRAIT' ? (
-                              <svg className="w-4 h-4 text-[var(--brand-primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
-                            ) : (
-                              <svg className="w-4 h-4 text-[var(--brand-primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6h16M4 10h16M4 14h16M4 18h16" /></svg>
-                            )}
-                            <p className="text-[9px] text-[var(--brand-primary)]/80 font-bold uppercase tracking-widest">
-                              Required: {config.orientation === 'PORTRAIT' ? 'A4 Portrait (1 : 1.414)' : 'Landscape (16 : 9)'}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="grid grid-cols-2 gap-4">
-                        {/* Drag and Drop Front Cover */}
-                        <div>
-                          <label className="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Front Cover Image</label>
-                          <div 
-                            onDragOver={(e) => e.preventDefault()}
-                            onDrop={(e) => handleImageDrop(e, 'frontCover')}
-                            className="relative w-full h-32 bg-[var(--bg-base)] border-2 border-dashed border-[var(--border-color)] rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-[var(--brand-primary)] hover:bg-[var(--brand-primary)]/5 transition-colors overflow-hidden group"
-                          >
-                            <input type="file" accept="image/jpeg, image/png" onChange={(e) => handleImageDrop(e, 'frontCover')} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" disabled={isProcessingImage} />
-                            {isProcessingImage && cropTarget === 'frontCover' ? (
-                              <div className="flex flex-col items-center">
-                                <svg className="animate-spin w-6 h-6 text-[var(--brand-primary)] mb-2" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                                <span className="text-[10px] font-bold text-[var(--brand-primary)] animate-pulse">Processing High-Res Image...</span>
-                              </div>
-                            ) : config.frontCover ? (
-                              <img src={config.frontCover} alt="Front Cover" className="w-full h-full object-cover opacity-60 group-hover:opacity-30 transition-opacity" />
-                            ) : (
-                              <>
-                                <IconUpload />
-                                <span className="text-[10px] font-bold text-[var(--text-muted)] mt-2">Drag & Drop or Click</span>
-                              </>
-                            )}
-                            {config.frontCover && <span className="absolute text-[10px] font-bold text-[var(--text-main)] bg-[var(--bg-surface)] px-3 py-1 rounded shadow opacity-0 group-hover:opacity-100 transition-opacity">Change Image</span>}
-                          </div>
-                        </div>
-
-                        {/* Drag and Drop Back Cover */}
-                        <div>
-                          <label className="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Back Cover Image</label>
-                          <div 
-                            onDragOver={(e) => e.preventDefault()}
-                            onDrop={(e) => handleImageDrop(e, 'backCover')}
-                            className="relative w-full h-32 bg-[var(--bg-base)] border-2 border-dashed border-[var(--border-color)] rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-[var(--brand-primary)] hover:bg-[var(--brand-primary)]/5 transition-colors overflow-hidden group"
-                          >
-                            <input type="file" accept="image/jpeg, image/png" onChange={(e) => handleImageDrop(e, 'backCover')} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" disabled={isProcessingImage} />
-                            {isProcessingImage && cropTarget === 'backCover' ? (
-                              <div className="flex flex-col items-center">
-                                <svg className="animate-spin w-6 h-6 text-[var(--brand-primary)] mb-2" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                                <span className="text-[10px] font-bold text-[var(--brand-primary)] animate-pulse">Processing High-Res Image...</span>
-                              </div>
-                            ) : config.backCover ? (
-                              <img src={config.backCover} alt="Back Cover" className="w-full h-full object-cover opacity-60 group-hover:opacity-30 transition-opacity" />
-                            ) : (
-                              <>
-                                <IconUpload />
-                                <span className="text-[10px] font-bold text-[var(--text-muted)] mt-2">Drag & Drop or Click</span>
-                              </>
-                            )}
-                            {config.backCover && <span className="absolute text-[10px] font-bold text-[var(--text-main)] bg-[var(--bg-surface)] px-3 py-1 rounded shadow opacity-0 group-hover:opacity-100 transition-opacity">Change Image</span>}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* AMBIENT BACKGROUND SELECTOR */}
-                    <div className="bg-[var(--bg-surface)] p-6 rounded-2xl border border-[var(--border-color)]">
-                      <h4 className="text-xs font-bold uppercase tracking-widest text-[var(--text-main)] mb-5 border-b border-[var(--border-color)] pb-3">Viewer Ambient Background</h4>
-                      <div className="grid grid-cols-6 gap-3">
-                        {/* Exact Unsplash Backgrounds Requested */}
-                        <button onClick={() => setConfig({...config, viewerBackground: 'UNSPLASH_BED'})} className={`w-full aspect-square rounded-xl border-2 transition-all bg-cover bg-center ${config.viewerBackground === 'UNSPLASH_BED' ? 'border-[var(--brand-primary)] shadow-lg scale-105' : 'border-transparent hover:scale-105'} bg-[url("https://images.unsplash.com/photo-1543751416-705d3e34d02a?q=80&w=500")]`}></button>
-                        <button onClick={() => setConfig({...config, viewerBackground: 'UNSPLASH_BROWN_WOOD'})} className={`w-full aspect-square rounded-xl border-2 transition-all bg-cover bg-center ${config.viewerBackground === 'UNSPLASH_BROWN_WOOD' ? 'border-[var(--brand-primary)] shadow-lg scale-105' : 'border-transparent hover:scale-105'} bg-[url("https://images.unsplash.com/photo-1621295693450-080546d2ec8e?q=80&w=500")]`}></button>
-                        <button onClick={() => setConfig({...config, viewerBackground: 'UNSPLASH_PARQUET'})} className={`w-full aspect-square rounded-xl border-2 transition-all bg-cover bg-center ${config.viewerBackground === 'UNSPLASH_PARQUET' ? 'border-[var(--brand-primary)] shadow-lg scale-105' : 'border-transparent hover:scale-105'} bg-[url("https://images.unsplash.com/photo-1576092762791-dd9e2220abd1?q=80&w=500")]`}></button>
-                        <button onClick={() => setConfig({...config, viewerBackground: 'UNSPLASH_METAL'})} className={`w-full aspect-square rounded-xl border-2 transition-all bg-cover bg-center ${config.viewerBackground === 'UNSPLASH_METAL' ? 'border-[var(--brand-primary)] shadow-lg scale-105' : 'border-transparent hover:scale-105'} bg-[url("https://images.unsplash.com/photo-1781877621630-5a6497bea75d?q=80&w=500")]`}></button>
-                        <button onClick={() => setConfig({...config, viewerBackground: 'UNSPLASH_WHITE_LINES'})} className={`w-full aspect-square rounded-xl border-2 transition-all bg-cover bg-center ${config.viewerBackground === 'UNSPLASH_WHITE_LINES' ? 'border-[var(--brand-primary)] shadow-lg scale-105' : 'border-transparent hover:scale-105'} bg-[url("https://images.unsplash.com/photo-1756758933069-411ca6f96b1a?q=80&w=500")]`}></button>
-                        <button onClick={() => setConfig({...config, viewerBackground: 'UNSPLASH_BLUR'})} className={`w-full aspect-square rounded-xl border-2 transition-all bg-cover bg-center ${config.viewerBackground === 'UNSPLASH_BLUR' ? 'border-[var(--brand-primary)] shadow-lg scale-105' : 'border-transparent hover:scale-105'} bg-[url("https://images.unsplash.com/photo-1719496175716-a62c78af1ee8?q=80&w=500")]`}></button>
-                      </div>
-                    </div>
-
-                    <div className="bg-[var(--bg-surface)] p-6 rounded-2xl border border-[var(--border-color)]">
-                      <div className="flex justify-between items-center border-b border-[var(--border-color)] pb-3 mb-5">
-                        <h4 className="text-xs font-bold uppercase tracking-widest text-[var(--text-main)]">Promotional & Campaign Pages</h4>
-                        <button onClick={addLifestyleInsert} className="text-[10px] font-bold text-[var(--brand-text)] bg-[var(--brand-primary)] px-3 py-1.5 rounded-lg uppercase tracking-wider hover:opacity-90 transition-opacity">+ Add Page</button>
-                      </div>
-                      
-                      <div className="space-y-3 max-h-[200px] overflow-y-auto pr-2 custom-scrollbar">
-                        {config.lifestyleInserts.map((insertObj, index) => (
-                          <div key={index} className="flex items-center gap-3 bg-[var(--bg-base)] p-2 rounded-xl border border-[var(--border-color)] relative">
-                            
-                            <div className="flex flex-col w-20">
-                              <label className="text-[8px] font-bold text-[var(--text-muted)] uppercase">Position Index</label>
-                              <input 
-                                type="number" min="0" 
-                                value={insertObj.position} 
-                                onChange={(e) => updateLifestyleInsert(index, parseInt(e.target.value) || 0, insertObj.image)}
-                                className="w-full bg-[var(--bg-surface)] border border-[var(--border-color)] rounded px-2 py-1 text-xs text-center outline-none focus:border-[var(--brand-primary)]"
-                              />
-                            </div>
-                            
-                            {/* Drag Drop for Insert */}
-                            <div className="flex-1 relative h-16 bg-[var(--bg-surface)] rounded-lg border-2 border-dashed border-[var(--border-color)] flex items-center justify-center overflow-hidden hover:border-[var(--brand-primary)] transition-colors">
-                               <input type="file" accept="image/jpeg, image/png" onChange={(e) => handleImageDrop(e, index)} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" disabled={isProcessingImage} />
-                               {isProcessingImage && cropTarget === index ? (
-                                  <div className="flex flex-col items-center">
-                                    <svg className="animate-spin w-6 h-6 text-[var(--brand-primary)] mb-2" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                                    <span className="text-[10px] font-bold text-[var(--brand-primary)] animate-pulse">Processing...</span>
-                                  </div>
-                               ) : insertObj.image ? (
-                                 <img src={insertObj.image} alt={`Promo ${index+1}`} className="w-full h-full object-contain bg-[var(--bg-base)]" />
-                               ) : (
-                                 <div className="flex flex-col items-center pointer-events-none p-4 text-center">
-                                   <IconUpload />
-                                   <span className="text-[10px] font-bold text-[var(--text-muted)] mt-2">Drop promo image here</span>
-                                 </div>
-                               )}
-                            </div>
-                            <button onClick={() => removeLifestyleInsert(index)} className="w-8 h-8 flex items-center justify-center text-[var(--text-muted)] hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"><IconTrash /></button>
-                          </div>
+                  {/* RIGHT COLUMN: Media */}
+                  <div className="space-y-4">
+                    {/* Backgrounds */}
+                    <div className="bg-[var(--bg-surface)] p-5 rounded-xl border border-[var(--border-color)] shadow-sm">
+                      <label className="block text-[10px] font-bold text-[var(--text-muted)] uppercase mb-2">Ambient Background</label>
+                      <div className="flex flex-wrap gap-2">
+                        {[
+                          { id: 'DARK', img: '/images/Catlog_BG_Dark.jpg' },
+                          { id: 'WOOD', img: 'https://images.unsplash.com/photo-1550684376-efcbd6e3f031?auto=format&fit=crop&w=200&q=80' },
+                          { id: 'MARBLE', img: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=200&q=80' },
+                          { id: 'SILK', img: 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?auto=format&fit=crop&w=200&q=80' },
+                          { id: 'LIGHT', img: '/images/Catlog_BG_Light.jpg' },
+                          { id: 'ABSTRACT', img: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=200&q=80' }
+                        ].map(bg => (
+                          <button key={bg.id} onClick={() => setConfig({ ...config, viewerBackground: bg.id })} className={`w-10 h-10 rounded overflow-hidden border-2 transition-all ${config.viewerBackground === bg.id ? 'border-[var(--brand-primary)] scale-110' : 'border-transparent'}`}>
+                            <img src={bg.img} alt={bg.id} className="w-full h-full object-cover" />
+                          </button>
                         ))}
-                        {config.lifestyleInserts.length === 0 && (
-                          <div className="text-center py-6 border-2 border-dashed border-[var(--border-color)] rounded-xl">
-                            <p className="text-[10px] text-[var(--text-muted)] font-medium">No promotional pages staged.</p>
+                      </div>
+                    </div>
+
+                    {/* Covers */}
+                    <div className="bg-[var(--bg-surface)] p-5 rounded-xl border border-[var(--border-color)] shadow-sm">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-[10px] font-bold text-[var(--text-muted)] uppercase mb-2">Front Cover (A4)</label>
+                          <div className="aspect-[1/1.414] w-full border-2 border-dashed border-[var(--border-color)] rounded-lg flex flex-col items-center justify-center relative overflow-hidden group hover:border-emerald-500 bg-[var(--bg-base)]">
+                            {config.frontCover ? (
+                              <img src={config.frontCover} alt="Front Cover" className="absolute inset-0 w-full h-full object-cover" />
+                            ) : (
+                              <div className="text-center"><IconUpload /><p className="text-[9px] mt-1 text-[var(--text-muted)]">Upload</p></div>
+                            )}
+                            <input type="file" accept="image/jpeg, image/png" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" onChange={(e) => handleImageDrop(e, 'frontCover')} />
                           </div>
-                        )}
+                        </div>
+                        <div>
+                          <label className="block text-[10px] font-bold text-[var(--text-muted)] uppercase mb-2">Back Cover (A4)</label>
+                          <div className="aspect-[1/1.414] w-full border-2 border-dashed border-[var(--border-color)] rounded-lg flex flex-col items-center justify-center relative overflow-hidden group hover:border-emerald-500 bg-[var(--bg-base)]">
+                            {config.backCover ? (
+                              <img src={config.backCover} alt="Back Cover" className="absolute inset-0 w-full h-full object-cover" />
+                            ) : (
+                              <div className="text-center"><IconUpload /><p className="text-[9px] mt-1 text-[var(--text-muted)]">Upload</p></div>
+                            )}
+                            <input type="file" accept="image/jpeg, image/png" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" onChange={(e) => handleImageDrop(e, 'backCover')} />
+                          </div>
+                        </div>
                       </div>
                     </div>
 

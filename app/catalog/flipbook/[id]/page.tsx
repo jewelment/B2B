@@ -46,6 +46,13 @@ export default async function ImmersiveFlipbookPage({ params }: { params: Promis
     }
   });
 
+  // Fetch store settings for proxy and webp logic
+  const settings = await prisma.storeSettings.findUnique({
+    where: { tenantId: catalog.tenantId }
+  });
+  const useProxy = settings?.enableSecureMediaProxy !== false;
+  const appendWebp = settings?.enableWebpOptimization === true;
+
   // 3. Enqueue the products directly into the catalog items
   const enrichedItems = catalog.items.map(item => {
     const productData = rawProducts.find(p => p.designCode === item.designCode);
@@ -53,6 +60,20 @@ export default async function ImmersiveFlipbookPage({ params }: { params: Promis
     // Map the media relation back to the legacy flat fields expected by FlipbookClient
     let mappedProduct = productData ? { ...productData, mainImage: null } : null;
     if (mappedProduct && mappedProduct.media && mappedProduct.media.length > 0) {
+      mappedProduct.media = mappedProduct.media.map(m => {
+        let finalUrl = m.url;
+        if (m.url) {
+          const originalFilename = m.url.split('/').pop() || 'image.jpg';
+          const baseName = originalFilename.substring(0, originalFilename.lastIndexOf('.')) || originalFilename;
+          
+          if (useProxy) {
+            finalUrl = `/api/media/${m.id}` + (appendWebp ? `/${baseName}.webp` : `/${originalFilename}`);
+          } else if (appendWebp) {
+            finalUrl = m.url.substring(0, m.url.lastIndexOf('.')) + '.webp';
+          }
+        }
+        return { ...m, url: finalUrl };
+      });
       // @ts-ignore - dynamic injection for client component compatibility
       mappedProduct.mainImage = mappedProduct.media[0].url;
     }

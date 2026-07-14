@@ -74,12 +74,33 @@ export default function FlipbookClient({ catalog }: { catalog: any }) {
 
   const [isUnlocked, setIsUnlocked] = useState(!config.password);
   const [passInput, setPassInput] = useState('');
-  const { selectedItems, toggleSelection, removeSelection, matrixQuantities, setMatrixQuantities } = useCartStore();
+  const { selectedItems, toggleSelection, removeSelection, matrixQuantities, setMatrixQuantities, clearCart } = useCartStore();
   const [currentPage, setCurrentPage] = useState(0);
 
   // LIVE PREVIEW HYDRATION
   const [previewConfig, setPreviewConfig] = useState<any>(config);
   const [previewCatalog, setPreviewCatalog] = useState<any>(catalog);
+
+  // --- TELEMETRY ENGINE ---
+  const sendTelemetry = (eventType: string, eventData?: any) => {
+    // Only track if it's a real catalog (not preview)
+    if (catalog.id === 'preview') return;
+    
+    fetch('/api/analytics/track', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        catalogId: catalog.id,
+        eventType,
+        eventData
+      })
+    }).catch(err => console.error('Telemetry failed:', err));
+  };
+
+  useEffect(() => {
+    // Log initial view
+    sendTelemetry('CATALOG_VIEW');
+  }, []);
 
   useEffect(() => {
     if (catalog.id === 'preview') {
@@ -162,6 +183,9 @@ export default function FlipbookClient({ catalog }: { catalog: any }) {
   const handleToggleCart = (code: string, e: React.MouseEvent) => {
     e.stopPropagation();
     toggleSelection(code);
+    if (!selectedItems.includes(code)) {
+      sendTelemetry('ADD_TO_CART', { designCode: code });
+    }
   };
 
   const handlePORequest = () => {
@@ -173,6 +197,7 @@ export default function FlipbookClient({ catalog }: { catalog: any }) {
 
   const onPageFlip = (e: any) => {
     setCurrentPage(e.data);
+    sendTelemetry('PAGE_TURN', { pageNumber: e.data });
     if (audioRef.current) {
       audioRef.current.src = '/dflip/sound/turn2.mp3';
       audioRef.current.currentTime = 0;
@@ -337,7 +362,7 @@ export default function FlipbookClient({ catalog }: { catalog: any }) {
   pages.push({ 
     type: 'COVER', 
     img: previewConfig.backCover || DEFAULT_COVER, 
-    title: 'Ashok Jewels Fine Wholesale',
+    title: previewConfig.backCoverText || 'Ashok Jewels Fine Wholesale',
     objectPosition: isDefaultBack ? 'right center' : 'center'
   });
 
@@ -421,7 +446,7 @@ export default function FlipbookClient({ catalog }: { catalog: any }) {
           height: 'calc(100vh - 160px)',
           marginTop: '60px',
           marginBottom: '100px',
-          transform: `scale(${zoomLevel}) ${isPortrait ? 'translateX(0)' : (currentPage === 0 ? 'translateX(-225px)' : currentPage >= pages.length - 2 ? 'translateX(225px)' : 'translateX(0)')}`,
+          transform: `scale(${zoomLevel}) ${windowDimensions.width <= windowDimensions.height ? 'translateX(0)' : (currentPage === 0 ? 'translateX(-225px)' : currentPage >= pages.length - 2 ? 'translateX(225px)' : 'translateX(0)')}`,
           transformOrigin: 'center center'
         }}
       >

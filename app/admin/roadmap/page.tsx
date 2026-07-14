@@ -9,12 +9,12 @@ const isDev = process.env.NODE_ENV === 'development';
 export default function DevRoadmapDashboard() {
   const [expandedTask, setExpandedTask] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'roadmap' | 'pseudo_code' | 'documentation' | 'qc_testing'>('roadmap');
-  
+
   const [isQC, setIsQC] = useState(false);
   const [qcResults, setQcResults] = useState<any>(null);
-  
+
   const [isSyncing, setIsSyncing] = useState(false);
-  const [syncStatus, setSyncStatus] = useState<{success: boolean, message: string} | null>(null);
+  const [syncStatus, setSyncStatus] = useState<{ success: boolean, message: string } | null>(null);
   const [syncLogs, setSyncLogs] = useState<string[]>([]);
 
   const handleGitSync = async () => {
@@ -24,7 +24,7 @@ export default function DevRoadmapDashboard() {
     try {
       const res = await fetch('/api/admin/git-sync', { method: 'POST' });
       if (!res.body) throw new Error("No response body");
-      
+
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
       let finalSuccess = false;
@@ -32,10 +32,10 @@ export default function DevRoadmapDashboard() {
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-        
+
         const chunk = decoder.decode(value, { stream: true });
         const lines = chunk.split('\n');
-        
+
         for (const line of lines) {
           if (line.startsWith('data: ')) {
             try {
@@ -48,11 +48,11 @@ export default function DevRoadmapDashboard() {
                 finalSuccess = false;
                 setSyncStatus({ success: false, message: data.message });
               }
-            } catch(e) {}
+            } catch (e) { }
           }
         }
       }
-      
+
       if (finalSuccess) {
         setSyncStatus({ success: true, message: 'Successfully synced to GitHub!' });
       } else if (!syncStatus) {
@@ -76,7 +76,7 @@ export default function DevRoadmapDashboard() {
       const res = await fetch('/api/admin/qc-runner');
       const data = await res.json();
       setQcResults(data);
-    } catch(e) {
+    } catch (e) {
       console.error(e);
       setQcResults({ systemStatus: 'ERROR', results: [] });
     } finally {
@@ -203,9 +203,9 @@ export default function DevRoadmapDashboard() {
       phase: "12.0 V2: FLIPBOOK ANALYTICS & TELEMETRY",
       description: "Tracking catalog impressions, page views, and user engagement metrics.",
       tasks: [
-        { name: "12.1 Flipbook Telemetry Engine", profile: "Admin", status: "Pending", progress: 0, url: "/catalog/flipbook/[id]" },
-        { name: "12.2 Real-time Dashboard Analytics", profile: "Admin", status: "Pending", progress: 0, url: "/admin/analytics" },
-        { name: "12.3 Conversion Funnel Tracking", profile: "Admin", status: "Pending", progress: 0, url: "/api/analytics/track" }
+        { name: "12.1 Flipbook Telemetry Engine", profile: "Admin", status: "Completed", progress: 100, url: "/catalog/flipbook/[id]" },
+        { name: "12.2 Real-time Dashboard Analytics", profile: "Admin", status: "Completed", progress: 100, url: "/admin/analytics" },
+        { name: "12.3 Conversion Funnel Tracking", profile: "Admin", status: "Completed", progress: 100, url: "/api/analytics/track" }
       ]
     },
     {
@@ -245,6 +245,32 @@ export default function DevRoadmapDashboard() {
       description: "Testing real-world data import via CSV to validate system stability.",
       tasks: [
         { name: "14.1 Real Inventory CSV Import Test", profile: "Admin", status: "Completed", progress: 100, url: "/admin/inventory/import" }
+      ]
+    },
+    {
+      phase: "15.0 SECURE MEDIA PROXY & OPTIMIZATION",
+      description: "Dynamic image proxy to securely serve product images and optimize them on-the-fly.",
+      tasks: [
+        { name: "15.1 Secure Media Proxy Engine", profile: "System", status: "Completed", progress: 100, url: "/api/media/[id]" },
+        { name: "15.2 On-the-fly WebP Optimization", profile: "System", status: "Completed", progress: 100, url: "sharp/memory" },
+        { name: "15.3 Image Configurations UI", profile: "Admin", status: "Completed", progress: 100, url: "/dashboard/settings" },
+        { name: "15.4 Smart Downloading URLs", profile: "Frontend", status: "Completed", progress: 100, url: "/dashboard/product" }
+      ]
+    },
+    {
+      phase: "16.0 V3: UPCOMING BUSINESS SCOPES & ENHANCEMENTS",
+      description: "Enterprise onboarding, flipbook optimizations, sidebar overhaul, matrix segregation, auto QC, and SDUI platform.",
+      tasks: [
+        { name: "16.1 Enterprise Onboarding Workflow", profile: "Super Admin", status: "Pending", progress: 0, url: "/admin/onboarding" },
+        { name: "16.2 Master Inventory Advanced Filters", profile: "Admin", status: "Pending", progress: 0, url: "/dashboard" },
+        { name: "16.3 Advanced PDF Generation Engine", profile: "System", status: "Pending", progress: 0, url: "/api/catalog/pdf" },
+        { name: "16.4 Flipbook Rendering & UI Bug Fixes", profile: "Client", status: "Pending", progress: 0, url: "/catalog/flipbook/[id]" },
+        { name: "16.5 Left Sidebar RBAC Overhaul", profile: "All Profiles", status: "Pending", progress: 0, url: "components/Sidebar.tsx" },
+        { name: "16.6 Segment-Oriented PO Matrix Engine", profile: "Admin", status: "Pending", progress: 0, url: "/admin/matrix-builder" },
+        { name: "16.7 SDUI Global Website Builder Platform", profile: "Admin", status: "Pending", progress: 0, url: "/admin/theme-builder" },
+        { name: "16.8 Auto QC & Diagnostics Interface", profile: "Super Admin", status: "Pending", progress: 0, url: "/admin/roadmap" },
+        { name: "16.9 AI MOM & Conversations Manager", profile: "System", status: "Pending", progress: 0, url: "AI_MOM_Backups" },
+        { name: "16.10 Comprehensive Pseudocode & Manual", profile: "System", status: "Pending", progress: 0, url: "/admin/roadmap" }
       ]
     }
   ];
@@ -309,7 +335,7 @@ export default function DevRoadmapDashboard() {
   return (
     <div className="min-h-screen bg-[var(--bg-base)] text-[var(--text-main)] font-sans p-6 md:p-12 pb-24">
       <div className="max-w-[1400px] mx-auto space-y-8">
-        
+
         <div className="relative bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-2xl p-8 md:p-10 shadow-sm flex flex-col xl:flex-row xl:items-center justify-between gap-10">
           {/* BACKGROUND GLOW WRAPPER */}
           <div className="absolute inset-0 overflow-hidden rounded-2xl pointer-events-none z-0">
@@ -326,8 +352,8 @@ export default function DevRoadmapDashboard() {
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
-              <Link 
-                href="/admin/system-routes" 
+              <Link
+                href="/admin/system-routes"
                 target="_blank"
                 className="inline-flex items-center gap-2 px-4 py-2 bg-[var(--bg-base)] border border-[var(--border-color)] text-[var(--text-main)] hover:border-emerald-500 hover:text-emerald-600 transition-all rounded-lg text-xs font-bold uppercase tracking-widest shadow-sm group"
               >
@@ -337,7 +363,7 @@ export default function DevRoadmapDashboard() {
 
               {/* GITHUB SYNC CTA */}
               <div className="relative z-50 flex items-center gap-3">
-                <button 
+                <button
                   onClick={handleGitSync}
                   disabled={isSyncing}
                   className="inline-flex items-center gap-2 px-6 py-2 bg-[#171515] hover:bg-[#2b2828] text-white transition-all rounded-lg text-xs font-bold uppercase tracking-widest shadow-md disabled:opacity-50 disabled:cursor-not-allowed group"
@@ -345,11 +371,11 @@ export default function DevRoadmapDashboard() {
                   {isSyncing ? (
                     <svg className="animate-spin w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                   ) : (
-                    <svg className="w-4 h-4 group-hover:scale-110 transition-transform" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+                    <svg className="w-4 h-4 group-hover:scale-110 transition-transform" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" /></svg>
                   )}
                   {isSyncing ? 'Syncing...' : 'Sync to GitHub'}
                 </button>
-                
+
                 {syncStatus && (
                   <div className={`absolute top-full mt-3 left-0 whitespace-nowrap text-[11px] uppercase font-bold tracking-widest px-4 py-2 rounded-lg border shadow-lg z-50 animate-in fade-in slide-in-from-top-2 ${syncStatus.success ? 'bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20' : 'bg-red-50 text-red-600 border-red-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20'}`}>
                     <div className="flex items-center gap-2">
@@ -391,7 +417,7 @@ export default function DevRoadmapDashboard() {
 
           {/* RIGHT: DASHBOARD METRICS */}
           <div className="relative z-10 w-full xl:w-1/2 grid grid-cols-2 gap-4">
-            
+
             {/* Metric 1: Global Completion (Brand Primary Tinted Glass) */}
             <div className="relative overflow-hidden bg-gradient-to-br from-[var(--brand-primary)]/10 to-[var(--brand-primary)]/5 backdrop-blur-2xl border border-[var(--brand-primary)]/20 p-5 rounded-2xl shadow-sm flex flex-col justify-between group transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:border-[var(--brand-primary)]/40">
               <div className="absolute -right-10 -top-10 w-32 h-32 bg-[var(--brand-primary)] opacity-10 rounded-full blur-2xl group-hover:opacity-20 transition-opacity"></div>
@@ -414,7 +440,7 @@ export default function DevRoadmapDashboard() {
               <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-600 dark:text-emerald-500">Deployed Tasks</p>
               <div className="mt-4 flex items-end justify-between relative z-10">
                 <div className="text-3xl lg:text-4xl font-bold text-emerald-600 dark:text-emerald-500 font-mono tracking-tighter drop-shadow-sm">{completedTasks}<span className="text-sm text-emerald-600/50 dark:text-emerald-500/50">/{totalTasks}</span></div>
-                
+
                 {/* Mini Bar Chart Graph */}
                 <div className="flex items-end gap-1 h-8 opacity-70 group-hover:opacity-100 transition-opacity">
                   <div className="w-1.5 h-3 bg-emerald-500/40 rounded-t-sm"></div>
@@ -433,7 +459,7 @@ export default function DevRoadmapDashboard() {
               <p className="text-[10px] font-bold uppercase tracking-widest text-amber-600 dark:text-amber-500">Active Queue</p>
               <div className="mt-4 flex items-end justify-between relative z-10">
                 <div className="text-3xl lg:text-4xl font-bold text-amber-600 dark:text-amber-500 font-mono tracking-tighter drop-shadow-sm">{allIncompleteTasks.length}</div>
-                
+
                 {/* Descending Mini Graph */}
                 <div className="flex items-end gap-1 h-8 opacity-70 group-hover:opacity-100 transition-opacity">
                   <div className="w-1.5 h-8 bg-amber-500 rounded-t-sm shadow-[0_0_8px_rgba(245,158,11,0.5)]"></div>
@@ -458,7 +484,7 @@ export default function DevRoadmapDashboard() {
                     <span className="relative inline-flex rounded-full h-3 w-3 bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.8)]"></span>
                   </div>
                 </div>
-                <div className="text-[9px] uppercase font-bold text-purple-600/70 dark:text-purple-400/70 text-right leading-tight tracking-widest">Multi-Tenant<br/>SaaS Pivot</div>
+                <div className="text-[9px] uppercase font-bold text-purple-600/70 dark:text-purple-400/70 text-right leading-tight tracking-widest">Multi-Tenant<br />SaaS Pivot</div>
               </div>
             </div>
 
@@ -473,7 +499,7 @@ export default function DevRoadmapDashboard() {
             { id: 'documentation', label: 'Detail Documentation' },
             { id: 'qc_testing', label: 'Auto QC & Diagnostics' }
           ].map(tab => (
-            <button 
+            <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
               className={`px-6 py-3 text-sm font-bold uppercase tracking-widest border-b-2 transition-colors ${activeTab === tab.id ? 'border-[var(--brand-primary)] text-[var(--brand-primary)]' : 'border-transparent text-[var(--text-muted)] hover:text-[var(--text-main)]'}`}
@@ -485,166 +511,57 @@ export default function DevRoadmapDashboard() {
 
         {/* TAB CONTENT: ROADMAP GRID */}
         {activeTab === 'roadmap' && (
-        <div className="space-y-16 animate-in fade-in slide-in-from-bottom-2 duration-300">
-          
-          {/* SECTION 1: ACTIVE PRIORITIES */}
-          <div className="space-y-6">
-            <div className="border-b border-[var(--border-color)] pb-3">
-              <h2 className="text-2xl font-bold tracking-tight text-[var(--brand-primary)] flex items-center gap-2">
-                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
-                Active Development Priorities
-              </h2>
-              <p className="text-sm text-[var(--text-muted)] mt-1">High-priority tasks queued or currently in progress.</p>
-            </div>
+          <div className="space-y-16 animate-in fade-in slide-in-from-bottom-2 duration-300">
 
-            {allIncompleteTasks.length === 0 ? (
-              <div className="text-center py-12 text-[var(--text-muted)] bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-xl">
-                All scheduled tasks are completed!
+            {/* SECTION 1: ACTIVE PRIORITIES */}
+            <div className="space-y-6">
+              <div className="border-b border-[var(--border-color)] pb-3">
+                <h2 className="text-2xl font-bold tracking-tight text-[var(--brand-primary)] flex items-center gap-2">
+                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                  Active Development Priorities
+                </h2>
+                <p className="text-sm text-[var(--text-muted)] mt-1">High-priority tasks queued or currently in progress.</p>
               </div>
-            ) : (
-              <div className="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-xl shadow-sm overflow-hidden">
-                <div className="overflow-x-auto custom-scrollbar">
-                  <table className="w-full text-left border-collapse whitespace-nowrap">
-                    <thead>
-                      <tr className="bg-black/5 dark:bg-white/5 border-b border-[var(--border-color)]">
-                        <th className="py-4 px-6 text-xs font-bold text-[var(--brand-primary)] tracking-wider uppercase w-[30%]">Task Name</th>
-                        <th className="py-4 px-6 text-xs font-bold text-[var(--brand-primary)] tracking-wider uppercase w-[15%]">Phase</th>
-                        <th className="py-4 px-6 text-xs font-bold text-[var(--brand-primary)] tracking-wider uppercase w-[15%] text-center">Priority</th>
-                        <th className="py-4 px-6 text-xs font-bold text-[var(--brand-primary)] tracking-wider uppercase w-[20%] text-center">Progress</th>
-                        <th className="py-4 px-6 text-xs font-bold text-[var(--brand-primary)] tracking-wider uppercase w-[20%] text-right">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-[var(--border-color)]">
-                      {allIncompleteTasks.map((task, idx) => {
-                        const taskId = `${task.originalPhaseIdx}-${task.originalTaskIdx}`;
-                        const isExpanded = expandedTask === taskId;
-                        return (
-                          <React.Fragment key={taskId}>
-                            <tr className={`hover:bg-black/5 dark:hover:bg-white/5 transition-colors ${isExpanded ? 'bg-black/5 dark:bg-white/5' : ''}`}>
-                              <td className="py-4 px-6 text-sm font-bold text-[var(--text-main)]">{task.name}</td>
-                              <td className="py-4 px-6">
-                                <span className="text-[10px] font-bold text-[var(--text-muted)] truncate max-w-[150px] inline-block">
-                                  {task.phaseName}
-                                </span>
-                              </td>
-                              <td className="py-4 px-6 text-center">
-                                <span className={`inline-flex items-center justify-center px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border ${
-                                  task.priority === 'High' ? 'bg-red-500/10 text-red-600 border-red-500/20' :
-                                  task.priority === 'Medium' ? 'bg-amber-500/10 text-amber-600 border-amber-500/20' :
-                                  'bg-slate-500/10 text-slate-500 border-slate-500/20'
-                                }`}>
-                                  {task.priority}
-                                </span>
-                              </td>
-                              <td className="py-4 px-6 align-middle">
-                                <div className="flex items-center gap-3">
-                                  <div className="w-full h-2 bg-[var(--bg-base)] rounded-full border border-[var(--border-color)] overflow-hidden">
-                                    <div className={`h-full rounded-full transition-all duration-500 ${getProgressColor(task.progress)}`} style={{ width: `${task.progress}%` }}></div>
-                                  </div>
-                                  <span className="text-xs font-mono font-bold text-[var(--text-muted)] w-8 text-right">{task.progress}%</span>
-                                </div>
-                              </td>
-                              <td className="py-4 px-6 text-right space-x-2">
-                                <button 
-                                  onClick={() => toggleTask(taskId)}
-                                  className="text-[10px] uppercase font-bold tracking-widest px-3 py-1.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-surface)] hover:bg-[var(--bg-base)] transition-colors"
-                                >
-                                  {isExpanded ? 'Hide Details' : 'Details'}
-                                </button>
-                                <a 
-                                  href={task.url.startsWith('/') ? task.url : `/${task.url}`} 
-                                  target="_blank" 
-                                  rel="noopener noreferrer"
-                                  className="inline-flex items-center text-[10px] uppercase font-bold tracking-widest px-3 py-1.5 rounded-lg border border-transparent bg-[var(--brand-primary)] text-white hover:opacity-90 transition-opacity"
-                                >
-                                  Open
-                                  <svg className="w-3 h-3 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
-                                </a>
-                              </td>
-                            </tr>
-                            {isExpanded && (
-                              <tr className="bg-black/5 dark:bg-white/5 border-b border-[var(--border-color)]">
-                                <td colSpan={5} className="px-6 py-6 border-l-4 border-[var(--brand-primary)] whitespace-normal">
-                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div className="bg-[var(--bg-base)] p-5 rounded-xl border border-[var(--border-color)]">
-                                      <h4 className="text-xs font-bold uppercase tracking-widest text-[var(--text-muted)] mb-3 flex items-center gap-2">
-                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                        Implementation Details
-                                      </h4>
-                                      <p className="text-sm text-[var(--text-main)] mb-3 leading-relaxed">
-                                        {taskDetailsMap[task.name]?.description || "Architectural specification and pseudo-code definition based on roadmap guidelines."}
-                                      </p>
-                                    </div>
-                                    <div className="bg-amber-500/5 p-5 rounded-xl border border-amber-500/20">
-                                      <h4 className="text-xs font-bold uppercase tracking-widest text-amber-600 mb-3 flex items-center gap-2">
-                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                        QA & Testing Pointers
-                                      </h4>
-                                      <ul className="list-disc pl-5 text-sm space-y-2 text-amber-700/80 dark:text-amber-400/80">
-                                        <li>{taskDetailsMap[task.name]?.howToTest || "Execute boundary tests on edge cases (e.g., invalid tokens, malformed POST payloads)."}</li>
-                                      </ul>
-                                    </div>
-                                  </div>
-                                </td>
-                              </tr>
-                            )}
-                          </React.Fragment>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            )}
-          </div>
 
-          {/* SECTION 2: COMPLETED DEVELOPMENTS */}
-          <div className="space-y-6 pt-8 border-t-2 border-dashed border-[var(--border-color)] opacity-80 hover:opacity-100 transition-opacity">
-            <div className="border-b border-[var(--border-color)] pb-3">
-              <h2 className="text-2xl font-bold tracking-tight text-emerald-600 flex items-center gap-2">
-                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                Completed Developments
-              </h2>
-              <p className="text-sm text-[var(--text-muted)] mt-1">Successfully deployed architecture and modules.</p>
-            </div>
-
-            {completedPhases.map((phase) => (
-              <div key={phase.originalPhaseIdx} className="space-y-4 mb-8">
-                <div>
-                  <h3 className="text-lg font-bold tracking-tight text-[var(--text-main)]">{phase.phase}</h3>
+              {allIncompleteTasks.length === 0 ? (
+                <div className="text-center py-12 text-[var(--text-muted)] bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-xl">
+                  All scheduled tasks are completed!
                 </div>
-                
+              ) : (
                 <div className="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-xl shadow-sm overflow-hidden">
                   <div className="overflow-x-auto custom-scrollbar">
                     <table className="w-full text-left border-collapse whitespace-nowrap">
                       <thead>
                         <tr className="bg-black/5 dark:bg-white/5 border-b border-[var(--border-color)]">
-                          <th className="py-3 px-6 text-xs font-bold text-[var(--text-muted)] tracking-wider uppercase w-[30%]">Task Name</th>
-                          <th className="py-3 px-6 text-xs font-bold text-[var(--text-muted)] tracking-wider uppercase w-[15%]">Profile</th>
-                          <th className="py-3 px-6 text-xs font-bold text-[var(--text-muted)] tracking-wider uppercase w-[15%] text-center">Status</th>
-                          <th className="py-3 px-6 text-xs font-bold text-[var(--text-muted)] tracking-wider uppercase w-[20%] text-center">Progress</th>
-                          <th className="py-3 px-6 text-xs font-bold text-[var(--text-muted)] tracking-wider uppercase w-[20%] text-right">Actions</th>
+                          <th className="py-4 px-6 text-xs font-bold text-[var(--brand-primary)] tracking-wider uppercase w-[30%]">Task Name</th>
+                          <th className="py-4 px-6 text-xs font-bold text-[var(--brand-primary)] tracking-wider uppercase w-[15%]">Phase</th>
+                          <th className="py-4 px-6 text-xs font-bold text-[var(--brand-primary)] tracking-wider uppercase w-[15%] text-center">Priority</th>
+                          <th className="py-4 px-6 text-xs font-bold text-[var(--brand-primary)] tracking-wider uppercase w-[20%] text-center">Progress</th>
+                          <th className="py-4 px-6 text-xs font-bold text-[var(--brand-primary)] tracking-wider uppercase w-[20%] text-right">Actions</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-[var(--border-color)]">
-                        {phase.tasks.map((task: any) => {
-                          const taskId = `${phase.originalPhaseIdx}-${task.originalTaskIdx}`;
+                        {allIncompleteTasks.map((task, idx) => {
+                          const taskId = `${task.originalPhaseIdx}-${task.originalTaskIdx}`;
                           const isExpanded = expandedTask === taskId;
                           return (
                             <React.Fragment key={taskId}>
                               <tr className={`hover:bg-black/5 dark:hover:bg-white/5 transition-colors ${isExpanded ? 'bg-black/5 dark:bg-white/5' : ''}`}>
-                                <td className="py-3 px-6 text-sm font-medium text-[var(--text-main)]">{task.name}</td>
-                                <td className="py-3 px-6">
-                                  <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest px-2 py-1 bg-[var(--bg-base)] border border-[var(--border-color)] rounded-md shadow-sm">
-                                    {task.profile}
+                                <td className="py-4 px-6 text-sm font-bold text-[var(--text-main)]">{task.name}</td>
+                                <td className="py-4 px-6">
+                                  <span className="text-[10px] font-bold text-[var(--text-muted)] truncate max-w-[150px] inline-block">
+                                    {task.phaseName}
                                   </span>
                                 </td>
-                                <td className="py-3 px-6 text-center">
-                                  <span className={`inline-flex items-center justify-center px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border ${getStatusColor(task.status)}`}>
-                                    {task.status}
+                                <td className="py-4 px-6 text-center">
+                                  <span className={`inline-flex items-center justify-center px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border ${task.priority === 'High' ? 'bg-red-500/10 text-red-600 border-red-500/20' :
+                                      task.priority === 'Medium' ? 'bg-amber-500/10 text-amber-600 border-amber-500/20' :
+                                        'bg-slate-500/10 text-slate-500 border-slate-500/20'
+                                    }`}>
+                                    {task.priority}
                                   </span>
                                 </td>
-                                <td className="py-3 px-6 align-middle">
+                                <td className="py-4 px-6 align-middle">
                                   <div className="flex items-center gap-3">
                                     <div className="w-full h-2 bg-[var(--bg-base)] rounded-full border border-[var(--border-color)] overflow-hidden">
                                       <div className={`h-full rounded-full transition-all duration-500 ${getProgressColor(task.progress)}`} style={{ width: `${task.progress}%` }}></div>
@@ -652,43 +569,44 @@ export default function DevRoadmapDashboard() {
                                     <span className="text-xs font-mono font-bold text-[var(--text-muted)] w-8 text-right">{task.progress}%</span>
                                   </div>
                                 </td>
-                                <td className="py-3 px-6 text-right space-x-2">
-                                  <button 
+                                <td className="py-4 px-6 text-right space-x-2">
+                                  <button
                                     onClick={() => toggleTask(taskId)}
-                                    className="text-[10px] uppercase font-bold tracking-widest px-3 py-1 rounded-lg border border-[var(--border-color)] bg-[var(--bg-surface)] hover:bg-[var(--bg-base)] transition-colors"
+                                    className="text-[10px] uppercase font-bold tracking-widest px-3 py-1.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-surface)] hover:bg-[var(--bg-base)] transition-colors"
                                   >
-                                    {isExpanded ? 'Hide' : 'Details'}
+                                    {isExpanded ? 'Hide Details' : 'Details'}
                                   </button>
-                                  <a 
-                                    href={task.url.startsWith('/') ? task.url : `/${task.url}`} 
-                                    target="_blank" 
+                                  <a
+                                    href={task.url.startsWith('/') ? task.url : `/${task.url}`}
+                                    target="_blank"
                                     rel="noopener noreferrer"
-                                    className="inline-flex items-center text-[10px] uppercase font-bold tracking-widest px-3 py-1 rounded-lg border border-transparent bg-[var(--bg-base)] text-[var(--text-main)] hover:bg-[var(--brand-primary)] hover:text-white transition-colors border-[var(--border-color)] shadow-sm"
+                                    className="inline-flex items-center text-[10px] uppercase font-bold tracking-widest px-3 py-1.5 rounded-lg border border-transparent bg-[var(--brand-primary)] text-white hover:opacity-90 transition-opacity"
                                   >
                                     Open
+                                    <svg className="w-3 h-3 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
                                   </a>
                                 </td>
                               </tr>
                               {isExpanded && (
                                 <tr className="bg-black/5 dark:bg-white/5 border-b border-[var(--border-color)]">
-                                  <td colSpan={5} className="px-6 py-6 border-l-4 border-emerald-500 whitespace-normal">
+                                  <td colSpan={5} className="px-6 py-6 border-l-4 border-[var(--brand-primary)] whitespace-normal">
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                       <div className="bg-[var(--bg-base)] p-5 rounded-xl border border-[var(--border-color)]">
                                         <h4 className="text-xs font-bold uppercase tracking-widest text-[var(--text-muted)] mb-3 flex items-center gap-2">
-                                          <svg className="w-4 h-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-                                          Completed Module Details
+                                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                          Implementation Details
                                         </h4>
                                         <p className="text-sm text-[var(--text-main)] mb-3 leading-relaxed">
-                                          {taskDetailsMap[task.name]?.description || "This module has been successfully integrated into the platform architecture and passed automated QA."}
+                                          {taskDetailsMap[task.name]?.description || "Architectural specification and pseudo-code definition based on roadmap guidelines."}
                                         </p>
                                       </div>
-                                      <div className="bg-emerald-500/5 p-5 rounded-xl border border-emerald-500/20">
-                                        <h4 className="text-xs font-bold uppercase tracking-widest text-emerald-600 mb-3 flex items-center gap-2">
+                                      <div className="bg-amber-500/5 p-5 rounded-xl border border-amber-500/20">
+                                        <h4 className="text-xs font-bold uppercase tracking-widest text-amber-600 mb-3 flex items-center gap-2">
                                           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                          Testing Instructions
+                                          QA & Testing Pointers
                                         </h4>
-                                        <ul className="list-disc pl-5 text-sm space-y-2 text-emerald-700/80 dark:text-emerald-400/80">
-                                          <li>{taskDetailsMap[task.name]?.howToTest || "Check the specific system route via the Open button to interact with it directly in the live environment."}</li>
+                                        <ul className="list-disc pl-5 text-sm space-y-2 text-amber-700/80 dark:text-amber-400/80">
+                                          <li>{taskDetailsMap[task.name]?.howToTest || "Execute boundary tests on edge cases (e.g., invalid tokens, malformed POST payloads)."}</li>
                                         </ul>
                                       </div>
                                     </div>
@@ -702,11 +620,118 @@ export default function DevRoadmapDashboard() {
                     </table>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              )}
+            </div>
 
-        </div>
+            {/* SECTION 2: COMPLETED DEVELOPMENTS */}
+            <div className="space-y-6 pt-8 border-t-2 border-dashed border-[var(--border-color)] opacity-80 hover:opacity-100 transition-opacity">
+              <div className="border-b border-[var(--border-color)] pb-3">
+                <h2 className="text-2xl font-bold tracking-tight text-emerald-600 flex items-center gap-2">
+                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                  Completed Developments
+                </h2>
+                <p className="text-sm text-[var(--text-muted)] mt-1">Successfully deployed architecture and modules.</p>
+              </div>
+
+              {completedPhases.map((phase) => (
+                <div key={phase.originalPhaseIdx} className="space-y-4 mb-8">
+                  <div>
+                    <h3 className="text-lg font-bold tracking-tight text-[var(--text-main)]">{phase.phase}</h3>
+                  </div>
+
+                  <div className="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-xl shadow-sm overflow-hidden">
+                    <div className="overflow-x-auto custom-scrollbar">
+                      <table className="w-full text-left border-collapse whitespace-nowrap">
+                        <thead>
+                          <tr className="bg-black/5 dark:bg-white/5 border-b border-[var(--border-color)]">
+                            <th className="py-3 px-6 text-xs font-bold text-[var(--text-muted)] tracking-wider uppercase w-[30%]">Task Name</th>
+                            <th className="py-3 px-6 text-xs font-bold text-[var(--text-muted)] tracking-wider uppercase w-[15%]">Profile</th>
+                            <th className="py-3 px-6 text-xs font-bold text-[var(--text-muted)] tracking-wider uppercase w-[15%] text-center">Status</th>
+                            <th className="py-3 px-6 text-xs font-bold text-[var(--text-muted)] tracking-wider uppercase w-[20%] text-center">Progress</th>
+                            <th className="py-3 px-6 text-xs font-bold text-[var(--text-muted)] tracking-wider uppercase w-[20%] text-right">Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-[var(--border-color)]">
+                          {phase.tasks.map((task: any) => {
+                            const taskId = `${phase.originalPhaseIdx}-${task.originalTaskIdx}`;
+                            const isExpanded = expandedTask === taskId;
+                            return (
+                              <React.Fragment key={taskId}>
+                                <tr className={`hover:bg-black/5 dark:hover:bg-white/5 transition-colors ${isExpanded ? 'bg-black/5 dark:bg-white/5' : ''}`}>
+                                  <td className="py-3 px-6 text-sm font-medium text-[var(--text-main)]">{task.name}</td>
+                                  <td className="py-3 px-6">
+                                    <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest px-2 py-1 bg-[var(--bg-base)] border border-[var(--border-color)] rounded-md shadow-sm">
+                                      {task.profile}
+                                    </span>
+                                  </td>
+                                  <td className="py-3 px-6 text-center">
+                                    <span className={`inline-flex items-center justify-center px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border ${getStatusColor(task.status)}`}>
+                                      {task.status}
+                                    </span>
+                                  </td>
+                                  <td className="py-3 px-6 align-middle">
+                                    <div className="flex items-center gap-3">
+                                      <div className="w-full h-2 bg-[var(--bg-base)] rounded-full border border-[var(--border-color)] overflow-hidden">
+                                        <div className={`h-full rounded-full transition-all duration-500 ${getProgressColor(task.progress)}`} style={{ width: `${task.progress}%` }}></div>
+                                      </div>
+                                      <span className="text-xs font-mono font-bold text-[var(--text-muted)] w-8 text-right">{task.progress}%</span>
+                                    </div>
+                                  </td>
+                                  <td className="py-3 px-6 text-right space-x-2">
+                                    <button
+                                      onClick={() => toggleTask(taskId)}
+                                      className="text-[10px] uppercase font-bold tracking-widest px-3 py-1 rounded-lg border border-[var(--border-color)] bg-[var(--bg-surface)] hover:bg-[var(--bg-base)] transition-colors"
+                                    >
+                                      {isExpanded ? 'Hide' : 'Details'}
+                                    </button>
+                                    <a
+                                      href={task.url.startsWith('/') ? task.url : `/${task.url}`}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="inline-flex items-center text-[10px] uppercase font-bold tracking-widest px-3 py-1 rounded-lg border border-transparent bg-[var(--bg-base)] text-[var(--text-main)] hover:bg-[var(--brand-primary)] hover:text-white transition-colors border-[var(--border-color)] shadow-sm"
+                                    >
+                                      Open
+                                    </a>
+                                  </td>
+                                </tr>
+                                {isExpanded && (
+                                  <tr className="bg-black/5 dark:bg-white/5 border-b border-[var(--border-color)]">
+                                    <td colSpan={5} className="px-6 py-6 border-l-4 border-emerald-500 whitespace-normal">
+                                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div className="bg-[var(--bg-base)] p-5 rounded-xl border border-[var(--border-color)]">
+                                          <h4 className="text-xs font-bold uppercase tracking-widest text-[var(--text-muted)] mb-3 flex items-center gap-2">
+                                            <svg className="w-4 h-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                                            Completed Module Details
+                                          </h4>
+                                          <p className="text-sm text-[var(--text-main)] mb-3 leading-relaxed">
+                                            {taskDetailsMap[task.name]?.description || "This module has been successfully integrated into the platform architecture and passed automated QA."}
+                                          </p>
+                                        </div>
+                                        <div className="bg-emerald-500/5 p-5 rounded-xl border border-emerald-500/20">
+                                          <h4 className="text-xs font-bold uppercase tracking-widest text-emerald-600 mb-3 flex items-center gap-2">
+                                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                            Testing Instructions
+                                          </h4>
+                                          <ul className="list-disc pl-5 text-sm space-y-2 text-emerald-700/80 dark:text-emerald-400/80">
+                                            <li>{taskDetailsMap[task.name]?.howToTest || "Check the specific system route via the Open button to interact with it directly in the live environment."}</li>
+                                          </ul>
+                                        </div>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                )}
+                              </React.Fragment>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+          </div>
         )}
 
         {/* TAB CONTENT: PSEUDO CODE */}
@@ -717,7 +742,7 @@ export default function DevRoadmapDashboard() {
               <div>
                 <h3 className="text-sm font-bold uppercase tracking-widest text-[var(--text-muted)] mb-3">1. The Matrix Checkout Engine</h3>
                 <div className="bg-black/80 text-emerald-400 p-5 rounded-xl font-mono text-xs overflow-x-auto">
-<pre>{`// Pseudo-code for /api/checkout/execute
+                  <pre>{`// Pseudo-code for /api/checkout/execute
 function executeMatrixCheckout(userId, cartItems) {
     // 1. Verify Session
     const session = getSession();
@@ -765,11 +790,11 @@ function executeMatrixCheckout(userId, cartItems) {
 }`}</pre>
                 </div>
               </div>
-              
+
               <div>
                 <h3 className="text-sm font-bold uppercase tracking-widest text-[var(--text-muted)] mb-3">2. The Responsive Immersive Flipbook Engine</h3>
                 <div className="bg-black/80 text-sky-400 p-5 rounded-xl font-mono text-xs overflow-x-auto">
-<pre>{`// Pseudo-code for /catalog/flipbook/[id]/FlipbookClient.tsx
+                  <pre>{`// Pseudo-code for /catalog/flipbook/[id]/FlipbookClient.tsx
 function renderFlipbook(catalogData, config) {
     // 1. Listen for viewport changes
     const windowState = useWindowSizeListener();
@@ -804,7 +829,7 @@ function renderFlipbook(catalogData, config) {
               <div>
                 <h3 className="text-sm font-bold uppercase tracking-widest text-[var(--text-muted)] mb-3">3. Headless Subdomain Routing (SaaS Pivot)</h3>
                 <div className="bg-black/80 text-amber-400 p-5 rounded-xl font-mono text-xs overflow-x-auto">
-<pre>{`// Pseudo-code for middleware.ts
+                  <pre>{`// Pseudo-code for middleware.ts
 export function middleware(req) {
     const url = req.nextUrl.clone();
     const hostname = req.headers.get("host");
@@ -824,7 +849,7 @@ export function middleware(req) {
               <div>
                 <h3 className="text-sm font-bold uppercase tracking-widest text-[var(--text-muted)] mb-3">4. Dynamic BYODB (Bring Your Own DB) Router</h3>
                 <div className="bg-black/80 text-purple-400 p-5 rounded-xl font-mono text-xs overflow-x-auto">
-<pre>{`// Pseudo-code for lib/prisma.ts
+                  <pre>{`// Pseudo-code for lib/prisma.ts
 function getTenantPrisma(tenantId) {
     // 1. Check if we already have a cached Prisma Client for this tenant
     if (global.prismaClients[tenantId]) return global.prismaClients[tenantId];
@@ -850,7 +875,7 @@ function getTenantPrisma(tenantId) {
               <div>
                 <h3 className="text-sm font-bold uppercase tracking-widest text-[var(--text-muted)] mb-3">5. Agile Support Kanban (Optimistic UI)</h3>
                 <div className="bg-black/80 text-pink-400 p-5 rounded-xl font-mono text-xs overflow-x-auto">
-<pre>{`// Pseudo-code for /admin/tickets Kanban Drag & Drop
+                  <pre>{`// Pseudo-code for /admin/tickets Kanban Drag & Drop
 async function handleDragEnd(event) {
     const { activeTicketId, newStatusColumn } = event;
 
@@ -888,7 +913,7 @@ async function handleDragEnd(event) {
               </div>
               <span className="px-3 py-1 bg-amber-500/10 text-amber-600 border border-amber-500/20 text-[10px] uppercase font-bold tracking-widest rounded-lg">Version 1.0</span>
             </div>
-            
+
             {/* INDEX */}
             <div className="bg-[var(--bg-base)] p-6 rounded-xl border border-[var(--border-color)] mb-8">
               <h3 className="text-sm font-bold uppercase tracking-widest text-[var(--text-main)] mb-4 flex items-center gap-2">
@@ -905,7 +930,7 @@ async function handleDragEnd(event) {
             </div>
 
             <div className="space-y-12">
-              
+
               {/* SECTION 1 */}
               <div id="section-1" className="space-y-4 pt-4 scroll-mt-20">
                 <h3 className="text-xl font-bold flex items-center gap-3"><span className="w-8 h-8 rounded-lg bg-[var(--brand-primary)] text-white flex items-center justify-center text-sm shadow-sm">1</span> Getting Started & Secure Access</h3>
@@ -1025,8 +1050,8 @@ async function handleDragEnd(event) {
                 <h2 className="text-2xl font-bold tracking-tight mb-2">Automated System QC</h2>
                 <p className="text-[var(--text-muted)] text-sm">Run a live diagnostic ping across the database, edge routing, and authentication layers.</p>
               </div>
-              
-              <button 
+
+              <button
                 onClick={runQC}
                 disabled={isQC}
                 className="mt-4 md:mt-0 inline-flex items-center gap-2 px-6 py-3 bg-[var(--brand-primary)] text-white font-bold uppercase tracking-widest text-xs rounded-xl shadow-md hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
@@ -1054,9 +1079,8 @@ async function handleDragEnd(event) {
 
             {qcResults && (
               <div className="space-y-6 animate-in fade-in zoom-in-95 duration-500">
-                <div className={`p-4 rounded-xl border flex items-center justify-between ${
-                  qcResults.systemStatus === 'HEALTHY' ? 'bg-emerald-500/10 border-emerald-500/30' : 'bg-red-500/10 border-red-500/30'
-                }`}>
+                <div className={`p-4 rounded-xl border flex items-center justify-between ${qcResults.systemStatus === 'HEALTHY' ? 'bg-emerald-500/10 border-emerald-500/30' : 'bg-red-500/10 border-red-500/30'
+                  }`}>
                   <div>
                     <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] mb-1">Global System Status</p>
                     <h3 className={`text-xl font-bold tracking-tight ${qcResults.systemStatus === 'HEALTHY' ? 'text-emerald-500' : 'text-red-500'}`}>
@@ -1073,10 +1097,9 @@ async function handleDragEnd(event) {
                   {qcResults.results.map((res: any, idx: number) => (
                     <div key={idx} className="bg-[var(--bg-base)] border border-[var(--border-color)] rounded-xl p-5 flex items-start justify-between group hover:border-[var(--brand-primary)] transition-colors">
                       <div className="flex items-start gap-4">
-                        <div className={`mt-1 flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
-                          res.status === 'PASS' ? 'bg-emerald-500/20 text-emerald-500' : 
-                          res.status === 'WARN' ? 'bg-amber-500/20 text-amber-500' : 'bg-red-500/20 text-red-500'
-                        }`}>
+                        <div className={`mt-1 flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${res.status === 'PASS' ? 'bg-emerald-500/20 text-emerald-500' :
+                            res.status === 'WARN' ? 'bg-amber-500/20 text-amber-500' : 'bg-red-500/20 text-red-500'
+                          }`}>
                           {res.status === 'PASS' ? (
                             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
                           ) : res.status === 'WARN' ? (
@@ -1098,11 +1121,10 @@ async function handleDragEnd(event) {
                           </div>
                         </div>
                       </div>
-                      
-                      <span className={`text-[10px] uppercase font-bold tracking-widest px-2 py-1 rounded border ${
-                        res.status === 'PASS' ? 'border-emerald-500/30 text-emerald-500' : 
-                        res.status === 'WARN' ? 'border-amber-500/30 text-amber-500' : 'border-red-500/30 text-red-500'
-                      }`}>
+
+                      <span className={`text-[10px] uppercase font-bold tracking-widest px-2 py-1 rounded border ${res.status === 'PASS' ? 'border-emerald-500/30 text-emerald-500' :
+                          res.status === 'WARN' ? 'border-amber-500/30 text-amber-500' : 'border-red-500/30 text-red-500'
+                        }`}>
                         {res.status}
                       </span>
                     </div>

@@ -30,7 +30,9 @@ export async function GET() {
           tenantId,
           pricingMode: 'MANUAL',
           manualGoldRate24K: 7250,
-          manualSilverRate: 88
+          manualSilverRate: 88,
+          enableSecureMediaProxy: true,
+          enableWebpOptimization: false
         }
       });
     }
@@ -61,7 +63,7 @@ export async function PATCH(request: Request) {
     }
 
     const body = await request.json();
-    const { pricingMode, manualGoldRate24K, manualSilverRate } = body;
+    const { pricingMode, manualGoldRate24K, manualSilverRate, enableSecureMediaProxy, enableWebpOptimization } = body;
 
     let settings = await prisma.storeSettings.findUnique({ where: { tenantId } });
     
@@ -70,8 +72,10 @@ export async function PATCH(request: Request) {
         where: { tenantId },
         data: { 
           pricingMode, 
-          manualGoldRate24K: Number(manualGoldRate24K), 
-          manualSilverRate: Number(manualSilverRate) 
+          manualGoldRate24K: manualGoldRate24K !== undefined ? Number(manualGoldRate24K) : undefined, 
+          manualSilverRate: manualSilverRate !== undefined ? Number(manualSilverRate) : undefined,
+          enableSecureMediaProxy: enableSecureMediaProxy !== undefined ? Boolean(enableSecureMediaProxy) : undefined,
+          enableWebpOptimization: enableWebpOptimization !== undefined ? Boolean(enableWebpOptimization) : undefined
         }
       });
     } else {
@@ -79,8 +83,10 @@ export async function PATCH(request: Request) {
         data: { 
           tenantId,
           pricingMode, 
-          manualGoldRate24K: Number(manualGoldRate24K), 
-          manualSilverRate: Number(manualSilverRate) 
+          manualGoldRate24K: manualGoldRate24K !== undefined ? Number(manualGoldRate24K) : 7250, 
+          manualSilverRate: manualSilverRate !== undefined ? Number(manualSilverRate) : 88,
+          enableSecureMediaProxy: enableSecureMediaProxy !== undefined ? Boolean(enableSecureMediaProxy) : true,
+          enableWebpOptimization: enableWebpOptimization !== undefined ? Boolean(enableWebpOptimization) : false
         }
       });
     }

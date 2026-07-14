@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 
-type Tab = 'BUSINESS' | 'CONTACTS' | 'ADDRESS' | 'SECURITY';
+type Tab = 'BUSINESS' | 'CONTACTS' | 'ADDRESS' | 'SECURITY' | 'SYSTEM';
 
 const BUSINESS_TYPES = [
   'Manufacturer', 'Wholesaler', 'Retailer', 'Distributor', 
@@ -24,6 +24,39 @@ export default function SettingsPage() {
     setTimeout(() => setResetLinkSent(false), 5000);
   };
 
+  // System Configuration State
+  const [enableSecureMediaProxy, setEnableSecureMediaProxy] = useState(true);
+  const [enableWebpOptimization, setEnableWebpOptimization] = useState(false);
+  const [savingSystem, setSavingSystem] = useState(false);
+
+  React.useEffect(() => {
+    fetch('/api/settings')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.settings) {
+          setEnableSecureMediaProxy(data.settings.enableSecureMediaProxy !== false);
+          setEnableWebpOptimization(data.settings.enableWebpOptimization === true);
+        }
+      });
+  }, []);
+
+  const handleSaveSystem = async () => {
+    setSavingSystem(true);
+    try {
+      await fetch('/api/settings', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ enableSecureMediaProxy, enableWebpOptimization })
+      });
+      alert('System settings updated successfully!');
+    } catch (e) {
+      console.error(e);
+      alert('Failed to save settings.');
+    } finally {
+      setSavingSystem(false);
+    }
+  };
+
   return (
     <div className="w-full animate-in fade-in duration-500">
       
@@ -39,7 +72,8 @@ export default function SettingsPage() {
           { id: 'BUSINESS', label: 'Business Profile' },
           { id: 'CONTACTS', label: 'Points of Contact' },
           { id: 'ADDRESS', label: 'Addresses' },
-          { id: 'SECURITY', label: 'Security' }
+          { id: 'SECURITY', label: 'Security' },
+          { id: 'SYSTEM', label: 'Image Configurations' }
         ].map((tab) => (
           <button
             key={tab.id}
@@ -304,6 +338,64 @@ export default function SettingsPage() {
         </div>
       )}
 
+      {/* ========================================== */}
+      {/* TAB 5: IMAGE CONFIGURATIONS                */}
+      {/* ========================================== */}
+      {activeTab === 'SYSTEM' && (
+        <div className="max-w-3xl bg-[var(--glass-bg)] backdrop-blur-xl border border-[var(--glass-border)] rounded-[2rem] p-8 shadow-sm">
+          <h2 className="text-lg font-light text-[var(--text-main)] mb-6">Image Configurations</h2>
+          
+          <div className="space-y-6">
+            {/* Secure Media Proxy Toggle */}
+            <div className="flex items-center justify-between p-4 bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-xl">
+              <div>
+                <h3 className="text-sm font-bold text-[var(--text-main)]">Require Secure Media Proxy</h3>
+                <p className="text-xs text-[var(--text-muted)] mt-1 max-w-lg">
+                  When enabled, all product images and files are hidden behind a secure API proxy requiring authentication. When disabled, images load from direct public paths.
+                </p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input 
+                  type="checkbox" 
+                  className="sr-only peer" 
+                  checked={enableSecureMediaProxy}
+                  onChange={(e) => setEnableSecureMediaProxy(e.target.checked)}
+                />
+                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[var(--brand-primary)]"></div>
+              </label>
+            </div>
+
+            {/* WebP Optimization Toggle */}
+            <div className="flex items-center justify-between p-4 bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-xl">
+              <div>
+                <h3 className="text-sm font-bold text-[var(--text-main)]">On-the-fly WebP Optimization</h3>
+                <p className="text-xs text-[var(--text-muted)] mt-1 max-w-lg">
+                  Automatically intercepts high-res JPG requests and optimizes them into fast-loading WebP format in memory. Requires Secure Media Proxy to be enabled.
+                </p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input 
+                  type="checkbox" 
+                  className="sr-only peer" 
+                  checked={enableWebpOptimization}
+                  onChange={(e) => setEnableWebpOptimization(e.target.checked)}
+                />
+                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[var(--brand-primary)]"></div>
+              </label>
+            </div>
+          </div>
+
+          <div className="mt-8 pt-6 border-t border-[var(--border-color)] flex justify-end">
+            <button 
+              onClick={handleSaveSystem}
+              disabled={savingSystem}
+              className="px-8 py-3.5 bg-[var(--brand-primary)] text-[var(--brand-text)] text-xs font-bold uppercase tracking-widest rounded-xl hover:opacity-90 hover:-translate-y-0.5 transition-all shadow-sm disabled:opacity-50"
+            >
+              {savingSystem ? 'Saving...' : 'Save Configuration'}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

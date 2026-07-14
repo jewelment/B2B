@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import PriceBreakup from '@/components/PriceBreakup';
 import MatrixModal from '@/components/MatrixModal';
 
@@ -12,44 +13,79 @@ export default function DashboardCatalog() {
   const [filter, setFilter] = useState<string>('ALL');
   
   const [layout, setLayout] = useState<any[]>([]);
+  
+  // Pagination and Infinite Scroll
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [uniquePurities, setUniquePurities] = useState<string[]>([]);
+  const observer = useRef<IntersectionObserver | null>(null);
+
+  const loadData = async (pageNum: number, currentFilter: string) => {
+    setLoading(true);
+    try {
+      const [invRes, layoutRes] = await Promise.all([
+        fetch(`/api/inventory?page=${pageNum}&limit=24&purity=${currentFilter}`),
+        pageNum === 1 ? fetch('/api/sdui/page?path=/&platform=WEB&environment=PRODUCTION') : Promise.resolve(null)
+      ]);
+      
+      if (invRes.ok) {
+         const data = await invRes.json();
+         const newProducts = Array.isArray(data.products) ? data.products : [];
+         
+         if (pageNum === 1) {
+           setInventory(newProducts);
+         } else {
+           setInventory(prev => [...prev, ...newProducts]);
+         }
+         
+         if (data.pagination) {
+           setHasMore(pageNum < data.pagination.totalPages);
+         } else {
+           setHasMore(false);
+         }
+
+         if (data.uniquePurities) {
+           setUniquePurities(data.uniquePurities);
+         }
+      }
+
+      if (layoutRes && layoutRes.ok) {
+        const layoutData = await layoutRes.json();
+        if (layoutData.layoutData && layoutData.layoutData.length > 0) {
+          setLayout(layoutData.layoutData);
+        } else if (pageNum === 1) {
+          // Fallback to default layout only on initial load
+          setLayout([{ id: 'default-grid', type: 'ProductGrid', props: { title: 'Master Inventory', showFilters: true } }]);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to fetch data", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    async function loadData() {
-      try {
-        const [invRes, layoutRes] = await Promise.all([
-          fetch('/api/inventory'),
-          fetch('/api/sdui/page?path=/&platform=WEB&environment=PRODUCTION')
-        ]);
-        
-        if (invRes.ok) {
-           const data = await invRes.json();
-           setInventory(Array.isArray(data) ? data : (data.items || data.inventory || data.products || []));
-        }
+    loadData(1, filter);
+  }, [filter]);
 
-        if (layoutRes.ok) {
-          const layoutData = await layoutRes.json();
-          if (layoutData.layoutData && layoutData.layoutData.length > 0) {
-            setLayout(layoutData.layoutData);
-          } else {
-            // Fallback to default layout
-            setLayout([{ id: 'default-grid', type: 'ProductGrid', props: { title: 'Master Inventory', showFilters: true } }]);
-          }
-        }
-      } catch (error) {
-        console.error("Failed to fetch data", error);
+  const lastElementRef = useCallback((node: HTMLDivElement | null) => {
+    if (loading) return;
+    if (observer.current) observer.current.disconnect();
+    observer.current = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting && hasMore) {
+        setPage(prev => {
+          const next = prev + 1;
+          loadData(next, filter);
+          return next;
+        });
       }
-    }
-    loadData();
-  }, []);
-
-  const uniquePurities = Array.isArray(inventory) 
-    ? Array.from(new Set(inventory.map(item => item?.metalPurity))).filter(Boolean)
-    : [];
+    });
+    if (node) observer.current.observe(node);
+  }, [loading, hasMore, filter]);
 
   const safeInventory = Array.isArray(inventory) ? inventory : [];
-  const filteredInventory = filter === 'ALL' 
-    ? safeInventory 
-    : safeInventory.filter(item => item?.metalPurity === filter);
 
   // --- Render Mappers ---
   const renderProductGrid = (props: any) => (
@@ -65,7 +101,10 @@ export default function DashboardCatalog() {
             <div className="relative">
               <select 
                 value={filter}
-                onChange={(e) => setFilter(e.target.value)}
+                onChange={(e) => {
+                  setFilter(e.target.value);
+                  setPage(1);
+                }}
                 className="appearance-none pl-6 pr-12 py-3.5 text-sm font-medium border border-[var(--border-color)] rounded-xl bg-[var(--bg-surface)] text-[var(--text-main)] shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]/20 cursor-pointer transition-all"
               >
                 <option value="ALL">All Karatage</option>
@@ -84,11 +123,15 @@ export default function DashboardCatalog() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-        {filteredInventory.map((item) => (
-          <div 
+        {safeInventory.map((item, index) => {
+          const isLastElement = index === safeInventory.length - 1;
+          return (
+          <Link 
+            href={`/dashboard/product/${item.handle}`}
+            prefetch={true}
             key={item.id} 
-            onClick={() => router.push(`/dashboard/product/${item.handle}`)}
-            className="group relative bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-[2rem] shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-500 flex flex-col cursor-pointer"
+            ref={isLastElement ? lastElementRef : null}
+            className="group relative bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-[2rem] shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-500 flex flex-col cursor-pointer block"
           >
             <div className="relative aspect-square m-3 rounded-[1.5rem] bg-[var(--text-muted)]/5 flex items-center justify-center overflow-hidden border border-[var(--border-color)] group-hover:border-[var(--brand-primary)]/30 transition-colors">
               {item.media && item.media.length > 0 ? (
@@ -119,15 +162,22 @@ export default function DashboardCatalog() {
                 <p className="text-xs text-[var(--text-muted)] line-clamp-1">{item.title}</p>
               </div>
               
-              <div className="mt-5 pt-4 border-t border-[var(--border-color)]" onClick={(e) => e.stopPropagation()}>
+              <div className="mt-5 pt-4 border-t border-[var(--border-color)]" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
                 <PriceBreakup estimatedPrice={item.price || item.estimatedPrice || 0} components={item.components} />
               </div>
             </div>
-          </div>
-        ))}
+          </Link>
+          );
+        })}
       </div>
       
-      {filteredInventory.length === 0 && (
+      {loading && (
+        <div className="w-full py-10 flex justify-center items-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--brand-primary)]"></div>
+        </div>
+      )}
+
+      {safeInventory.length === 0 && !loading && (
         <div className="w-full py-20 flex flex-col items-center justify-center text-[var(--text-muted)]">
           <svg className="w-12 h-12 mb-4 opacity-20" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
           <p className="text-sm font-medium">No inventory matches the selected filter.</p>

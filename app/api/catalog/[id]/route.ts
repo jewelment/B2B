@@ -78,12 +78,42 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       }
     });
 
+    // Fetch settings to check if proxy is enabled
+    const settings = await prisma.storeSettings.findUnique({
+      where: { tenantId: catalog.tenantId }
+    });
+    const useProxy = settings?.enableSecureMediaProxy !== false;
+    const appendWebp = settings?.enableWebpOptimization === true;
+
     // Map products to the ordered catalog items
     const populatedItems = catalog.items.map(item => {
       const product = products.find(p => p.designCode === item.designCode);
+      
+      let securedProduct = product;
+      if (product && product.media) {
+        const securedMedia = product.media.map(m => {
+          let finalUrl = m.url;
+          if (m.url) {
+            const originalFilename = m.url.split('/').pop() || 'image.jpg';
+            const baseName = originalFilename.substring(0, originalFilename.lastIndexOf('.')) || originalFilename;
+            
+            if (useProxy) {
+              finalUrl = `/api/media/${m.id}` + (appendWebp ? `/${baseName}.webp` : `/${originalFilename}`);
+            } else if (appendWebp) {
+              finalUrl = m.url.substring(0, m.url.lastIndexOf('.')) + '.webp';
+            }
+          }
+          return { 
+            ...m, 
+            url: finalUrl
+          };
+        });
+        securedProduct = { ...product, media: securedMedia };
+      }
+
       return {
         ...item,
-        product
+        product: securedProduct
       };
     });
 

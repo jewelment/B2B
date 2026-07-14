@@ -3,7 +3,6 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { prisma } from '@/lib/prisma';
 
-
 export async function GET() {
   try {
     // 1. Strict B2B Gatekeeper: Only logged-in, approved clients can view the catalog
@@ -38,6 +37,27 @@ export async function GET() {
       }
     });
 
+    const settings = await prisma.storeSettings.findUnique({
+      where: { tenantId }
+    });
+    
+    const useProxy = settings?.enableSecureMediaProxy !== false;
+    const appendWebp = settings?.enableWebpOptimization === true;
+    
+    const getMediaUrl = (m: any) => {
+      if (!m.url) return m.url;
+      let finalUrl = m.url;
+      const originalFilename = m.url.split('/').pop() || 'image.jpg';
+      const baseName = originalFilename.substring(0, originalFilename.lastIndexOf('.')) || originalFilename;
+      
+      if (useProxy) {
+        finalUrl = `/api/media/${m.id}` + (appendWebp ? `/${baseName}.webp` : `/${originalFilename}`);
+      } else if (appendWebp) {
+        finalUrl = m.url.substring(0, m.url.lastIndexOf('.')) + '.webp';
+      }
+      return finalUrl;
+    };
+
     // 3. Flatten and format the payload for the Flipbook UI
     const storefrontCatalog = products.map(product => {
       const formattedProduct: any = {
@@ -47,9 +67,11 @@ export async function GET() {
         category: product.category,
         price: product.price, // Will be overridden by real-time matrix pricing later
         
-        // Asset Pipeline: Map local server paths
-        primaryImage: product.media.find(m => m.isPrimary)?.url || product.media[0]?.url || null,
-        gallery: product.media.map(m => m.url),
+        // Asset Pipeline: Map local server paths securely via proxy or directly
+        primaryImage: product.media.find(m => m.isPrimary) 
+          ? getMediaUrl(product.media.find(m => m.isPrimary)!)
+          : (product.media[0] ? getMediaUrl(product.media[0]) : null),
+        gallery: product.media.map(m => getMediaUrl(m)),
       };
 
       // Inject dynamic custom fields (e.g., Metal Purity, Diamond Pcs) for UI filtering

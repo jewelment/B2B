@@ -72,6 +72,8 @@ export async function POST(req: Request) {
           orderItemsData.push({
             designCode, purity, size, quantity,
             unitPrice: basePrice, 
+
+            // Force Turbopack Cache Invalidation
             totalPrice: basePrice * quantity
           });
         }
@@ -91,6 +93,17 @@ export async function POST(req: Request) {
           items: { create: orderItemsData }
         }
       });
+      
+      // Log Analytics Event
+      await prisma.analyticsEvent.create({
+        data: {
+          tenantId,
+          userId: clientId,
+          eventType: 'CHECKOUT',
+          eventData: JSON.stringify({ poNumber, totalUnits, totalValue })
+        }
+      }).catch(e => console.error("Telemetry log failed:", e));
+
     } catch (dbError) {
       console.warn("⚠️ Database Write Failed (Likely Schema/User mis-mapping). Proceeding with UI Draft PO.", dbError);
     }

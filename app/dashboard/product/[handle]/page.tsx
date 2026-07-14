@@ -35,6 +35,35 @@ export default async function ProductPage({ params }: { params: { handle: string
     }
   });
 
+  const settings = await prisma.storeSettings.findUnique({
+    where: { tenantId }
+  });
+
+  const useProxy = settings?.enableSecureMediaProxy !== false;
+  const appendWebp = settings?.enableWebpOptimization === true;
+
+  // Apply secure proxy or webp optimization
+  if (product) {
+    product.media = product.media.map(m => {
+      let finalUrl = m.url;
+      if (m.url) {
+        const originalFilename = m.url.split('/').pop() || 'image.jpg';
+        const baseName = originalFilename.substring(0, originalFilename.lastIndexOf('.')) || originalFilename;
+        
+        if (useProxy) {
+          finalUrl = `/api/media/${m.id}` + (appendWebp ? `/${baseName}.webp` : `/${originalFilename}`);
+        } else if (appendWebp) {
+          // If proxy is off but WebP is on, change the public URL extension to .webp
+          finalUrl = m.url.substring(0, m.url.lastIndexOf('.')) + '.webp';
+        }
+      }
+      return {
+        ...m,
+        url: finalUrl
+      };
+    });
+  }
+
   if (!product) {
     return (
       <div className="flex items-center justify-center h-[60vh] text-gray-500">
