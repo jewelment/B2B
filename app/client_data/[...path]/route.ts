@@ -35,7 +35,8 @@ export async function GET(request: NextRequest, context: { params: Promise<{ pat
     const filePathArray = params.path || [];
     
     // The base directory for all client data (isolated from the main codebase)
-    const baseDir = path.resolve(process.cwd(), '../client_data');
+    // E.g. we store them in Jewelment B2B Dev V1/b2b-portal/client_data
+    const baseDir = path.resolve(process.cwd(), 'client_data');
     
     // Safely join the requested path to prevent directory traversal attacks
     let requestedPath = path.join(baseDir, ...filePathArray);

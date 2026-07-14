@@ -54,9 +54,9 @@ export async function GET(request: NextRequest, context: { params: Promise<{ id:
 
     // 4. File Resolution
     const cleanUrl = media.url.startsWith('/') ? media.url.substring(1) : media.url;
-    const baseDir = path.resolve(process.cwd(), '..'); 
-    const requestedPath = path.join(baseDir, cleanUrl);
+    const baseDir = process.cwd();
     const clientDataDir = path.join(baseDir, 'client_data');
+    const requestedPath = path.join(baseDir, cleanUrl);
 
     if (!requestedPath.startsWith(clientDataDir)) {
       return new NextResponse('Forbidden', { status: 403 });

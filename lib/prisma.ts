@@ -35,8 +35,8 @@ export function getTenantPrisma(tenantId: string | null): PrismaClient {
 
   if (folderName) {
     // Construct the path to the isolated client_data folder
-    // E.g., D:\Google AJ Drive - home\Maste B2B Jewelement Project\Jewelment B2B Dev V1\client_data\Ashok_Jewels\database.sqlite
-    const dbPath = path.resolve(process.cwd(), `../client_data/${folderName}/database.sqlite`);
+    // E.g., D:\Google AJ Drive - home\Maste B2B Jewelement Project\Jewelment B2B Dev V1\b2b-portal\client_data\Ashok_Jewels\database.sqlite
+    const dbPath = path.resolve(process.cwd(), `client_data/${folderName}/database.sqlite`);
     
     // In Phase 2, this will use a dedicated SQLite Prisma Client (e.g., @prisma/tenant-client)
     customUrl = `file:${dbPath}`;

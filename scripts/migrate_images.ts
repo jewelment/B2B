@@ -4,7 +4,7 @@ import path from 'path';
 
 const prisma = new PrismaClient();
 const OLD_DIR = path.join(process.cwd(), 'public', 'uploads', 'gallery');
-const NEW_DIR = path.resolve(process.cwd(), '../client_data/Ashok_Jewels/images');
+const NEW_DIR = path.resolve(process.cwd(), 'client_data/Ashok_Jewels/images');
 
 async function main() {
   console.log('Starting Local Image Migration...');

@@ -4,7 +4,7 @@ import path from 'path';
 import https from 'https';
 
 const prisma = new PrismaClient();
-const UPLOAD_DIR = path.resolve(process.cwd(), '../client_data/Ashok_Jewels/images');
+const UPLOAD_DIR = path.resolve(process.cwd(), 'client_data/Ashok_Jewels/images');
 
 async function downloadImage(url: string, dest: string): Promise<boolean> {
   return new Promise((resolve, reject) => {
