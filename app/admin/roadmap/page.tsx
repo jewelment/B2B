@@ -354,7 +354,7 @@ export default function DevRoadmapDashboard() {
       phase: "24.0 EXECUTIVE DASHBOARD & SYSTEM LOGS",
       description: "Primary performance indicators and global audit logging to ensure operational accountability across all users.",
       tasks: [
-        { name: "24.1 Executive Dashboard Analytics", profile: "Super Admin", status: "Completed", progress: 100, url: "/admin/dashboard" },
+        { name: "24.1 Executive Dashboard Analytics", profile: "Super Admin", status: "Pending", progress: 0, url: "/admin/dashboard" },
         { name: "24.2 Global Events & Logs Panel", profile: "System", status: "Pending", progress: 0, url: "/admin/logs" }
       ]
     }
