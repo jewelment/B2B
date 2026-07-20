@@ -288,7 +288,7 @@ export default function DevRoadmapDashboard() {
       phase: "18.0 MASTER CATALOG & INVENTORY",
       description: "Extensive product-level configuration, displaying a segmented timeline editor for pricing, multi-level variants, and stock store allocation.",
       tasks: [
-        { name: "18.1 Single Product Editable Timeline", profile: "Admin", status: "Pending", progress: 0, url: "/admin/products" },
+        { name: "18.1 Single Product Editable Timeline", profile: "Admin", status: "Completed", progress: 100, url: "/admin/products/edit/[id]" },
         { name: "18.2 Automated Variant Matrix UI", profile: "Admin", status: "Pending", progress: 0, url: "/admin/products" },
         { name: "18.3 Variant Media Upload Modal", profile: "Admin", status: "Pending", progress: 0, url: "/admin/products" },
         { name: "18.4 Inventory Store Allocation Grid", profile: "Manager", status: "Pending", progress: 0, url: "/admin/inventory" },
