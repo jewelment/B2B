@@ -272,6 +272,80 @@ export default function DevRoadmapDashboard() {
         { name: "16.9 AI MOM & Conversations Manager", profile: "System", status: "Pending", progress: 0, url: "AI_MOM_Backups" },
         { name: "16.10 Comprehensive Pseudocode & Manual", profile: "System", status: "Pending", progress: 0, url: "/admin/roadmap" }
       ]
+    },
+    {
+      phase: "17.0 PARAMETERS & DYNAMIC VARIANT ENGINE",
+      description: "Advanced product configuration architecture, managing specific component variants (metal, size, gem) through hierarchical option sets and categories.",
+      tasks: [
+        { name: "17.1 Options Master Grid", profile: "Admin", status: "Completed", progress: 100, url: "/admin/parameters/options" },
+        { name: "17.2 Option Sets Hierarchy Builder", profile: "Admin", status: "Pending", progress: 0, url: "/admin/parameters/options" },
+        { name: "17.3 Product Categories Management", profile: "Admin", status: "Pending", progress: 0, url: "/admin/parameters" },
+        { name: "17.4 Collections Matrix (Manual & Rule-Based)", profile: "Admin", status: "Pending", progress: 0, url: "/admin/parameters" },
+        { name: "17.5 Collection Sub-Section Media Architecture", profile: "Admin", status: "Pending", progress: 0, url: "/admin/parameters" }
+      ]
+    },
+    {
+      phase: "18.0 MASTER CATALOG & INVENTORY",
+      description: "Extensive product-level configuration, displaying a segmented timeline editor for pricing, multi-level variants, and stock store allocation.",
+      tasks: [
+        { name: "18.1 Single Product Editable Timeline", profile: "Admin", status: "Pending", progress: 0, url: "/admin/products" },
+        { name: "18.2 Automated Variant Matrix UI", profile: "Admin", status: "Pending", progress: 0, url: "/admin/products" },
+        { name: "18.3 Variant Media Upload Modal", profile: "Admin", status: "Pending", progress: 0, url: "/admin/products" },
+        { name: "18.4 Inventory Store Allocation Grid", profile: "Manager", status: "Pending", progress: 0, url: "/admin/inventory" },
+        { name: "18.5 Product Reviews Workflow", profile: "Support", status: "Pending", progress: 0, url: "/admin/inventory" }
+      ]
+    },
+    {
+      phase: "19.0 OMNICHANNEL PRICING & LIVE RATES",
+      description: "Core algorithmic pricing module syncing live MCX bullion rates and calculating specific gemstone, pearl, and labor making charges.",
+      tasks: [
+        { name: "19.1 Live Metal Price Dashboard", profile: "System", status: "Pending", progress: 0, url: "/admin/pricing" },
+        { name: "19.2 Diamond & Gemstone Price Master Matrix", profile: "Admin", status: "Pending", progress: 0, url: "/admin/pricing" },
+        { name: "19.3 Standard Details Configuration Modal", profile: "Admin", status: "Pending", progress: 0, url: "/admin/pricing" },
+        { name: "19.4 Making Charges & Pearl Price Matrices", profile: "Admin", status: "Pending", progress: 0, url: "/admin/pricing" }
+      ]
+    },
+    {
+      phase: "20.0 ADVANCED SDUI & BANNER MERCHANDISING",
+      description: "Visual directory for routing high-fidelity promotional banners directly into storefront landing pages and PLP catalog grids.",
+      tasks: [
+        { name: "20.1 Banner Management Directory", profile: "Admin", status: "Pending", progress: 0, url: "/admin/banners" },
+        { name: "20.2 Edit Banner Modal & Responsive Media Mapping", profile: "Admin", status: "Pending", progress: 0, url: "/admin/banners" },
+        { name: "20.3 PLP In-Grid Promo Banner Integration", profile: "Admin", status: "Pending", progress: 0, url: "/admin/banners" },
+        { name: "20.4 Frontend Hero Landing Page Automation", profile: "System", status: "Pending", progress: 0, url: "/admin/banners" }
+      ]
+    },
+    {
+      phase: "21.0 ORDER RECONCILIATION & 11+1 SCHEMES",
+      description: "Tracking engine for comprehensive order lifecycle events, advanced log filtering, inventory weight bagging, and gold savings schemes.",
+      tasks: [
+        { name: "21.1 All Orders & Ecom Orders Advanced Filters", profile: "Sales", status: "Pending", progress: 0, url: "/admin/orders" },
+        { name: "21.2 Single Order Detail View & Timeline Logging", profile: "Sales", status: "Pending", progress: 0, url: "/admin/orders" },
+        { name: "21.3 Inventory Bagging & Weight Reconciliation Tool", profile: "Admin", status: "Pending", progress: 0, url: "/admin/orders" },
+        { name: "21.4 All Transactions & Payment Gateway Status", profile: "Finance", status: "Pending", progress: 0, url: "/admin/orders" },
+        { name: "21.5 11+1 Monthly Gold Savings Scheme Dashboard", profile: "Admin", status: "Pending", progress: 0, url: "/admin/schemes" }
+      ]
+    },
+    {
+      phase: "22.0 CRM, ENQUIRIES & TEAM PERMISSIONS",
+      description: "Centralized support hub for tracking video appointments, resolving client tickets, and establishing internal enterprise HR roles.",
+      tasks: [
+        { name: "22.1 All Customers & User Group Policy routing", profile: "Sales", status: "Pending", progress: 0, url: "/admin/customers" },
+        { name: "22.2 Enquiries Dashboard", profile: "Support", status: "Pending", progress: 0, url: "/admin/enquiries" },
+        { name: "22.3 Customer Inquiry Modal & Ticket Resolution", profile: "Support", status: "Pending", progress: 0, url: "/admin/enquiries" },
+        { name: "22.4 Teams & Permission Roles Access Control", profile: "Super Admin", status: "Pending", progress: 0, url: "/admin/teams" }
+      ]
+    },
+    {
+      phase: "23.0 ENTERPRISE SETTINGS & DOMAIN MAPPING",
+      description: "Global multi-tenant configuration establishing unique SaaS brand identities, typography, domain DNS mapping, and 3rd-party software routing.",
+      tasks: [
+        { name: "23.1 Brand Profile & Logo Asset Management", profile: "Super Admin", status: "Pending", progress: 0, url: "/admin/settings" },
+        { name: "23.2 Appearance & Theme Colors Configuration", profile: "Admin", status: "Pending", progress: 0, url: "/admin/settings" },
+        { name: "23.3 3rd Party Integrations", profile: "Super Admin", status: "Pending", progress: 0, url: "/admin/settings" },
+        { name: "23.4 Advanced Configuration (Domain DNS Setup)", profile: "System", status: "Pending", progress: 0, url: "/admin/settings" },
+        { name: "23.5 Social Media & OG Image Routing", profile: "Admin", status: "Pending", progress: 0, url: "/admin/settings" }
+      ]
     }
   ];
 
@@ -348,7 +422,7 @@ export default function DevRoadmapDashboard() {
               <h1 className="text-4xl md:text-5xl font-light tracking-tight text-[var(--text-main)] mb-2 flex items-center gap-4">
                 Project <strong className="font-bold bg-[var(--brand-primary)] text-white px-3 py-1 rounded-lg shadow-sm">Master</strong> Ledger
               </h1>
-              <p className="text-[var(--text-muted)] font-mono text-sm">Ashok Jewels B2B Architecture</p>
+              <p className="text-[var(--text-muted)] font-mono text-sm">Jewelment B2B Architecture</p>
             </div>
 
             <div className="flex flex-wrap items-center gap-3">

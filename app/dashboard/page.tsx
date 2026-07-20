@@ -129,7 +129,7 @@ export default function DashboardCatalog() {
           <Link 
             href={`/dashboard/product/${item.handle}`}
             prefetch={true}
-            key={item.id} 
+            key={`${item.id}-${index}`} 
             ref={isLastElement ? lastElementRef : null}
             className="group relative bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-[2rem] shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-500 flex flex-col cursor-pointer block"
           >
