@@ -16,6 +16,7 @@ This document tracks major features, architectural updates, and tasks completed 
 
 ### 2. Phase 18.1: Single Product Editable Timeline (UI/UX)
 **Status**: Completed
+**Last Modified**: 21 July 2026, 01:28 AM (IST)
 **Description**: Designed a multi-step timeline workflow for editing individual products, integrating a rich-text WYSIWYG editor, status toggles, advanced tags management, and a bespoke 12-hour modern calendar UI.
 **Key Capabilities for User Manual**:
 - **Bespoke Calendar Component**: A custom React-based 12-hour AM/PM scheduler that strictly enforces chronological integrity and inherits global UI CSS variables.

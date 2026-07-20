@@ -79,3 +79,25 @@ When executing tasks or interacting within this project workspace, you must adhe
 - Explicitly declare what was done and provide clear testing points in your command outputs so the user can easily review the state of the project.
 - Always provide immediate Testing URLs, Profiles, and Credentials for rapid cross-checking.
 - Consistently build using global standards and adhere to the high-level UI trends established for this portal.
+
+---
+
+## Part 5: Component-Level UI Standard Guidelines (Phase 18+ Addition)
+
+When developing specialized functional components (like schedulers, advanced inputs, or modals), strictly enforce the following micro-interaction and stylistic standards:
+
+### 1. Bespoke & Native Component Architecture
+- **Avoid Native Browser Inputs:** Completely avoid un-styleable native browser inputs like `<input type="datetime-local">` or `<input type="color">`. Instead, build completely bespoke, React-native components (e.g., custom 12-hour AM/PM schedulers) that seamlessly inherit our global Design Token CSS variables (like `var(--brand-primary)` or `var(--bg-surface)`).
+- **Time/Date Standardization:** Always force a 12-hour AM/PM chronological format in UI components, rather than relying on inconsistent OS-level browser defaults. Automatically validate and disable past-dated chronological interactions to prevent user error.
+
+### 2. Smart Form Inputs & Tagging
+- **Tag-Pill Mechanics:** When dealing with array-based text inputs (like SEO tags or feature bullets), utilize dynamic tag-pill mechanics. Users should be able to type, press enter, and instantly generate a visually distinct, deletable tag chip with smooth hover states.
+- **Dynamic Field Suggestions:** Tie smart inputs directly into recommendation lists (like Google search recommendations) where possible to guide user data entry.
+
+### 3. State & Animation Polish
+- **Framer Motion Integration:** Always employ fluid `framer-motion` animations (`<AnimatePresence>`, `<motion.div>`) for mounting and unmounting active states (e.g., dropdowns, modals, tabs). Use custom cubic-bezier easing curves to simulate high-end "friction" rather than abrupt pop-ins.
+- **Glassmorphism & Depth (Ambient Occlusion):** Wrap elevated dialogs and dropdown menus in frosted glass treatments (`backdrop-filter: blur(12px)`) with ultra-thin `1px` translucent borders and heavily blurred, soft inset or drop shadows to emulate physical depth.
+- **Micro-Hover Effects:** Implement subtle scale increments (`scale-105`), color transitions (`transition-colors`), or metallic shimmer effects on interactive elements to confirm interactivity prior to clicks.
+
+### 4. Smart Business Logic Binding
+- **Implicit Status Transitions:** Tying UI actions to smart business logic is mandatory. (e.g., If an Admin uses a custom UI scheduler to push a publication date into the future, the component should automatically intercept and transition the product's live status back to "Draft" to prevent accidental immediate publication).
