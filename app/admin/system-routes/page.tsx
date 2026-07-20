@@ -4,7 +4,8 @@ import React from 'react';
 import Link from 'next/link';
 
 export default function SystemRoutesAuditor() {
-  const routes = [
+  type Route = { path: string; label: string; type: string; status: string; lastModified?: string };
+  const routes: Route[] = [
     // --- Public / Gateway ---
     { path: '/', label: 'B2B Front Door (Gateway)', type: 'Public', status: 'Active' },
     { path: '/login', label: 'B2B Login & PIN Lock', type: 'Public', status: 'Active' },
@@ -29,7 +30,7 @@ export default function SystemRoutesAuditor() {
     { path: '/admin/inventory/grid', label: 'Global Inventory Engine', type: 'Admin', status: 'Active' },
     { path: '/admin/inventory/fields', label: 'Inventory Metafields', type: 'Admin', status: 'Active' },
     { path: '/admin/inventory/import', label: 'Data Import Engine', type: 'Admin', status: 'Active' },
-    { path: '/admin/products/edit/[id]', label: 'Single Product Editor', type: 'Admin', status: 'Active' },
+    { path: '/admin/products/edit/[id]', label: 'Single Product Editor', type: 'Admin', status: 'Active', lastModified: '21 July 2026, 01:28 AM' },
     { path: '/admin/discounts', label: 'Discount CRM', type: 'Admin', status: 'Active' },
     { path: '/admin/clients', label: 'Partner Network (CRM)', type: 'Admin', status: 'Active' },
     { path: '/admin/orders', label: 'PO Inbox & Kanban', type: 'Admin', status: 'Active' },
@@ -90,6 +91,7 @@ export default function SystemRoutesAuditor() {
                   <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">Path</th>
                   <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">Component / API Engine</th>
                   <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">Access Tier</th>
+                  <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">Last Modified</th>
                   <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-[var(--text-muted)] text-right">Action</th>
                 </tr>
               </thead>
@@ -107,6 +109,9 @@ export default function SystemRoutesAuditor() {
                       <span className={`px-3 py-1 text-[10px] uppercase font-bold tracking-widest rounded-md border ${getTypeColor(route.type)}`}>
                         {route.type}
                       </span>
+                    </td>
+                    <td className="px-6 py-4 text-xs text-[var(--text-muted)] whitespace-nowrap">
+                      {route.lastModified || '-'}
                     </td>
                     <td className="px-6 py-4 text-right">
                       {route.path.includes('[') ? (
