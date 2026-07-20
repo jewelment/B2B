@@ -62,7 +62,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className="dark" suppressHydrationWarning>
       <body className="bg-[var(--bg-base)] text-[var(--text-main)] font-sans antialiased" suppressHydrationWarning>
         <SessionProviderWrapper>
           {children}
