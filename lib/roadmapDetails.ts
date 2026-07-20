@@ -1,4 +1,11 @@
-export const taskDetailsMap: Record<string, { description: string; howToTest: string; testPath: string }> = {
+export type TaskDetail = {
+  description: string;
+  howToTest: string;
+  testPath: string;
+  images?: { src: string; caption: string }[];
+};
+
+export const taskDetailsMap: Record<string, TaskDetail> = {
   // Phase 1
   "1.1 Interactive PIM Grid": {
     description: "Built the master Product Information Management (PIM) grid. This allows admins to view, filter, and manage all jewelry inventory in a data-dense spreadsheet-like view.",
@@ -154,7 +161,7 @@ export const taskDetailsMap: Record<string, { description: string; howToTest: st
   },
   "7.2 CSS Variable Injection API": {
     description: "Engineered an API that injects CSS variables into the root layout dynamically based on the tenant's saved theme.",
-    howToTest: "Inspect the DOM root to see the custom `--brand-primary` CSS variables applied.",
+    howToTest: "Inspect the DOM root to see the custom '--brand-primary' CSS variables applied.",
     testPath: "/api/admin/theme"
   },
   "7.3 Live Preview Engine": {
@@ -197,7 +204,7 @@ export const taskDetailsMap: Record<string, { description: string; howToTest: st
     testPath: "/admin/layout-builder"
   },
   "9.2 Native Mobile Auth (Expo)": {
-    description: "Built dedicated, stateless POST endpoints leveraging `jose` to issue secure JWTs specifically for the React Native mobile app.",
+    description: "Built dedicated, stateless POST endpoints leveraging jose to issue secure JWTs specifically for the React Native mobile app.",
     howToTest: "Send a POST request with credentials to the mobile auth API to receive a Bearer token.",
     testPath: "/api/mobile/auth"
   },
@@ -214,7 +221,7 @@ export const taskDetailsMap: Record<string, { description: string; howToTest: st
     testPath: "/admin/inventory/import"
   },
   "10.2 Expo EAS OTA Update Pipeline": {
-    description: "Configured the `eas.json` pipeline to allow Over-The-Air JavaScript updates to the mobile app without requiring app store resubmissions.",
+    description: "Configured the eas.json pipeline to allow Over-The-Air JavaScript updates to the mobile app without requiring app store resubmissions.",
     howToTest: "Review the EAS configuration file.",
     testPath: "eas.json"
   },
@@ -226,22 +233,22 @@ export const taskDetailsMap: Record<string, { description: string; howToTest: st
 
   // Phase 11
   "11.1 Custom Domain DNS Resolver": {
-    description: "Configured the Edge Middleware to intercept Custom Vanity Domains (e.g., wholesale.tiffany.com) and map them to internal Tenant IDs invisibly.",
+    description: "Configured the Edge Middleware to intercept Custom Vanity Domains and map them to internal Tenant IDs invisibly.",
     howToTest: "Review the Host header inspection logic in middleware.ts.",
     testPath: "middleware.ts"
   },
   "11.2 BYODB (Bring Your Own DB) Router": {
-    description: "Engineered a dynamic Prisma connection pool router that spins up isolated PostgreSQL instances for Enterprise clients providing their own database strings.",
+    description: "Engineered a dynamic Prisma connection pool router that spins up isolated PostgreSQL instances for Enterprise clients.",
     howToTest: "Review getTenantPrisma() in lib/prisma.ts to see the connection pooling logic.",
     testPath: "lib/prisma.ts"
   },
   "11.3 Automated PITR Cloud Backups": {
-    description: "Provided the AWS/Supabase DevOps blueprint for configuring Point-in-Time Recovery (PITR) to ensure zero data loss during catastrophic failures.",
+    description: "Provided the AWS/Supabase DevOps blueprint for configuring Point-in-Time Recovery (PITR).",
     howToTest: "Review the AWS DevOps Guide artifact for configuration steps.",
     testPath: "AWS_DEVOPS_GUIDE.md"
   },
   "11.4 QLDB Tamper-Proof PO Ledger": {
-    description: "Outlined the architecture for integrating Amazon Quantum Ledger Database (QLDB) to create cryptographically immutable records of all financial Purchase Orders.",
+    description: "Outlined the architecture for integrating Amazon Quantum Ledger Database (QLDB) to create cryptographically immutable records.",
     howToTest: "Review the AWS DevOps Guide artifact.",
     testPath: "AWS_DEVOPS_GUIDE.md"
   },
@@ -295,73 +302,153 @@ export const taskDetailsMap: Record<string, { description: string; howToTest: st
   
   // Phase 17
   "17.1 Options Master Grid": {
-    description: "Built the centralized parameters dashboard allowing admins to define global options (Metal, Gemstone, Size) with specific input types (Drop-Down List) for the variant generation engine.",
+    description: "Built the centralized parameters dashboard allowing admins to define global options (Metal, Gemstone, Size) with specific input types (Drop-Down List) for the variant generation engine. \n\n**Detailed Context (From HTML):**\nThe option menu is very important in the perspective of the jewelry variant. The multiple possible options can help to create the multiple possible variants. It works on permutation combinations fundamentally. Components like Gemstone, Metal, Diamond, Sizes — all of these combinations can make a unique jewelry piece which can easily support our custom order mechanism into the B2B business model. For every option/component we have a dedicated setting panel. For example, when we click on Metal, we can assign option name, front-end name, and toggle options like 'including in filters' and 'including in price master'. Expanding the Gold menu reveals multiple fields like gold priority (14KT, 18KT, 22KT) and gold color (Yellow, White, Rose Gold).",
     howToTest: "Navigate to Parameters -> Options and view the All Options tab.",
-    testPath: "/admin/parameters/options"
+    testPath: "/admin/parameters/options",
+    images: [
+      { src: "/extracted_media/image33.png", caption: "Parameters — All Options Master List" },
+      { src: "/extracted_media/image34.png", caption: "Parameters — Edit Option Detail View (Metal)" },
+      { src: "/extracted_media/image35.png", caption: "Parameters — Option Values Hierarchy" },
+      { src: "/extracted_media/image36.png", caption: "Diamond & Gemstone Options Configuration" }
+    ]
   },
   "17.2 Option Sets Hierarchy Builder": {
-    description: "Engineered the hierarchical interface for grouping specific Options and OptionValues into logical 'Sets' (e.g., Ladies Diamond Rings 6-20 All Os), powering automated complex permutations.",
+    description: "Engineered the hierarchical interface for grouping specific Options and OptionValues into logical 'Sets' (e.g., Ladies Diamond Rings 6-20 All Os), powering automated complex permutations. \n\n**Detailed Context (From HTML):**\nIn the menu of options, we click on another tab 'Option Sets'. With all six options we create around 320 option sets that help us predict variants. **How it all works:** Here we set all the options and inside we create the multiple option sets. Whenever we create the product we just need to select the option of this particular set and then we can see all the product variant options on our PDP or all active variants. (e.g., Chain Bracelet Gemstone OS, Ladies Diamond Gemstone Ring All OS).",
     howToTest: "Create an Option Set and assign Metal (14KT/18KT), Diamond (SI-HI), and Sizes (7-20).",
-    testPath: "/admin/parameters/options/sets"
+    testPath: "/admin/parameters/options/sets",
+    images: [
+      { src: "/extracted_media/image37.png", caption: "Parameters — Option Sets Master List (320 Sets)" },
+      { src: "/extracted_media/image38.png", caption: "Option Sets — Group Configuration (Top Section)" },
+      { src: "/extracted_media/image39.png", caption: "Option Sets — Metal Hierarchy Setup" },
+      { src: "/extracted_media/image40.png", caption: "Option Sets — Diamond & Gemstone Setup" },
+      { src: "/extracted_media/image41.png", caption: "Option Sets — Group Configuration Overview (Ring)" },
+      { src: "/extracted_media/image42.png", caption: "Parameters — All Options Master List (Size Focus)" },
+      { src: "/extracted_media/image43.png", caption: "Option Sets — Expanded Size Parameter" }
+    ]
   },
   "17.3 Product Categories Management": {
     description: "Developed the taxonomy tree manager allowing admins to build out categories and sub-categories with associated view logs to track accountability.",
-    howToTest: "Navigate to Categories and create a new nested sub-category.",
-    testPath: "/admin/parameters/categories"
+    howToTest: "1. Navigate to Categories (/admin/parameters/categories).\n2. Verify the fluid w-full layout spans correctly.\n3. Test the horizontal tab navigation (Categories, Sub Categories, Archived).\n4. Verify data grid displays Name, Products Count, Status Badges.",
+    testPath: "/admin/parameters/categories",
+    images: [
+      { src: "/extracted_media/image32.png", caption: "Parameters — Categories Dashboard" },
+      { src: "/extracted_media/image103.png", caption: "Parameters Module — Detailed Category Audit Logs" }
+    ]
   },
   "17.4 Collections Matrix (Manual & Rule-Based)": {
     description: "Built the collection grouping engine. Supports manual assignment of products or dynamic rule-based sorting (e.g., OR/AND logic for 'Best-Sellers').",
-    howToTest: "Navigate to Collections and assign products to a new collection using the search functionality.",
-    testPath: "/admin/parameters/collections"
+    howToTest: "1. Open Collections Dashboard (/admin/parameters/collections).\n2. Test tab filters (Active, Inactive).\n3. Click a row to open the Edit view (/admin/parameters/collections/[id]).\n4. Verify 'Manual Product Assignment' priority sorting.\n5. Test character tracking on SEO metadata fields.",
+    testPath: "/admin/parameters/collections",
+    images: [
+      { src: "/extracted_media/image47.png", caption: "Parameters — Collections Dashboard" },
+      { src: "/extracted_media/image48.png", caption: "Collection Edit — Primary Information View (Echo)" },
+      { src: "/extracted_media/image49.png", caption: "Collection Edit — Manual Product Assignment" },
+      { src: "/extracted_media/image50.png", caption: "Collection Edit — Search Engine Optimisation (SEO)" }
+    ]
   },
   "17.5 Collection Sub-Section Media Architecture": {
     description: "Implemented a responsive, section-based media upload interface for collections, allowing distinct 'Desktop Media' and 'Mobile Media' assets for the frontend hero layout.",
     howToTest: "Edit a collection, add a sub-section, and upload a desktop hero banner.",
-    testPath: "/admin/parameters/collections/edit"
+    testPath: "/admin/parameters/collections/edit",
+    images: [
+      { src: "/extracted_media/image51.png", caption: "Parameters — Collection Details Dashboard" },
+      { src: "/extracted_media/image52.png", caption: "Collection Details — Edit Section Architecture" },
+      { src: "/extracted_media/image53.png", caption: "Collection Details — Sub-Section Media Configuration" }
+    ]
   },
 
   // Phase 18
   "18.1 Single Product Editable Timeline": {
     description: "Designed a multi-step timeline workflow (Info, Options, Price Master, Variants) for editing individual products. Integrates a WYSIWYG editor, status toggles, and live visual preview card.",
-    howToTest: "Click Edit on a product and navigate through the configuration timeline steps.",
-    testPath: "/admin/products/edit"
+    howToTest: "1. Navigate to Edit Product (/admin/products/edit/123).\n2. Test the Left Pane vertical timeline (click steps to see Framer Motion transitions).\n3. Verify the WYSIWYG editor loads correctly without SSR errors.\n4. Type in SEO Title and Meta Description to test dynamic character limit trackers (turn amber when exceeded).\n5. Test the 'AI Generate' UI placeholder in the Media Grid.",
+    testPath: "/admin/products/edit",
+    images: [
+      { src: "/extracted_media/image5.png", caption: "Product Info — General Data & Preview" },
+      { src: "/extracted_media/image6.png", caption: "Media Management Grid & AI Generate" },
+      { src: "/extracted_media/image7.png", caption: "Product Type Selection Panel" },
+      { src: "/extracted_media/image8.png", caption: "Product Type & Inventory Configuration" },
+      { src: "/extracted_media/image9.png", caption: "Inventory Tracking & Pricing Toggles" },
+      { src: "/extracted_media/image10.png", caption: "Shipping & Search Engine Optimisation" },
+      { src: "/extracted_media/image11.png", caption: "Options — Variant Mapping Configuration" },
+      { src: "/extracted_media/image12.png", caption: "Options — Empty State (Create or Import)" },
+      { src: "/extracted_media/image13.png", caption: "Import Option Sets — Modal Popup" },
+      { src: "/extracted_media/image20.png", caption: "Product Info — General Data & Preview (Full View)" },
+      { src: "/extracted_media/image45.png", caption: "Product Info — General Data Configuration" },
+      { src: "/extracted_media/image46.png", caption: "Product Options — Variant Configuration" }
+    ]
   },
   "18.2 Automated Variant Matrix UI": {
     description: "Built the massive grid view that renders hundreds of generated variant combinations. Integrates individual weight entry, price breakups, and variant status toggles.",
     howToTest: "Navigate to the Variants step of a product and use the pagination controls.",
-    testPath: "/admin/products/variants"
+    testPath: "/admin/products/variants",
+    images: [
+      { src: "/extracted_media/image14.png", caption: "1. Variant Master List — Configuration View" },
+      { src: "/extracted_media/image15.png", caption: "2. Variant Master List — Pagination View" },
+      { src: "/extracted_media/image16.png", caption: "3. Variant Master List — Horizontal Scroll View" },
+      { src: "/extracted_media/image18.png", caption: "Variant Master List — Price Breakup Overlay" },
+      { src: "/extracted_media/image19.png", caption: "Frontend Product Detail Page — Price Breakup" }
+    ]
   },
   "18.3 Variant Media Upload Modal": {
     description: "Engineered a specific modal allowing admins to map unique media assets (Primary Image, Videos) to specific variant configurations for accurate color-swapping on the storefront.",
     howToTest: "Click the image icon on a variant row and upload a specific gold-color image.",
-    testPath: "/admin/products/media"
+    testPath: "/admin/products/media",
+    images: [
+      { src: "/extracted_media/image17.png", caption: "4. Variant Medias — Upload Modal" }
+    ]
   },
   "18.4 Inventory Store Allocation Grid": {
     description: "Created the logistics interface mapping available inventory variants to specific physical store branches with active/inactive availability badges.",
     howToTest: "Navigate to Inventory and view the branch allocation for a specific SKU.",
-    testPath: "/admin/inventory/stores"
+    testPath: "/admin/inventory/stores",
+    images: [
+      { src: "/extracted_media/image21.png", caption: "Inventory Management Panel" }
+    ]
   },
   "18.5 Product Reviews Workflow": {
     description: "Built the review management panel allowing admins to approve, deny, and track client product feedback. Features star-rating visuals and user linking.",
     howToTest: "Navigate to Product Reviews and filter by Pending status.",
-    testPath: "/admin/inventory/reviews"
+    testPath: "/admin/inventory/reviews",
+    images: [
+      { src: "/extracted_media/image22.png", caption: "Product Reviews Dashboard" }
+    ]
+  },
+  "18.6 Master Inventory Grid": {
+    description: "The primary master inventory grid for viewing, filtering, and managing product catalog listings across all statuses (Active, Draft, Archived).",
+    howToTest: "1. Navigate to Master Inventory (/admin/inventory/master-grid).\n2. Verify the staggered Fade-and-Cascade Framer Motion animation upon load.\n3. Verify liquid glass backdrop-filter on the top Bento Grid widgets.\n4. Hover over rows to check 'Ambient Occlusion' shadow adjustments.\n5. Test the 'Press and Inset' micro-interactions on the Action buttons.",
+    testPath: "/admin/products",
+    images: [
+      { src: "/extracted_media/image4.png", caption: "All Products Management Console" },
+      { src: "/extracted_media/image44.png", caption: "All Products — Master Inventory Grid" }
+    ]
   },
 
   // Phase 19
   "19.1 Live Metal Price Dashboard": {
     description: "Developed the live pricing matrix syncing real-time MCX bullion rates for exact carat purities (9KT, 14KT, 18KT, 22KT, 24KT) alongside manual override options.",
     howToTest: "Navigate to Live Price and view the active gold/silver metrics.",
-    testPath: "/admin/pricing/live"
+    testPath: "/admin/pricing/live",
+    images: [
+      { src: "/extracted_media/image64.png", caption: "Live Price Management Dashboard" }
+    ]
   },
   "19.2 Diamond & Gemstone Price Master Matrix": {
     description: "Built the core algorithmic foundation for the B2B pricing model, managing granular cost bases for Diamonds, Pearl, and Gemstones categorized by setting type and shape.",
     howToTest: "Navigate to Price Master and view the Diamond Pricing Matrix.",
-    testPath: "/admin/pricing/master"
+    testPath: "/admin/pricing/master",
+    images: [
+      { src: "/extracted_media/image60.png", caption: "Price Master — Main Dashboard" },
+      { src: "/extracted_media/image61.png", caption: "Price Master — Diamond Pricing Matrix" }
+    ]
   },
   "19.3 Standard Details Configuration Modal": {
-    description: "Engineered a complex popover matrix allowing admins to set numeric price values based strictly on minimum and maximum physical weight brackets (e.g., 79 - 95.999 per Carat).",
+    description: "Engineered a complex popover matrix allowing admins to set numeric price values based strictly on minimum and maximum physical weight brackets.",
     howToTest: "Edit a Diamond Price Master rule and adjust the minimum weight threshold.",
-    testPath: "/admin/pricing/standard"
+    testPath: "/admin/pricing/standard",
+    images: [
+      { src: "/extracted_media/image62.png", caption: "Diamond Price Configuration" },
+      { src: "/extracted_media/image63.png", caption: "Price Master — Standard Details Configuration Modal" }
+    ]
   },
   "19.4 Making Charges & Pearl Price Matrices": {
     description: "Integrated the Making Charges management console allowing granular labor cost additions synchronized with the broader Omnichannel framework.",
@@ -373,98 +460,224 @@ export const taskDetailsMap: Record<string, { description: string; howToTest: st
   "20.1 Banner Management Directory": {
     description: "Built a highly visual grid-based asset directory indexing all frontend promotional zones (Store, Checkout, Leadpopup, Pdp, Pip, Featured).",
     howToTest: "Navigate to Banners and view the available placement groups.",
-    testPath: "/admin/banners"
+    testPath: "/admin/banners",
+    images: [
+      { src: "/extracted_media/image65.png", caption: "Banner Management Dashboard — Primary View" },
+      { src: "/extracted_media/image66.png", caption: "Banner Management Dashboard — Scrolled View" },
+      { src: "/extracted_media/image67.png", caption: "Banner Detail — Hero Banner Configuration" },
+      { src: "/extracted_media/image71.png", caption: "Banner Management — PLP Configuration" }
+    ]
   },
   "20.2 Edit Banner Modal & Responsive Media Mapping": {
     description: "Engineered the modal overlay for uploading responsive banner assets (Desktop/Mobile media, thumbnails). Includes URL redirect linking and rich-text descriptions.",
     howToTest: "Click a banner group and upload a new promotional graphic.",
-    testPath: "/admin/banners/edit"
+    testPath: "/admin/banners/edit",
+    images: [
+      { src: "/extracted_media/image68.png", caption: "Edit Banner Modal — Media Assets" },
+      { src: "/extracted_media/image69.png", caption: "Edit Banner Modal — Additional Details" }
+    ]
   },
   "20.3 PLP In-Grid Promo Banner Integration": {
     description: "Developed the engine that allows targeted, dynamic promotional banners to be injected directly into the standard Product Listing Page (PLP) catalog grid.",
     howToTest: "Assign a banner to the PLP group and view it alongside products on the storefront.",
-    testPath: "/admin/banners/plp"
+    testPath: "/admin/banners/plp",
+    images: [
+      { src: "/extracted_media/image72.png", caption: "Frontend PLP — In-Grid Promo Banner" },
+      { src: "/extracted_media/image73.png", caption: "Frontend PLP — Dynamic Banner Display" }
+    ]
   },
   "20.4 Frontend Hero Landing Page Automation": {
     description: "Built the SDUI connection rendering the configured 'Herobanner' and 'Collections' directly onto the Next.js B2B/B2C landing pages.",
     howToTest: "Visit the live storefront home page and verify the banner matches the admin configuration.",
-    testPath: "/admin/banners/landing"
+    testPath: "/admin/banners/landing",
+    images: [
+      { src: "/extracted_media/image54.png", caption: "Frontend Landing Page — Hero Banner" },
+      { src: "/extracted_media/image55.png", caption: "Frontend Landing Page — Featured Collections" },
+      { src: "/extracted_media/image56.png", caption: "Frontend Landing Page — Collections Grid" },
+      { src: "/extracted_media/image57.png", caption: "Frontend Collection Details — Hero Section (Blare Collection)" },
+      { src: "/extracted_media/image58.png", caption: "Frontend Collection Details — Alternate Hero" },
+      { src: "/extracted_media/image59.png", caption: "Frontend Collection Details — Editorial Content" },
+      { src: "/extracted_media/image70.png", caption: "Frontend Landing Page — Promotional Hero Banner" }
+    ]
+  },
+  "20.5 Theme Builder & Assets Library": {
+    description: "Storefront configuration enabling deep customization of headers, footers, website layouts, and multi-domain connectivity.",
+    howToTest: "Navigate to Theme Builder and modify a global template.",
+    testPath: "/admin/theme-builder",
+    images: [
+      { src: "/extracted_media/image1.png", caption: "Storefront & Builders Interface" }
+    ]
   },
 
   // Phase 21
   "21.1 All Orders & Ecom Orders Advanced Filters": {
     description: "Created a comprehensive orders dashboard featuring advanced slide-out filter panels allowing precise segmentation by Payment Status, Destination, Date, and Tags.",
     howToTest: "Navigate to Orders and toggle the advanced filter accordion menu.",
-    testPath: "/admin/orders/ecom"
+    testPath: "/admin/orders/ecom",
+    images: [
+      { src: "/extracted_media/image23.png", caption: "Orders Dashboard — All Orders" },
+      { src: "/extracted_media/image24.png", caption: "Orders Dashboard — Secondary View" },
+      { src: "/extracted_media/image26.png", caption: "Ecom Orders — Advanced Filters Overview" },
+      { src: "/extracted_media/image27.png", caption: "Ecom Orders — Order Status Filter Selection" },
+      { src: "/extracted_media/image28.png", caption: "Order Status Filter - Full View" }
+    ]
   },
   "21.2 Single Order Detail View & Timeline Logging": {
     description: "Designed a dense informational layout displaying logistical KPIs, item-level price breakups, payment statuses, and a chronological tracking log of all automated order events.",
     howToTest: "Click on a specific order ID to view the detailed tracking timeline.",
-    testPath: "/admin/orders/detail"
+    testPath: "/admin/orders/detail",
+    images: [
+      { src: "/extracted_media/image29.png", caption: "Single Order Detail — Primary Information Panel" },
+      { src: "/extracted_media/image30.png", caption: "Single Order Detail — Timelines and Logging" }
+    ]
   },
   "21.3 Inventory Bagging & Weight Reconciliation Tool": {
     description: "Engineered the critical 'Attach Inventory' modal allowing admins to map actual manufactured physical weights to orders, calculating live price differences for refunds/charges.",
     howToTest: "Open an order, attach a bag number, and compare the physical weight to the digital inventory weight.",
-    testPath: "/admin/orders/bagging"
+    testPath: "/admin/orders/bagging",
+    images: [
+      { src: "/extracted_media/image104.png", caption: "Order Management — Inventory Bagging & Weight Reconciliation" }
+    ]
   },
   "21.4 All Transactions & Payment Gateway Status": {
-    description: "Built the financial ledger displaying transaction IDs, amounts, multi-country origin flags, and associated payment gateway routing (Razorpay, Gokwik).",
+    description: "Built the financial ledger displaying transaction IDs, amounts, multi-country origin flags, and associated payment gateway routing.",
     howToTest: "Navigate to All Transactions and verify the Success/Initiated status badges.",
-    testPath: "/admin/orders/transactions"
+    testPath: "/admin/orders/transactions",
+    images: [
+      { src: "/extracted_media/image25.png", caption: "Orders Dashboard — All Transactions" }
+    ]
   },
   "21.5 11+1 Monthly Gold Savings Scheme Dashboard": {
     description: "Developed a custom financial tracker for installment-based gold savings schemes, configuring tenure, grace periods, and maximum amount limits.",
     howToTest: "Navigate to Schemes and view the active Swarna Lakshmi Yojana configuration.",
-    testPath: "/admin/schemes"
+    testPath: "/admin/schemes",
+    images: [
+      { src: "/extracted_media/image101.png", caption: "11+1 Schemes Management Dashboard" }
+    ]
+  },
+  "21.6 Return Management (Reverse Pickup)": {
+    description: "Return Management module functioning as a logistical tracker for returned customer orders, with tabbed navigation for 'Authorize Return', 'RVP Initiate', and 'In-Transit'.",
+    howToTest: "Navigate to Returns and generate a Reverse Pickup.",
+    testPath: "/admin/returns",
+    images: [
+      { src: "/extracted_media/image3.png", caption: "Reverse Pickup Management Console" }
+    ]
   },
 
   // Phase 22
   "22.1 All Customers & User Group Policy routing": {
     description: "Built the CRM dashboard managing B2B/B2C users, featuring list segmentation (Active, Blacklisted) and geographic policy assignment.",
     howToTest: "Navigate to Customers and view the multi-column data grid.",
-    testPath: "/admin/customers"
+    testPath: "/admin/customers",
+    images: [
+      { src: "/extracted_media/image74.png", caption: "All Customers — Dashboard" }
+    ]
   },
   "22.2 Enquiries Dashboard": {
     description: "Developed a unified inbox for Support, Cancel Requests, Appointments (Video Calls), and Help/FAQ submissions with actionable ticket resolution flows.",
     howToTest: "Navigate to Enquiries and view the active Support tab.",
-    testPath: "/admin/enquiries"
+    testPath: "/admin/enquiries",
+    images: [
+      { src: "/extracted_media/image75.png", caption: "Enquiries Dashboard — Support Tab" },
+      { src: "/extracted_media/image77.png", caption: "Enquiries Dashboard — Appointment Tab" },
+      { src: "/extracted_media/image78.png", caption: "Enquiries Dashboard — Cancel Requests Tab" },
+      { src: "/extracted_media/image79.png", caption: "Enquiries Dashboard — Lead Tab" }
+    ]
   },
   "22.3 Customer Inquiry Modal & Ticket Resolution": {
     description: "Engineered the overlay modal allowing support agents to view exact message context, attached images, and client details to resolve tickets efficiently.",
     howToTest: "Click 'View' on an enquiry row to open the detailed modal.",
-    testPath: "/admin/enquiries/ticket"
+    testPath: "/admin/enquiries/ticket",
+    images: [
+      { src: "/extracted_media/image76.png", caption: "Enquiry Detail — Modal Overlay" }
+    ]
   },
   "22.4 Teams & Permission Roles Access Control": {
     description: "Built the internal HR control panel defining specific 'Permission Roles' (Operations, Accounts) mapped to granular module access levels.",
     howToTest: "Navigate to Teams -> Permission Roles and view the access configuration table.",
-    testPath: "/admin/teams"
+    testPath: "/admin/teams",
+    images: [
+      { src: "/extracted_media/image80.png", caption: "Permissions Roles Management Dashboard" }
+    ]
   },
 
   // Phase 23
   "23.1 Brand Profile & Logo Asset Management": {
     description: "Designed the General Settings interface for inputting legal enterprise profiles and uploading responsive brand logos (Square, Wide, Dark Theme) via specific dropzones.",
     howToTest: "Navigate to Settings -> Brand Logos and upload a new asset.",
-    testPath: "/admin/settings/brand"
+    testPath: "/admin/settings/brand",
+    images: [
+      { src: "/extracted_media/image81.png", caption: "General Settings — Brand Profile" },
+      { src: "/extracted_media/image82.png", caption: "General Settings — Brand Logos" },
+      { src: "/extracted_media/image97.png", caption: "General Settings — Expanded Branding Assets" },
+      { src: "/extracted_media/image98.png", caption: "Store Customization — Portal Login Splash Setup" },
+      { src: "/extracted_media/image99.png", caption: "Store Customization — Authentication & Mail Server Gateway" },
+      { src: "/extracted_media/image100.png", caption: "Dedicated Client Login Panel" }
+    ]
   },
   "23.2 Appearance & Theme Colors Configuration": {
     description: "Implemented visual configurations dictating global theme hex codes, product layout columns, pop-up events (Scroll-50%), and Announcement bars.",
     howToTest: "Navigate to Settings -> Appearance and toggle the Cart Popup switch.",
-    testPath: "/admin/settings/appearance"
+    testPath: "/admin/settings/appearance",
+    images: [
+      { src: "/extracted_media/image84.png", caption: "Appearance — General Configuration" },
+      { src: "/extracted_media/image85.png", caption: "Appearance — Layout Configuration" },
+      { src: "/extracted_media/image86.png", caption: "Appearance — Product Page Configuration" },
+      { src: "/extracted_media/image87.png", caption: "Appearance — Pop-up Settings" },
+      { src: "/extracted_media/image88.png", caption: "Appearance — Announcement Bar Configuration" }
+    ]
   },
   "23.3 3rd Party Integrations": {
     description: "Integrated the configuration UI for routing external tools like Payment Gateways (PhonePe, Stripe), Shipping Partners (ShipRocket), and Analytics (Google Tag Manager, Facebook Pixel).",
     howToTest: "Navigate to Settings -> 3rd Party and view the Analytics tracking fields.",
-    testPath: "/admin/settings/integrations"
+    testPath: "/admin/settings/integrations",
+    images: [
+      { src: "/extracted_media/image89.png", caption: "Shop Settings — Checkout Configuration" },
+      { src: "/extracted_media/image90.png", caption: "3rd Party — Payment Gateway Settings" },
+      { src: "/extracted_media/image91.png", caption: "Payment Gateway Selection Dropdown" },
+      { src: "/extracted_media/image92.png", caption: "3rd Party — Analytics Integration Settings" },
+      { src: "/extracted_media/image93.png", caption: "Shipping Partners — ShipRocket Authentication" }
+    ]
   },
   "23.4 Advanced Configuration (Domain DNS Setup)": {
     description: "Built the advanced SaaS multi-tenant domain mapping wizard, verifying A-records and generating XML sitemaps for the mapped domains.",
     howToTest: "Navigate to Settings -> Advanced and follow the 3-step domain setup process.",
-    testPath: "/admin/settings/advanced"
+    testPath: "/admin/settings/advanced",
+    images: [
+      { src: "/extracted_media/image94.png", caption: "Advanced Settings — Miscellaneous Configurations" },
+      { src: "/extracted_media/image95.png", caption: "Advanced Settings — Domain Mapping Complete" },
+      { src: "/extracted_media/image96.png", caption: "Store Settings — XML Sitemap Management" }
+    ]
   },
   "23.5 Social Media & OG Image Routing": {
     description: "Developed the settings panel managing external social media handles, WhatsApp chat toggles, and Open Graph (OG) sharing metadata for precise off-site linking.",
     howToTest: "Navigate to Settings -> Social Media and update the OG Description.",
-    testPath: "/admin/settings/social"
+    testPath: "/admin/settings/social",
+    images: [
+      { src: "/extracted_media/image83.png", caption: "General Settings — Social Media & OG Metadata" }
+    ]
+  },
+  "23.6 Global Currency Configuration": {
+    description: "Proposed roadmap feature: A settings module allowing the Admin to define the platform's default display currency (e.g., INR, USD, EUR) and its corresponding symbol (₹, $).",
+    howToTest: "Navigate to Settings -> Currency (Once Developed) and select INR.",
+    testPath: "/admin/settings/currency"
+  },
+  
+  // Phase 24
+  "24.1 Executive Dashboard Analytics": {
+    description: "Developed a primary executive e-commerce dashboard designed for real-time business performance monitoring with active site traffic, KPI cards, and revenue grids.",
+    howToTest: "Navigate to the Home Dashboard and view the KPIs.",
+    testPath: "/admin/dashboard",
+    images: [
+      { src: "/extracted_media/image2.png", caption: "Executive E-commerce Dashboard" }
+    ]
+  },
+  "24.2 Global Events & Logs Panel": {
+    description: "Created a global event tracking system auditing 'who made what changes'. Enables accountability for price master adjustments, exports, and inventory edits.",
+    howToTest: "Open the Global Notification panel or View Logs in Categories.",
+    testPath: "/admin/logs",
+    images: [
+      { src: "/extracted_media/image102.png", caption: "Global Notification Panel — Export Events" }
+    ]
   }
 };
-

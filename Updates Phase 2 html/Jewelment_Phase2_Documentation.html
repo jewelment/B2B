@@ -1,0 +1,2350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Jewelment B2B Architecture - Phase 2 Development Documentation with competitive analysis, structural enhancements, and integration workflows.">
+    <title>Jewelment B2B Architecture — Phase 2 Development Documentation</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        /* ===== CSS RESET & VARIABLES ===== */
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #111118;
+            --bg-card: #16161f;
+            --bg-card-hover: #1c1c28;
+            --bg-elevated: #1e1e2a;
+            --border-primary: #2a2a3a;
+            --border-subtle: #1f1f2f;
+            --text-primary: #f0f0f5;
+            --text-secondary: #a0a0b5;
+            --text-muted: #6a6a80;
+            --accent-blue: #4f8cff;
+            --accent-purple: #8b5cf6;
+            --accent-emerald: #34d399;
+            --accent-amber: #f59e0b;
+            --accent-rose: #f43f5e;
+            --accent-cyan: #22d3ee;
+            --gradient-hero: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            --gradient-card: linear-gradient(145deg, rgba(79, 140, 255, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%);
+            --gradient-accent: linear-gradient(135deg, #4f8cff 0%, #8b5cf6 100%);
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.4);
+            --shadow-md: 0 4px 16px rgba(0,0,0,0.5);
+            --shadow-lg: 0 8px 32px rgba(0,0,0,0.6);
+            --shadow-glow: 0 0 30px rgba(79, 140, 255, 0.1);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            font-size: 16px;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* ===== SCROLLBAR ===== */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-primary); }
+        ::-webkit-scrollbar-thumb { background: var(--border-primary); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--accent-blue); }
+
+        /* ===== LAYOUT ===== */
+        .page-wrapper {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* ===== SIDEBAR / TABLE OF CONTENTS ===== */
+        .sidebar {
+            width: 320px;
+            min-width: 320px;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border-primary);
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 100;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-header {
+            padding: 24px 20px;
+            border-bottom: 1px solid var(--border-primary);
+            background: var(--gradient-hero);
+        }
+
+        .sidebar-logo {
+            font-size: 1.1rem;
+            font-weight: 800;
+            background: var(--gradient-accent);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.02em;
+        }
+
+        .sidebar-subtitle {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .sidebar-search {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .sidebar-search input {
+            width: 100%;
+            padding: 10px 14px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            font-size: 0.85rem;
+            font-family: inherit;
+            outline: none;
+            transition: var(--transition);
+        }
+
+        .sidebar-search input:focus {
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px rgba(79, 140, 255, 0.15);
+        }
+
+        .sidebar-search input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .toc {
+            padding: 12px 0;
+        }
+
+        .toc-section {
+            padding: 0;
+        }
+
+        .toc-section-title {
+            display: block;
+            padding: 8px 20px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            margin-top: 12px;
+        }
+
+        .toc a {
+            display: block;
+            padding: 7px 20px 7px 24px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.82rem;
+            font-weight: 400;
+            transition: var(--transition);
+            border-left: 3px solid transparent;
+            line-height: 1.4;
+        }
+
+        .toc a:hover {
+            color: var(--text-primary);
+            background: rgba(79, 140, 255, 0.06);
+            border-left-color: var(--accent-blue);
+        }
+
+        .toc a.active {
+            color: var(--accent-blue);
+            background: rgba(79, 140, 255, 0.08);
+            border-left-color: var(--accent-blue);
+            font-weight: 500;
+        }
+
+        .toc a.level-2 { padding-left: 24px; }
+        .toc a.level-3 { padding-left: 38px; font-size: 0.78rem; }
+        .toc a.level-4 { padding-left: 52px; font-size: 0.75rem; }
+        .toc a.level-5 { padding-left: 64px; font-size: 0.73rem; }
+
+        /* ===== MAIN CONTENT ===== */
+        .main-content {
+            margin-left: 320px;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .content-container {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 40px 48px 120px;
+        }
+
+        /* ===== HERO SECTION ===== */
+        .hero {
+            background: var(--gradient-hero);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-xl);
+            padding: 56px 48px;
+            margin-bottom: 48px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -30%;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(79, 140, 255, 0.08) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: -40%;
+            left: -20%;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            background: rgba(79, 140, 255, 0.12);
+            border: 1px solid rgba(79, 140, 255, 0.2);
+            border-radius: 20px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: var(--accent-blue);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-badge::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            background: var(--accent-blue);
+            border-radius: 50%;
+            animation: pulse-dot 2s infinite;
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        .hero h1 {
+            font-size: 2.4rem;
+            font-weight: 900;
+            letter-spacing: -0.03em;
+            line-height: 1.15;
+            margin-bottom: 16px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero h1 .gradient-text {
+            background: var(--gradient-accent);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            font-size: 1.05rem;
+            color: var(--text-secondary);
+            max-width: 640px;
+            line-height: 1.7;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ===== READING PROTOCOL BOX ===== */
+        .protocol-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-lg);
+            padding: 32px;
+            margin-bottom: 48px;
+        }
+
+        .protocol-box h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--accent-cyan);
+        }
+
+        .protocol-box .protocol-item {
+            margin-bottom: 16px;
+        }
+
+        .protocol-box .protocol-item h4 {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+        }
+
+        .protocol-box .protocol-item p,
+        .protocol-box .protocol-item li {
+            font-size: 0.88rem;
+            color: var(--text-secondary);
+        }
+
+        .protocol-box .protocol-item ul {
+            padding-left: 20px;
+        }
+
+        .protocol-box .protocol-item li {
+            margin-bottom: 4px;
+        }
+
+        /* ===== HEADINGS ===== */
+        h1, h2, h3, h4, h5, h6 {
+            scroll-margin-top: 24px;
+        }
+
+        .section-h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            margin: 64px 0 24px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid var(--border-primary);
+            position: relative;
+        }
+
+        .section-h1::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 80px;
+            height: 2px;
+            background: var(--gradient-accent);
+        }
+
+        .section-h2 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            margin: 48px 0 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-subtle);
+            color: var(--text-primary);
+        }
+
+        .section-h2 .emoji {
+            margin-right: 8px;
+        }
+
+        .section-h3 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin: 40px 0 16px;
+            color: var(--accent-blue);
+        }
+
+        .section-h4 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 32px 0 12px;
+            color: var(--accent-purple);
+        }
+
+        .section-h5 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin: 24px 0 10px;
+            color: var(--accent-emerald);
+        }
+
+        .section-h6 {
+            font-size: 0.88rem;
+            font-weight: 600;
+            margin: 20px 0 8px;
+            color: var(--accent-amber);
+        }
+
+        .section-h7 {
+            font-size: 0.82rem;
+            font-weight: 600;
+            margin: 16px 0 8px;
+            color: var(--accent-cyan);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        /* ===== PARAGRAPHS ===== */
+        p {
+            font-size: 0.93rem;
+            color: var(--text-secondary);
+            margin-bottom: 14px;
+            line-height: 1.75;
+        }
+
+        p strong {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        /* ===== LISTS ===== */
+        ul, ol {
+            padding-left: 24px;
+            margin-bottom: 16px;
+        }
+
+        li {
+            font-size: 0.93rem;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+            line-height: 1.65;
+        }
+
+        li strong {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        li::marker {
+            color: var(--accent-blue);
+        }
+
+        /* ===== IMAGES ===== */
+        .image-container {
+            margin: 24px 0;
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            border: 1px solid var(--border-primary);
+            background: var(--bg-card);
+            transition: var(--transition);
+        }
+
+        .image-container:hover {
+            border-color: rgba(79, 140, 255, 0.3);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .image-container img {
+            width: 100%;
+            display: block;
+            cursor: zoom-in;
+            transition: transform 0.3s ease;
+        }
+
+        .image-container:hover img {
+            transform: scale(1.005);
+        }
+
+        .image-caption {
+            padding: 16px 20px;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+            border-top: 1px solid var(--border-subtle);
+            background: var(--bg-elevated);
+        }
+
+        .image-caption .caption-title {
+            font-weight: 600;
+            color: var(--text-secondary);
+            display: block;
+            margin-bottom: 6px;
+            font-size: 0.82rem;
+        }
+
+        /* ===== COMPLETED PHASES CARDS ===== */
+        .phase-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .phase-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-md);
+            padding: 16px 20px;
+            transition: var(--transition);
+        }
+
+        .phase-card:hover {
+            border-color: rgba(79, 140, 255, 0.2);
+            background: var(--bg-card-hover);
+        }
+
+        .phase-card .phase-title {
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .phase-card .phase-desc {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* ===== PENDING TASKS ===== */
+        .task-list {
+            list-style: none;
+            padding-left: 0;
+            margin: 20px 0;
+        }
+
+        .task-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 14px 18px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-md);
+            margin-bottom: 8px;
+            transition: var(--transition);
+        }
+
+        .task-list li:hover {
+            border-color: rgba(79, 140, 255, 0.2);
+        }
+
+        .task-number {
+            min-width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--gradient-accent);
+            border-radius: 50%;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .task-content {
+            font-size: 0.88rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .task-content strong {
+            color: var(--text-primary);
+        }
+
+        .task-tag {
+            display: inline-block;
+            padding: 2px 8px;
+            background: rgba(245, 158, 11, 0.12);
+            color: var(--accent-amber);
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 500;
+            margin-left: 6px;
+        }
+
+        /* ===== INFO BOXES ===== */
+        .info-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border-primary);
+            border-left: 4px solid var(--accent-blue);
+            border-radius: var(--radius-md);
+            padding: 20px 24px;
+            margin: 20px 0;
+        }
+
+        .info-box.important {
+            border-left-color: var(--accent-amber);
+        }
+
+        .info-box.success {
+            border-left-color: var(--accent-emerald);
+        }
+
+        .info-box p {
+            margin-bottom: 0;
+        }
+
+        /* ===== HORIZONTAL RULES ===== */
+        hr {
+            border: none;
+            border-top: 1px solid var(--border-primary);
+            margin: 32px 0;
+        }
+
+        /* ===== COPY BUTTON ===== */
+        .copy-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: rgba(79, 140, 255, 0.1);
+            border: 1px solid rgba(79, 140, 255, 0.2);
+            border-radius: 6px;
+            color: var(--accent-blue);
+            font-size: 0.72rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            font-family: inherit;
+        }
+
+        .copy-btn:hover {
+            background: rgba(79, 140, 255, 0.2);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* ===== SUB-MENU LIST ===== */
+        .submenu-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            list-style: none;
+            padding-left: 0;
+            margin: 12px 0 16px;
+        }
+
+        .submenu-list li {
+            padding: 6px 14px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-primary);
+            border-radius: 20px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 0;
+        }
+
+        /* ===== LIGHTBOX ===== */
+        .lightbox-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.92);
+            z-index: 10000;
+            cursor: zoom-out;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+        }
+
+        .lightbox-overlay.active {
+            display: flex;
+        }
+
+        .lightbox-overlay img {
+            max-width: 95%;
+            max-height: 95vh;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .lightbox-close {
+            position: fixed;
+            top: 20px;
+            right: 24px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10001;
+            transition: var(--transition);
+        }
+
+        .lightbox-close:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        /* ===== BACK TO TOP ===== */
+        .back-to-top {
+            position: fixed;
+            bottom: 32px;
+            right: 32px;
+            width: 44px;
+            height: 44px;
+            background: var(--gradient-accent);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            cursor: pointer;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow-md);
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+            z-index: 99;
+        }
+
+        .back-to-top.visible {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        /* ===== MOBILE TOGGLE ===== */
+        .sidebar-toggle {
+            display: none;
+            position: fixed;
+            top: 16px;
+            left: 16px;
+            z-index: 200;
+            width: 40px;
+            height: 40px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            cursor: pointer;
+            font-size: 1.2rem;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 1024px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .sidebar-toggle {
+                display: flex;
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .content-container {
+                padding: 24px 20px 80px;
+            }
+
+            .hero {
+                padding: 36px 28px;
+            }
+
+            .hero h1 {
+                font-size: 1.7rem;
+            }
+        }
+
+        /* ===== PRINT STYLES ===== */
+        @media print {
+            .sidebar, .sidebar-toggle, .back-to-top, .copy-btn { display: none !important; }
+            .main-content { margin-left: 0; }
+            .content-container { max-width: 100%; padding: 20px; }
+            body { background: white; color: #111; }
+            .hero { background: #f5f5f5; }
+            .image-container { break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- SIDEBAR TOGGLE (Mobile) -->
+<button class="sidebar-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open')" aria-label="Toggle navigation">☰</button>
+
+<!-- ===== SIDEBAR / TABLE OF CONTENTS ===== -->
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <div class="sidebar-logo">Jewelment B2B</div>
+        <div class="sidebar-subtitle">Phase 2 Development Documentation</div>
+    </div>
+    <div class="sidebar-search">
+        <input type="text" id="tocSearch" placeholder="Search sections..." oninput="filterToc(this.value)">
+    </div>
+    <nav class="toc" id="toc">
+        <div class="toc-section">
+            <span class="toc-section-title">Overview</span>
+            <a href="#project-overview" class="level-2">Project Overview</a>
+            <a href="#project-summary" class="level-2">Project Summary</a>
+            <a href="#what-is-this" class="level-3">What is this project for?</a>
+            <a href="#how-solves" class="level-3">How does this solve the problem?</a>
+            <a href="#completed-phases" class="level-2">🟢 Completed Phases (1-15)</a>
+            <a href="#pending-priorities" class="level-2">🚀 Pending Priorities</a>
+        </div>
+        <div class="toc-section">
+            <span class="toc-section-title">Research & Analysis</span>
+            <a href="#research" class="level-2">Research</a>
+            <a href="#web-search-design" class="level-3">Full-function Web Search Design</a>
+            <a href="#dashboard" class="level-3">Dashboard</a>
+            <a href="#return-management" class="level-3">Return Management</a>
+        </div>
+        <div class="toc-section">
+            <span class="toc-section-title">Products</span>
+            <a href="#products" class="level-2">Products</a>
+            <a href="#all-products" class="level-3">All Products</a>
+            <a href="#product-edit-view" class="level-4">Single Product Editable View</a>
+            <a href="#product-info" class="level-5">Product Info</a>
+            <a href="#options-product" class="level-5">Options</a>
+            <a href="#price-master-product" class="level-5">Price Master</a>
+            <a href="#variant" class="level-5">Variant</a>
+            <a href="#more-features" class="level-5">More Features</a>
+            <a href="#inventory" class="level-3">Inventory</a>
+            <a href="#review" class="level-3">Reviews</a>
+        </div>
+        <div class="toc-section">
+            <span class="toc-section-title">Orders</span>
+            <a href="#orders" class="level-2">Orders</a>
+        </div>
+        <div class="toc-section">
+            <span class="toc-section-title">Product Parameters</span>
+            <a href="#product-parameter" class="level-2">Product Parameter</a>
+            <a href="#categories" class="level-3">Categories</a>
+            <a href="#options" class="level-3">Options</a>
+            <a href="#all-options" class="level-4">All Options</a>
+            <a href="#metal" class="level-5">Metal</a>
+            <a href="#diamond-gemstone" class="level-5">Diamond & Gemstone</a>
+            <a href="#option-sets" class="level-4">Option Sets</a>
+            <a href="#collection" class="level-3">Collection</a>
+            <a href="#collection-details" class="level-3">Collection Details</a>
+            <a href="#price-master" class="level-3">Price Master</a>
+            <a href="#metal-price-master" class="level-4">Metal Price Master</a>
+            <a href="#diamond-price-master" class="level-4">Diamond Price Master</a>
+        </div>
+        <div class="toc-section">
+            <span class="toc-section-title">Platform Features</span>
+            <a href="#live-price" class="level-2">Live Price</a>
+            <a href="#theme-builder" class="level-2">Theme Builder</a>
+            <a href="#banners" class="level-2">Banners</a>
+            <a href="#customers" class="level-2">Customers</a>
+            <a href="#all-customer" class="level-3">All Customer</a>
+            <a href="#user-group" class="level-3">User Group</a>
+            <a href="#enquires" class="level-3">Enquiries</a>
+            <a href="#teams" class="level-2">Teams</a>
+            <a href="#permission-role" class="level-3">Permission Role</a>
+            <a href="#members" class="level-3">Members</a>
+        </div>
+        <div class="toc-section">
+            <span class="toc-section-title">Settings & Configuration</span>
+            <a href="#settings" class="level-2">Settings</a>
+            <a href="#store-config" class="level-3">Store Configuration</a>
+            <a href="#general-settings" class="level-4">General Settings</a>
+            <a href="#appearance" class="level-4">Appearance</a>
+            <a href="#shop-setting" class="level-4">Shop Setting</a>
+            <a href="#checkout" class="level-4">Checkout</a>
+            <a href="#third-party" class="level-4">Third-Party</a>
+            <a href="#shipping-partners" class="level-4">Shipping Partners</a>
+            <a href="#advance" class="level-4">Advance</a>
+            <a href="#domain-mapping" class="level-3">Map your Domain</a>
+            <a href="#sitemap" class="level-3">Sitemap</a>
+            <a href="#enterprise-profile" class="level-3">Enterprise Profile</a>
+            <a href="#client-login" class="level-4">Client Login Panel</a>
+        </div>
+        <div class="toc-section">
+            <span class="toc-section-title">Business Logic</span>
+            <a href="#scheme-11-1" class="level-2">11+1 Scheme</a>
+            <a href="#generic-thoughts" class="level-2">Generic Thoughts</a>
+            <a href="#events-logs" class="level-2">Events & Logs Panel</a>
+            <a href="#ready-to-ship" class="level-2">Ready to Ship Solution</a>
+            <a href="#extra-gold" class="level-2">Extra Gold Solution</a>
+            <a href="#development" class="level-2">Development</a>
+        </div>
+    </nav>
+</aside>
+
+<!-- ===== MAIN CONTENT ===== -->
+<main class="main-content">
+    <div class="content-container">
+
+        <!-- HERO SECTION -->
+        <header class="hero" id="project-overview">
+            <div class="hero-badge">Phase 2 Documentation</div>
+            <h1>Jewelment B2B Architecture<br><span class="gradient-text">Project Overview</span></h1>
+            <p>Complete development documentation covering competitive analysis updates, structural enhancements, integration workflows, and UI/UX specifications for the Jewelment B2B/B2C platform.</p>
+        </header>
+
+        <!-- READING PROTOCOL -->
+        <div class="protocol-box">
+            <h3>📋 Document Navigation & Reading Protocol</h3>
+            <div class="protocol-item">
+                <h4>1. Document Objective</h4>
+                <ul><li>This file outlines the Phase 2 competitive analysis updates, structural enhancements, and integration workflows required for the existing system architecture.</li></ul>
+            </div>
+            <div class="protocol-item">
+                <h4>2. Information Hierarchy</h4>
+                <ul>
+                    <li><strong>Strategic Context:</strong> Each section defines the core objective and the specific architectural or UI/UX changes required to improve system performance.</li>
+                    <li><strong>Visual Assets:</strong> Interface screenshots are positioned immediately below the relevant contextual text to ensure immediate visual alignment.</li>
+                    <li><strong>Technical Image Summaries:</strong> Every screenshot is accompanied by a structured breakdown detailing UI panels, data table structures, sorting logic, and action triggers for precise development execution.</li>
+                </ul>
+            </div>
+            <div class="protocol-item">
+                <h4>3. Recommended Review Process</h4>
+                <ul>
+                    <li><strong>Step 1:</strong> Review the high-level structural changes and data routing proposed in the primary text.</li>
+                    <li><strong>Step 2:</strong> Cross-reference the proposed updates with the provided visual interface screenshots to map out the user journey.</li>
+                    <li><strong>Step 3:</strong> Analyze the detailed image summaries to extract exact component requirements and structural logic before initiating deployment in the development environment.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- ======================== -->
+        <!-- PROJECT SUMMARY -->
+        <!-- ======================== -->
+        <h2 class="section-h1" id="project-summary">## Project Summary</h2>
+
+        <h3 class="section-h2" id="what-is-this">### What is this project for?</h3>
+        <p>The <strong>Jewelment B2B Platform</strong> is a luxury digital showroom, wholesale e-commerce portal, and internal CRM system. It is designed as a scalable, multi-tenant SaaS platform where businesses like <strong>Ashok Jewels</strong> (one of the clients) can bring their own databases (BYODB) and operate under their own branding. It features a complete Product Information Management (PIM) system, dynamic margin automation tied to live bullion rates, and Server-Driven UI (SDUI) for mobile apps.</p>
+
+        <h3 class="section-h2" id="how-solves">### How does this solve the problem?</h3>
+        <p>Traditional B2B jewelry wholesale heavily relies on manual purchase orders, static pricing, and offline printed catalogs. The Jewelment platform completely solves those inefficiencies by:</p>
+        <ol>
+            <li><strong>Frictionless Ordering:</strong> Replacing manual POs with a highly visual "PO Matrix Checkout" and "Flipbook" presentation layer.</li>
+            <li><strong>Profitability Protection:</strong> Utilizing a dynamic margin calculator tied to <strong>live MCX bullion rates</strong> to automatically adjust tiered pricing and discounts.</li>
+            <li><strong>Sales Empowerment:</strong> Giving field sales reps powerful CRM tools, including the ability to "impersonate" clients to place orders on their behalf.</li>
+            <li><strong>Scalable SaaS Infrastructure:</strong> By leveraging PostgreSQL, Edge subdomain routing, and Server-Driven UI (SDUI), it allows the entire ecosystem to be safely segmented and sold to other businesses as a service.</li>
+        </ol>
+
+        <hr>
+
+        <!-- COMPLETED PHASES -->
+        <h3 class="section-h2" id="completed-phases"><span class="emoji">🟢</span> Completed Developments (Phases 1-15)</h3>
+        <p>The vast majority of the core infrastructure has been successfully deployed. Notable completed phases include:</p>
+        <div class="phase-grid">
+            <div class="phase-card"><span class="phase-title">1.0 Admin Catalog Infrastructure</span><span class="phase-desc"> — PIM grid, bulk-sync engines, and CSV imports.</span></div>
+            <div class="phase-card"><span class="phase-title">2.0 Gateway & RBAC</span><span class="phase-desc"> — Edge middleware, JWT auth, and CRM verification.</span></div>
+            <div class="phase-card"><span class="phase-title">3.0 B2B Presentation Layer</span><span class="phase-desc"> — Master lookbook, Framer Motion flipbook, and PIN gatekeeper.</span></div>
+            <div class="phase-card"><span class="phase-title">4.0 Unified PO Matrix & Cart</span><span class="phase-desc"> — Global cart logic and draft PO generation.</span></div>
+            <div class="phase-card"><span class="phase-title">5.0 Margin Automation</span><span class="phase-desc"> — MCX live bullion sync, discount CRM, and client impersonation.</span></div>
+            <div class="phase-card"><span class="phase-title">6.0 Fulfillment & ERP</span><span class="phase-desc"> — ERP webhook engine and SendGrid automations.</span></div>
+            <div class="phase-card"><span class="phase-title">7.0 Global Theme Customization</span><span class="phase-desc"> — CSS variable injection and live preview engines.</span></div>
+            <div class="phase-card"><span class="phase-title">8.0 V2 Multi-Tenant Isolation</span><span class="phase-desc"> — PostgreSQL schema, Edge subdomain routing, and brand asset bundlers.</span></div>
+            <div class="phase-card"><span class="phase-title">10.0 V2 OTA Scale</span><span class="phase-desc"> — React Native CLI & CodePush pipeline.</span></div>
+            <div class="phase-card"><span class="phase-title">11.0 V2 Enterprise Infrastructure</span><span class="phase-desc"> — BYODB (Bring Your Own DB), custom DNS, and PITR cloud backups.</span></div>
+            <div class="phase-card"><span class="phase-title">12.0 Analytics & Ticketing</span><span class="phase-desc"> — Flipbook telemetry, funnel tracking, and Jira-style Kanban boards.</span></div>
+            <div class="phase-card"><span class="phase-title">13.0 V3 SDUI Theme Builder</span><span class="phase-desc"> — Elementor-style visual property editors and dynamic components.</span></div>
+            <div class="phase-card"><span class="phase-title">15.0 Secure Media Proxy</span><span class="phase-desc"> — WebP optimization and secure proxy engines.</span></div>
+        </div>
+
+        <hr>
+
+        <!-- PENDING PRIORITIES -->
+        <h3 class="section-h2" id="pending-priorities"><span class="emoji">🚀</span> Pending / Active Priorities (Phase 16 & Remaining)</h3>
+        <p>The following tasks are queued for active development based on the Roadmap Ledger:</p>
+        <ol class="task-list">
+            <li><span class="task-number">1</span><span class="task-content"><strong>Headless PO Matrix Checkout (Phase 9.0):</strong> Currently In Progress (15%) for the decoupling of API for React Native Expo.<span class="task-tag">In Progress</span></span></li>
+            <li><span class="task-number">2</span><span class="task-content"><strong>Enterprise Onboarding Workflow:</strong> Automating the onboarding process for new B2B tenants.</span></li>
+            <li><span class="task-number">3</span><span class="task-content"><strong>Master Inventory Advanced Filters:</strong> Enhancing the dashboard with deep filtering capabilities.</span></li>
+            <li><span class="task-number">4</span><span class="task-content"><strong>Advanced PDF Generation Engine:</strong> API for creating dynamic catalog PDFs.</span></li>
+            <li><span class="task-number">5</span><span class="task-content"><strong>Flipbook Rendering & UI Bug Fixes:</strong> Refining the client-facing presentation layer.</span></li>
+            <li><span class="task-number">6</span><span class="task-content"><strong>Left Sidebar RBAC Overhaul:</strong> Restructuring the navigation component based on user roles.</span></li>
+            <li><span class="task-number">7</span><span class="task-content"><strong>Segment-Oriented PO Matrix Engine:</strong> Advanced matrix builder for admins.</span></li>
+            <li><span class="task-number">8</span><span class="task-content"><strong>SDUI Global Website Builder Platform:</strong> Finalizing the theme-builder capabilities.</span></li>
+            <li><span class="task-number">9</span><span class="task-content"><strong>Auto QC & Diagnostics Interface:</strong> Creating the interface for system health and troubleshooting.</span></li>
+            <li><span class="task-number">10</span><span class="task-content"><strong>AI MOM & Conversations Manager:</strong> Finalizing the AI Minutes of Meeting manager based on recent backups.</span></li>
+            <li><span class="task-number">11</span><span class="task-content"><strong>Comprehensive Pseudocode & Manual:</strong> Finalizing documentation for onboarding future developers.</span></li>
+        </ol>
+
+        <!-- ======================== -->
+        <!-- RESEARCH -->
+        <!-- ======================== -->
+        <h2 class="section-h1" id="research">Research</h2>
+        <p>You know the detailed information about the project. What is the goal? Whatever we did, if required, you can still analyze the folder and all the logic and the functions to understand what we did yet. Also for the understanding we create the road map. So you can analyze that for detailed clarity about what's done and what's pending task.</p>
+        <p>Along with that I get a chance to do some research as a competitive analysis. I take the call with some of my competitive brands and get a better understanding about the product. So I think we can implement those things into our system too. Those have the similar portal. I will tell you some of the logics that they integrated, which is absolutely correct. We also need to follow the same. I will tell you the proper detailing also along with that I will share the detailed screenshots for your understanding so you can understand my prompt and also check the related images.</p>
+
+        <h3 class="section-h2" id="web-search-design">Full-function Web Search Design</h3>
+        <p>As we know the dashboard is managing the backend or the internal dashboards of the product management system but from the front face we required a panel where we can develop our web page for the general user. This website will be not for just B2B also we can utilize this entire panel for the B2C too. For example whatever inventory we are uploading, we provide the three tags:</p>
+        <ul class="submenu-list">
+            <li>B2B</li>
+            <li>B2C</li>
+            <li>Both</li>
+        </ul>
+        <p>With that we can simply justify that inventory for a particular portal.</p>
+        <p>We create a <strong>Storefront & Builders</strong> who can help us to design the website, and app. We just need to work on that to make it that much more advanced, like Shopify, so easily we can design a website with better drag and drop components. Here we need to follow all the e-commerce standards where we can create this kind of the website. Here in the centralized database system we can create multiple websites. As I told you I want to create two websites so definitely we have the two domains. For example:</p>
+        <ul>
+            <li><strong>ashokjeweles.com</strong> for the B2C</li>
+            <li><strong>b2b.ashokjewels.com</strong> for the B2B</li>
+        </ul>
+        <p>But the master inventory is always the same. Which we can segregate with the tag of the product: B2B, B2C, or both. Same will happen with the app. So there we need the required functionality to manage the domain connectivity.</p>
+        <p>Here we will create some default pages. For the user according to the global standards you need to research the architectures to design this website where everything will be kept separate. This client data will be saved on the website-like portal but the database, like product image, product data, will be saved on the client internal server.</p>
+        <p>As a basic e-commerce B2B or B2C website, we require the basic pages like: <strong>Home Page, About Us, Collections, Blogs, Multiple Blocks View, Single Block Page, Product Landing Page, Product Description Page, Policies Pages, Contact Us, FAQ, Order Tracking Page, Shipping Policy, Return Policy, Cookies Policy, Terms and Conditions</strong>.</p>
+        <p>For the components we need to design a separate editor for header and footer. Analyze how the Shopify architecture is working for all scenarios and accordingly I want it to lie the same. You need to create a dedicated separate section in a sidebar to display all relative menus.</p>
+
+        <div class="image-container">
+            <img src="extracted_media/image1.png" alt="Storefront & Builders Interface" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Storefront & Builders Interface</span>
+                Reference screenshot for the web search design panel layout.
+            </div>
+        </div>
+
+        <!-- DASHBOARD -->
+        <h3 class="section-h2" id="dashboard">Dashboard</h3>
+        <p>Below are competitive brand screenshots. In this dashboard I like to see the welcome message for that particular client or customer, like "Good morning Kevin, and the day and date with the beautiful quote".</p>
+        <p>Then we can show the order and revenue matrix in a short way and also we can add a CTA of event log or export log. This is very helpful for security levels.</p>
+        <p>Below that we can add a bar to show the live Visitors — that scenario, I like the live visitor view of Google Analytics where they are showing how many live visitors are coming in the past 30 minutes.</p>
+
+        <div class="image-container">
+            <img src="extracted_media/image2.png" alt="Executive E-commerce Dashboard" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Executive E-commerce Dashboard</span>
+                This image displays a primary executive e-commerce dashboard designed for real-time business performance monitoring. The layout includes a top navigation bar with a global search field, notification icons, and a user profile, alongside a comprehensive vertical sidebar where the primary dashboard view is currently active. The main header section features a personalized welcome message that includes the user's name, the current day and date, and a brief contextual quote, followed by a concise order and revenue trend matrix. Adjacent to this greeting are two primary call-to-action buttons for exporting logs and event logs, positioned for security and auditing purposes. Directly below the header, a dedicated bar tracks live visitors to monitor active site traffic. The central interface contains a store performance panel structured into minimalist KPI cards, displaying plain-text integer metrics for orders, customers, engagement, and conversions, along with monetary revenue figures formatted in local currency.
+            </div>
+        </div>
+
+        <!-- RETURN MANAGEMENT -->
+        <h3 class="section-h2" id="return-management">Return Management</h3>
+
+        <div class="image-container">
+            <img src="extracted_media/image3.png" alt="Reverse Pickup Management Console" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Reverse Pickup Management Console</span>
+                This image displays the Reverse Pickup management console within the Return Management module, functioning as a logistical tracker for returned customer orders. The interface features a top navigation bar with global search and profile settings, alongside a left vertical sidebar where the 'Return Management' section and its sub-menu 'Reverse Pickup' are actively highlighted. The main content area utilizes a tabbed navigation system containing 'All (17)', 'Authorize Return', 'RVP Initiate', 'RVP In-Transit Items', and 'RVP Delivered Items'. The page header contains the title "Reverse Pickup" and two primary Call-to-Action buttons: "Generate Reverse Pickup" and "Export".
+            </div>
+        </div>
+
+        <!-- ======================== -->
+        <!-- PRODUCTS -->
+        <!-- ======================== -->
+        <h2 class="section-h2" id="products">Products</h2>
+        <p>Product is a main menu in the sidebar. In the products we have some sub-menus like:</p>
+        <ul class="submenu-list">
+            <li>All Products</li>
+            <li>Inventory</li>
+            <li>Product Grid (existing)</li>
+            <li>Product Meta Field (existing)</li>
+            <li>Import Products (existing)</li>
+            <li>Reviews</li>
+        </ul>
+        <p>Here we can easily manage:</p>
+        <ul>
+            <li>How many products we have</li>
+            <li>For that particular SKU how much inventory we have right now</li>
+            <li>How many products are available for ready to ship</li>
+            <li>How many we have for the custom manufacturing orders</li>
+        </ul>
+        <p>We can easily check the inventory based on the store, like in which store we have how much inventory, so we can do the ready to ship. Also we can manage the reviews.</p>
+
+        <!-- ALL PRODUCTS -->
+        <h4 class="section-h4" id="all-products">All Products</h4>
+
+        <div class="image-container">
+            <img src="extracted_media/image4.png" alt="All Products Management Console" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">All Products Management Console</span>
+                This image displays the "All Products" management console, which serves as the primary master inventory grid for viewing, filtering, and managing product catalog listings. The interface architecture includes a top global navigation bar featuring a search field, cache clearance, and user profile. The main content panel utilizes a horizontal tab system categorizing products by state — 'All (5819)', 'Active (5774)', 'Draft (45)', 'Pending (0)', and 'Archived (2386)'. The page header provides several primary and secondary Call-to-Action controls: "View Logs", "Export", "Update Variants", "Import", and a prominent "+ Add Product" button. The core data is presented in a minimalist list-view table.
+            </div>
+        </div>
+
+        <!-- SINGLE PRODUCT EDITABLE VIEW -->
+        <h5 class="section-h5" id="product-edit-view">All Product > Open Product / Create New Product</h5>
+        <h6 class="section-h6">Single Product Editable View</h6>
+        <p>Based on the below screenshot you can see there we have the multiple options and we have the product timeline to manage all product settings. First the layout is very clear and here this is a split layout in the two parts:</p>
+        <ul>
+            <li>We can see the product details.</li>
+            <li>We can see how the product will look in the frontend.</li>
+        </ul>
+        <p>In the timeline you can see the five options:</p>
+
+        <!-- PRODUCT INFO -->
+        <h6 class="section-h7" id="product-info">Product Info</h6>
+        <p>Here you can see the Title, Product Status, Descriptions, HSN Code, Media. We can easily select the Product Type. In this section we have multiple options like:</p>
+        <ul>
+            <li>Category</li>
+            <li>Sub-category</li>
+            <li>Vendor Name</li>
+            <li>Collections</li>
+            <li>Tag</li>
+            <li>Chain</li>
+            <li>SKU</li>
+            <li>Barcode</li>
+            <li>Track inventory on variants</li>
+            <li>Price</li>
+        </ul>
+        <p>Here I want to add an option for the selling channels. We can select the channels like <strong>B2B, B2C, or both</strong>. With this simple small trick we can work dynamically for the two solutions B2B and B2C both. If you select the B2B then the product will be only reflected on the B2B channels. If we select B2C then the product will only reflect on B2C eCommerce channels. If we select both then the product will be shown on both channels.</p>
+        <p>Also we need all these required fields in the Excel so we can easily manage the product import/export features.</p>
+
+        <div class="image-container">
+            <img src="extracted_media/image5.png" alt="Product Info - General Data & Preview" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Product Info — General Data & Preview</span>
+                This image displays the top section of the single product editable view within the master inventory, functioning to capture primary product metadata alongside a live frontend preview. The main interface utilizes a horizontal timeline stepper navigation with 'Product Info' currently active, followed by 'Options', 'Price Master', 'Variants', and 'More Features'. The workspace is split into two panels: the left data-entry pane contains a text input for Title, a segmented control for Product Status (Active, Draft, Pending), a WYSIWYG rich text editor for the Description, and an input for HSN Code; the right pane features a live product preview card.
+            </div>
+        </div>
+
+        <p>Here you can see how we can set the media and how we can align the media with the particular product color segments. You can see there are the two options where we can make the image, prime image, which will be reflecting in the first under PDP and PLP. Also variant-wise we can select and auto-align the images based on the variant color. Like here we have some options like gold, rose gold, and white gold or silver/platinum. So based on that selection the image will automatically fall into that variant.</p>
+
+        <div class="image-container">
+            <img src="extracted_media/image6.png" alt="Media Management Grid & AI Toolset" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Media Management Grid & AI Generate</span>
+                This image displays the lower continuation of the Media management grid and the introduction of the Generative AI toolset within the 'Product Info' timeline. The manual upload grid displays additional image cards mapped to the "White" color variant via dropdown selectors, a specifically designated "Description Image" card, and an empty dashed-border dropzone card for adding new media. Directly below the manual grid is a distinct "Auto AI Generate" container panel featuring an "AI ASSIST" badge with an "AI Image Generator" tool.
+            </div>
+        </div>
+
+        <p>Also in the upcoming phase we can develop the technology where we also can enhance the image using generative AI or Google Gemini models. For example if a user updates some raw images then with a simple click on "Refine Images" all images will be automatically refined according to the e-commerce standards.</p>
+
+        <div class="image-container">
+            <img src="extracted_media/image7.png" alt="Product Type & Categories Selection" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Product Type Selection Panel</span>
+                Product type and category configuration with vendor name, collections, and tags selection.
+            </div>
+        </div>
+
+        <div class="image-container">
+            <img src="extracted_media/image8.png" alt="Product Type & Inventory Configuration" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Product Type & Inventory Configuration</span>
+                This image illustrates the "Product Type" and "Inventory" configuration panels within the 'Product Info' timeline view, utilized to establish product taxonomy, collection routing, and core tracking identifiers. The "Product Type" container features dropdown menus for Category, Sub-Category, and Vendor Name, followed by a wide input field for Collections. Below this is a "Tags" input displaying active pill-shaped tags ("Modern", "Trendy"), a dropdown for "Chain" options. The "Inventory" section displays mandatory text input fields for SKU and optional fields for Barcode data.
+            </div>
+        </div>
+
+        <p>Then we have the section for the inventory with three major options: SKU, barcode, and the track inventory on variance option. Then we have another section of price with two options to enable dynamic price and show price breakup.</p>
+
+        <div class="image-container">
+            <img src="extracted_media/image9.png" alt="Inventory & Price Toggles" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Inventory Tracking & Pricing Toggles</span>
+                This image displays a lower segment of the product configuration timeline, specifically focusing on inventory tracking and initial pricing toggles. It shows SKU (displaying an alphanumeric code) and Barcode fields, along with checkboxes to manage variant tracking rules such as "Continue to sell when out of stock" and "Meta Available". Below this, the top of a "Price" section is visible, featuring toggles to "Enable Dynamic Pricing" and "Show Price Breakup".
+            </div>
+        </div>
+
+        <p>Then we need to create an option for shipping where we can tell the shipping weight, length, height, and width. And the search engine optimization where we can preview and review the meta data title and descriptions.</p>
+
+        <div class="image-container">
+            <img src="extracted_media/image10.png" alt="Shipping & SEO Configuration" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Shipping & Search Engine Optimisation</span>
+                This image illustrates the final visible sections of the single product editable view, focusing on physical logistics and search engine optimization. The "Shipping" container provides text input fields for Product Weight (kg), Length (cm), Height (cm), and Width (cm), alongside a checkbox for international shipping availability. The "Search Engine Optimisation" panel displays a "Metadata Preview" featuring an auto-generated SEO Title and Description, accompanied by an "Edit" action link.
+            </div>
+        </div>
+
+        <!-- OPTIONS -->
+        <h6 class="section-h7" id="options-product">Options</h6>
+        <p>In options you can see the selected option sets or the option to select the single variant option. Also there you can remove the option set. So simply we create the options earlier and that option will be easily reflected in this. Based on this option selection, we can see the effect on the price master and the product variants.</p>
+
+        <div class="image-container">
+            <img src="extracted_media/image11.png" alt="Options - Variant Mapping" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Options — Variant Mapping Configuration</span>
+                This image displays the 'Options' segment of the single product editable view, designed to map and manage variant combinations for "Gradiant Triangle Diamond Ring". The left data pane contains the "Options" container, indicating an active Option Set titled "Ladies Diamond Rings 6-20 All Os" alongside a "Remove Option Set" text action and a "Single variant" checkbox. Data structure displays rows for: "Metal" mapped to "Gold (2)", "Diamond" mapped to "SI-HI (0), VVS-FG (0)", and "Size" mapped to multiple numeric sizes (7 through 20).
+            </div>
+        </div>
+
+        <p>If we click on the remove option set then it will be redirected to the options to create an option set and import an option set.</p>
+
+        <div class="image-container">
+            <img src="extracted_media/image12.png" alt="Options - Empty State" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Options — Empty State (Create or Import)</span>
+                Initial empty state of the 'Options' timeline step featuring "Create Option Set" and "Import Option Set" buttons.
+            </div>
+        </div>
+
+        <div class="image-container">
+            <img src="extracted_media/image13.png" alt="Import Option Sets Modal" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Import Option Sets — Modal Popup</span>
+                This image showcases the "Import Option Sets" modal popup with a "Select Option Sets" dropdown field that integrates a search bar. The expanded dropdown list displays a structured data hierarchy of available master option sets.
+            </div>
+        </div>
+
+        <!-- PRICE MASTER (PRODUCT) -->
+        <h6 class="section-h7" id="price-master-product">Price Master</h6>
+
+        <!-- VARIANT -->
+        <h6 class="section-h7" id="variant">Variant</h6>
+        <p>Based on the second step of options we selected, we can see here that the multiple variants are automatically created on those particular combinations. Even here if we want to update the countries then we can show the different prices for the different countries. As default for now here we select India.</p>
+        <p>The actual magic is based on those particular options for the single ring. Now we have <strong>270 variants</strong>. Based on the option sets and option combinations, it can be more. All variants are automatically created.</p>
+
+        <div class="image-container">
+            <img src="extracted_media/image14.png" alt="Variant Master List - Configuration View" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">1. Variant Master List — Configuration View</span>
+                This image displays the 'Variants' configuration step within the single product editable timeline, functioning as the master matrix for managing 270 automatically generated product permutations. The data structure is a dense, multi-column list-view table featuring column headers for VARIANTS (displaying combination strings like "6 • Gold • Yellow • 9KT • SI-HI"), MEDIAS, METAL NET WEIGHT (GMS) and GROSS WEIGHT (GMS), PRICE (₹), and DISCOUNT TYP.
+            </div>
+        </div>
+
+        <div class="image-container">
+            <img src="extracted_media/image15.png" alt="Variant Master List - Pagination View" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">2. Variant Master List — Pagination View</span>
+                This image illustrates the lower section of the 'Variants' data table focusing on list continuation and pagination controls. Pagination controls display "1 - 10 of 270" alongside "Previous" and "Next" buttons.
+            </div>
+        </div>
+
+        <div class="image-container">
+            <img src="extracted_media/image16.png" alt="Variant Master List - Horizontal Scroll View" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">3. Variant Master List — Horizontal Scroll View</span>
+                This image displays a horizontally scrolled view revealing additional inventory and discount management columns including STONE DISCOUNT, MAKING CHARGES DISCOUNT, COMMITTED QTY, and AVAILABLE QTY. Interactive elements include row-level 'View' and 'Edit' action icons, as well as active toggle switches under a "CONTINUE SELLING" column.
+            </div>
+        </div>
+
+        <p>With a click on the below screenshot, we can add images in that particular variant.</p>
+
+        <div class="image-container">
+            <img src="extracted_media/image17.png" alt="Variant Medias - Upload Modal" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">4. Variant Medias — Upload Modal</span>
+                The "Variant Medias" modal popup for managing specific visual assets for individual product permutations. Features a designated "Primary Image" upload slot and a general "Add Image/Video" slot with a "Done" CTA button.
+            </div>
+        </div>
+
+        <p>Even if you click on the price dropdown then you can actually see the exact price breakup.</p>
+
+        <div class="image-container">
+            <img src="extracted_media/image18.png" alt="Variant Price Breakup Overlay" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Variant Master List — Price Breakup Overlay</span>
+                An active "Price Breakup" floating popover panel, triggered by clicking the downward caret adjacent to the total price. This overlay details the exact mathematical cost structure in INR, providing a two-column plain-text ledger that itemizes Metal Price, Diamond Price, Making Charges, GST (3%), Sub Total, and the final Sale Price.
+            </div>
+        </div>
+
+        <p>We can see the similar price breakup for that particular product on the main B2C and B2B product panel.</p>
+
+        <div class="image-container">
+            <img src="extracted_media/image19.png" alt="Frontend Product Detail Page - Price Breakup" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Frontend Product Detail Page — Price Breakup</span>
+                A frontend Product Detail Page (PDP) interface designed to present transparent component data and exact pricing breakdowns to the end user. Core component data is organized into three cards: "Product Details", "Gold Details", and "Diamond Details". An expanded "PRICE BREAKUP" accordion panel itemizes individual costs for Gold, Diamond (with inline 21% discount badge), Making Charges, and GST (3%), concluding with a final Total.
+            </div>
+        </div>
+
+        <!-- MORE FEATURES -->
+        <h6 class="section-h7" id="more-features">More Features</h6>
+
+        <div class="image-container">
+            <img src="extracted_media/image20.png" alt="Product Info - General Data & Preview" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Product Info — General Data & Preview (Full View)</span>
+                The primary "Product Info" configuration step with all data entry fields and the interactive live product preview card.
+            </div>
+        </div>
+
+        <!-- INVENTORY -->
+        <h3 class="section-h3" id="inventory">Inventory</h3>
+        <p>Below are the screenshots of the inventory.</p>
+
+        <div class="image-container">
+            <img src="extracted_media/image21.png" alt="Inventory Management Panel" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Inventory Management Panel</span>
+                The 'Inventory' management console nested under the 'Products' parent menu. Features a horizontal tab system categorizing locations by 'All (190)', 'Active (156)', 'In Active (33)', and 'Archived (1)'. The page header provides CTAs including "View Logs", "Transfer Inventory", "Purge Inventory", "Export", "Import", and a primary "+ Add Store" button. The data table features columns for SELECT STORE, BRANCH CODE, VARIANTS, BAG COUNT, STATUS, and ACTIONS.
+            </div>
+        </div>
+
+        <!-- REVIEWS -->
+        <h3 class="section-h3" id="review">Reviews</h3>
+        <p>Below are the screenshots for the review section.</p>
+
+        <div class="image-container">
+            <img src="extracted_media/image22.png" alt="Product Reviews Dashboard" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Product Reviews Dashboard</span>
+                The 'Product Reviews' dashboard with tabbed navigation for 'All', 'Pending', 'Approved', 'Disapproved', and 'Archived'. The list-view table features columns for REVIEWS (displaying the review ID, a star rating, the review content, associated product), CUSTOMER, STATUS, and ACTION.
+            </div>
+        </div>
+
+        <!-- ======================== -->
+        <!-- ORDERS -->
+        <!-- ======================== -->
+        <h2 class="section-h2" id="orders">Orders</h2>
+        <p>Here you can see the panel of the orders. Please do a deep analysis for all options, all tabs. Here we have the option of the logs. We can import also there. We can create the order manually.</p>
+        <p>There we can track the orders, total sale fulfillment items, and we can switch all the dashboard timelines from today, for the one week, for the month, for the year. We can export the order report directly from this portal.</p>
+        <p>Along with that we have the multiple tabs:</p>
+        <ul>
+            <li>All orders</li>
+            <li>Order in the store</li>
+            <li>Order via the e-commerce</li>
+            <li>The pending orders</li>
+            <li>Multi, New, Completed, Archived other Tabs</li>
+        </ul>
+
+        <div class="image-container">
+            <img src="extracted_media/image23.png" alt="Orders Dashboard - All Orders" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Orders Dashboard — All Orders</span>
+                The 'All Orders' management console with KPI cards tracking "ORDERS", "SALES AMOUNT", and "FULFILLMENT ITEMS". A horizontal tab system categorizes orders into 'All', 'Store', 'Ecom', 'Pending', and 'Complete'. The list-view table displays ORDER INFO, FULFILLED BY, USER, ITEMS, TOTAL, PAYMENT STATUS, ORDER STATUS, and ACTIONS.
+            </div>
+        </div>
+
+        <div class="image-container">
+            <img src="extracted_media/image24.png" alt="Orders Dashboard - Secondary View" loading="lazy" onclick="openLightbox(this)">
+        </div>
+
+        <p>Under the order we also have the four menus: All orders, E-commerce order, Store order, All transaction.</p>
+
+        <div class="image-container">
+            <img src="extracted_media/image25.png" alt="All Transactions Panel" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Orders Dashboard — All Transactions</span>
+                The 'All Transactions' tracking panel with columns for TRANSACTION ID, ORDER ID, CUSTOMER, AMOUNT (displaying payment gateways like Gokwik or Razorpay), PAYMENT STATUS, and INVOICE.
+            </div>
+        </div>
+
+        <div class="image-container">
+            <img src="extracted_media/image26.png" alt="Ecom Orders - Advanced Filters" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Ecom Orders — Advanced Filters Overview</span>
+                The "Filters" slide-out panel overlaying the 'Ecom Orders' dashboard. The panel lists advanced filtering categories: Order Status, Payment Status, Amount Spent, No. of Items in Order, Tagged With, Date of Order, Destination, and Vendor.
+            </div>
+        </div>
+
+        <div class="image-container">
+            <img src="extracted_media/image27.png" alt="Order Status Filter Selection" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Ecom Orders — Order Status Filter Selection</span>
+                The "Order Status" accordion expanded showing checkbox options including: Pending, Processing, Partial Shipping, Shipping, Partially Delivered, Delivered, Cancelled, Archived, On Hold, Abandoned, Completed, Awaiting Shipment, Fulfilled, and Confirmed.
+            </div>
+        </div>
+
+        <div class="image-container">
+            <img src="extracted_media/image28.png" alt="Order Status Filter - Full View" loading="lazy" onclick="openLightbox(this)">
+        </div>
+
+        <p>In the below screenshot I just click on a particular order and I can see information about that particular order. I can even manage the actions, transactions, send a payment link to a customer, check all the status price break-ups.</p>
+
+        <div class="image-container">
+            <img src="extracted_media/image29.png" alt="Single Order Detail - Primary Information" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Single Order Detail — Primary Information Panel</span>
+                Detailed configuration view for a specific individual e-commerce order. Cards display Delivery Date, Order Source, Item Status, Item Type, Payment Status, product details with price breakdown, financial summary, payment transaction details, and a 'Notes' sidebar with chronological annotations.
+            </div>
+        </div>
+
+        <div class="image-container">
+            <img src="extracted_media/image30.png" alt="Single Order Detail - Timelines" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Single Order Detail — Timelines and Logging</span>
+                The "Timelines" container presents a list-view data table detailing the order's backend lifecycle with columns: Date, Team Member, and Activity. Visible entries track system-generated events like "Invoice Sent", "Order Confirmation", and "Payment Success".
+            </div>
+        </div>
+
+        <!-- ======================== -->
+        <!-- PRODUCT PARAMETER -->
+        <!-- ======================== -->
+        <h2 class="section-h2" id="product-parameter">Product Parameter</h2>
+        <div class="info-box important">
+            <p><strong>⚠️ Very Important Section:</strong> This is a very, very important section in the entire project — you need to understand the internal linking between the product, product pricing, category, collection tags, and all of this stuff.</p>
+        </div>
+        <p>Product parameter is a solution about the products. In this menu we will create some sub menus like:</p>
+        <ul class="submenu-list">
+            <li>Categories</li>
+            <li>Options</li>
+            <li>Product Tabs</li>
+            <li>Collections</li>
+            <li>Collection Details</li>
+            <li>Task Manager</li>
+        </ul>
+
+        <div class="image-container">
+            <img src="extracted_media/image31.png" alt="Orders Dashboard - View Logs Overlay" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Orders Dashboard — View Logs Overlay</span>
+                The "View Logs" slide-out panel showing the 'Orders Module' audit trail.
+            </div>
+        </div>
+
+        <!-- CATEGORIES -->
+        <h3 class="section-h3" id="categories">Categories</h3>
+        <p>This section will help us to manage the product filters of the product and divide all products into particular perfect categories. Same as per the screenshot we can create some tabs like:</p>
+        <ul>
+            <li>Category</li>
+            <li>Sub category</li>
+            <li>Archived category</li>
+            <li>Archived sub category</li>
+            <li>The searching panels</li>
+        </ul>
+        <p>Below that section we can show the search bar and then tables. In a table we can show: row selector, category name, number of products that fall in that category, number of subcategories, the status (draft/active/inactive), and actions (edit, delete, or add products).</p>
+
+        <div class="image-container">
+            <img src="extracted_media/image32.png" alt="Categories Dashboard" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Parameters — Categories Dashboard</span>
+                The 'Categories' management dashboard with horizontal tabs showing 'Categories (27)', 'Sub Categories (136)', 'Archived Categories (4)', and 'Archived Sub Categories (1)'. The data table columns include CATEGORIES NAME, NO. OF PRODUCTS, NO. OF SUB-CATEGORIES, STATUS, and ACTIONS.
+            </div>
+        </div>
+
+        <!-- OPTIONS -->
+        <h3 class="section-h3" id="options">Options</h3>
+        <p>The option menu is very important in the perspective of the jewelry variant. The multiple possible options can help to create the multiple possible variants. It works on <strong>permutation combinations</strong> fundamentally. Components like Gemstone, Metal, Diamond, Sizes — all of these combinations can make a unique jewelry piece which can easily support our custom order mechanism into the B2B business model.</p>
+
+        <!-- ALL OPTIONS -->
+        <h4 class="section-h4" id="all-options">All Options</h4>
+        <p>Here we know all the parameters will be created by the below possible component combinations.</p>
+
+        <div class="image-container">
+            <img src="extracted_media/image33.png" alt="All Options Master List" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Parameters — All Options Master List</span>
+                The 'All Options' configuration panel showing foundational product variant building blocks. A horizontal tab system toggles between 'All Options (6)' and 'Option Sets (320)'. The table includes OPTION NAME (Solitaire, Gemstone, Pearl, Metal, Size, Diamond), APPEARANCE, OPTION VALUES (pill-shaped tags), and ACTION.
+            </div>
+        </div>
+
+        <p>Here you can see for every option/component we have a dedicated setting panel. Like in the below image we click on Metal — here you can see we can assign option name, front-end name. Also you can see the two options: <strong>including in filters</strong> and <strong>including in price master</strong>.</p>
+
+        <!-- METAL -->
+        <h5 class="section-h5" id="metal">Metal</h5>
+
+        <div class="image-container">
+            <img src="extracted_media/image34.png" alt="Edit Option Detail View - Metal" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Parameters — Edit Option Detail View (Metal)</span>
+                Detailed edit view for the "metal" option. Includes text inputs for "Option Name" and "Frontend Name", checkboxes for "Include in Filters" and "Include in Price Master", "Frontend Appearance" dropdown set to "Drop-Down List", and a "VALUES" container with expandable parent rows "Gold" and "Platinum".
+            </div>
+        </div>
+
+        <p>When we click on the Gold menu then we can expand this and there we have multiple fields like gold priority, gold color. In the gold priority we have 14 karat, 18 karat, 22 karat and other gold variants. Also in color we have yellow gold, white gold, rose gold.</p>
+
+        <div class="image-container">
+            <img src="extracted_media/image35.png" alt="Option Values Hierarchy - Gold" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Parameters — Option Values Hierarchy</span>
+                Deeply expanded view of the "VALUES" configuration for 'metal'. The "Gold" container reveals inner groups: "Gold Purity" (14KT, 18KT, 22KT pill tags) and "Gold Color" (Yellow, White, Rose). Each inner group specifies "Drop-Down List" type with edit and delete controls.
+            </div>
+        </div>
+
+        <!-- DIAMOND & GEMSTONE -->
+        <h5 class="section-h5" id="diamond-gemstone">Diamond & Gemstone</h5>
+
+        <div class="image-container">
+            <img src="extracted_media/image36.png" alt="Diamond & Gemstone Options" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Diamond & Gemstone Options Configuration</span>
+            </div>
+        </div>
+
+        <!-- OPTION SETS -->
+        <h4 class="section-h4" id="option-sets">Option Sets</h4>
+        <p>In the menu of options, we click on another tab option sets. With all six options we create around <strong>320 option sets</strong> that help us predict variant.</p>
+
+        <div class="image-container">
+            <img src="extracted_media/image37.png" alt="Option Sets Master List" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Parameters — Option Sets Master List (320 Sets)</span>
+                The 'Option Sets' configuration panel showing pre-configured variant combinations. The data table includes SHARED OPTIONS, NO OF PRODUCTS, OPTION GROUPS (pill-shaped tags such as 'metal', 'diamond', 'gemstone', 'size'), and ACTION.
+            </div>
+        </div>
+
+        <h5 class="section-h5">Example 1: Chain Bracelet Gemstone OS</h5>
+
+        <div class="image-container">
+            <img src="extracted_media/image38.png" alt="Option Sets - Group Configuration" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Option Sets — Group Configuration (Top Section)</span>
+                Detailed creation interface for "chain bracelet gemstone os" option set, showing "Is Single Variant" toggle, "Metal" dropdown configuration with "Gold" selected, and nested dropdowns for "Select Gold Purity" (14KT, 18KT) and its "Select Default" value.
+            </div>
+        </div>
+
+        <div class="image-container">
+            <img src="extracted_media/image39.png" alt="Option Sets - Metal Hierarchy Setup" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Option Sets — Metal Hierarchy Setup</span>
+                Nested hierarchy of the "metal" parameter showing Gold Color selections (Yellow, White, Rose) and their default values, with Platinum as an available unselected attribute.
+            </div>
+        </div>
+
+        <div class="image-container">
+            <img src="extracted_media/image40.png" alt="Option Sets - Diamond & Gemstone Setup" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Option Sets — Diamond & Gemstone Setup</span>
+                Configuration panel for 'diamond' parameter (SI-HI and VVS-FG checkboxes) and 'gemstone' parameter blocks. A "Save" CTA button is anchored within the diamond block.
+            </div>
+        </div>
+
+        <h5 class="section-h5">Example 2: Ladies Diamond Gemstone Ring All OS</h5>
+
+        <div class="image-container">
+            <img src="extracted_media/image41.png" alt="Option Sets - Ring Configuration" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Option Sets — Group Configuration Overview (Ring)</span>
+                Configuration for "ladies diamond gemstone ring all os" showing 'metal' (Gold 2), 'diamond' (SI-HI, VVS-FG), and 'gemstone' (Gemstone) components in collapsed view.
+            </div>
+        </div>
+
+        <div class="image-container">
+            <img src="extracted_media/image42.png" alt="All Options - Size Values" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Parameters — All Options Master List (Size Focus)</span>
+                The 'Size' row displays an extensive block of numerical pill tags for ring sizing.
+            </div>
+        </div>
+
+        <div class="image-container">
+            <img src="extracted_media/image43.png" alt="Option Sets - Expanded Size Parameter" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Option Sets — Expanded Size Parameter</span>
+                The 'size' parameter row displays a sequential array of numeric pill-shaped tags ranging from 7 to 18.
+            </div>
+        </div>
+
+        <div class="info-box">
+            <p><strong>How it all works:</strong> Here we set all the options and inside we create the multiple option sets. Whenever we create the product we just need to select the option of this particular set and then we can see all the product variant options on our PDP or all active variants.</p>
+        </div>
+
+        <div class="image-container">
+            <img src="extracted_media/image44.png" alt="All Products - Master Inventory Grid" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">All Products — Master Inventory Grid</span>
+            </div>
+        </div>
+
+        <div class="image-container">
+            <img src="extracted_media/image45.png" alt="Product Info - General Data" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Product Info — General Data Configuration</span>
+            </div>
+        </div>
+
+        <div class="image-container">
+            <img src="extracted_media/image46.png" alt="Product Options - Variant Configuration" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Product Options — Variant Configuration</span>
+            </div>
+        </div>
+
+        <!-- COLLECTION -->
+        <h3 class="section-h3" id="collection">Collection</h3>
+        <p>Collection is a very important panel for us. In this panel you can see the logs, who created collections, we can import, export, create a new collection. Also we have multiple tabs:</p>
+        <ul class="submenu-list">
+            <li>All Collections</li>
+            <li>Active Collections</li>
+            <li>Inactive Collections</li>
+            <li>Archived</li>
+        </ul>
+
+        <div class="image-container">
+            <img src="extracted_media/image47.png" alt="Collections Dashboard" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Parameters — Collections Dashboard</span>
+                The 'Collections' management dashboard with 'All (60)', 'Active (52)', 'In-Active (8)', and 'Archived' tabs. Table columns include COLLECTION NAME (with thumbnail), NO. OF PRODUCTS, STATUS, and ACTIONS (edit, duplicate, delete).
+            </div>
+        </div>
+
+        <div class="image-container">
+            <img src="extracted_media/image48.png" alt="Collection Edit - Primary Information" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Collection Edit — Primary Information View (Echo)</span>
+                Configuration for collection "Echo" with Collection Title, Description editor, Collection Status toggle, Media upload, and Notes section.
+            </div>
+        </div>
+
+        <p>Into that collection we can manage the products. Here I would love to utilize the <strong>Shopify approach</strong> where we can define some definitions, like from the product title, from the product tag, the pricing, or other parameters. If the product falls into that particular category with OR and AND situations then the product will automatically be reflected in that collection.</p>
+
+        <div class="image-container">
+            <img src="extracted_media/image49.png" alt="Collection Edit - Manual Product Assignment" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Collection Edit — Manual Product Assignment</span>
+                The "Add Products Manual" configuration block with a data table listing items assigned to this collection. Columns include PRODUCT NAME, PRIORITY, STATUS, PRICE, and ACTION (Remove).
+            </div>
+        </div>
+
+        <div class="image-container">
+            <img src="extracted_media/image50.png" alt="Collection Edit - SEO" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Collection Edit — Search Engine Optimisation (SEO)</span>
+                The SEO panel with Metadata Preview, Page Title, Meta Description (with character tracker), and Meta Keywords fields. Also consider pushing collections to GEO (Generative Engine Optimization) for AI model suggestions.
+            </div>
+        </div>
+
+        <!-- COLLECTION DETAILS -->
+        <h3 class="section-h3" id="collection-details">Collection Details</h3>
+        <p>Here you can see we can manage all collections and can assign the collection definitions so the product will automatically fall into that collection.</p>
+
+        <div class="image-container">
+            <img src="extracted_media/image51.png" alt="Collection Details Dashboard" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Parameters — Collection Details Dashboard</span>
+                The 'Collection Details' management dashboard with 'All (12)' tab. Table columns include COLLECTION NAME (with thumbnail), NO. OF PRODUCTS, STATUS, and ACTIONS.
+            </div>
+        </div>
+
+        <div class="image-container">
+            <img src="extracted_media/image52.png" alt="Collection Details - Edit Section" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Collection Details — Edit Section Architecture</span>
+                The "Edit Collection Detail" interface showing nested card-based hierarchy with Section Name, Sub-Section configuration (Title, Description, Redirect URL, Status), and Media containers for Desktop and Mobile views.
+            </div>
+        </div>
+
+        <div class="image-container">
+            <img src="extracted_media/image53.png" alt="Collection Details - Sub-Section Media" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Collection Details — Sub-Section Media Configuration</span>
+                Media asset assignment with "Desktop Media" and "Mobile Media" dropzones, file metadata pills showing Type and MIME.
+            </div>
+        </div>
+
+        <div class="image-container">
+            <img src="extracted_media/image54.png" alt="Frontend - Hero Banner" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Frontend Landing Page — Hero Banner</span>
+                The live frontend homepage featuring a persistent top navigation bar and a full-width hero banner showcasing the "ECHO COLLECTION".
+            </div>
+        </div>
+
+        <div class="image-container">
+            <img src="extracted_media/image55.png" alt="Frontend - Featured Collections" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Frontend Landing Page — Featured Collections</span>
+                A wide, high-fidelity banner spotlighting the "Nura" collection with premium product photography.
+            </div>
+        </div>
+
+        <div class="image-container">
+            <img src="extracted_media/image56.png" alt="Frontend - Collections Grid" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Frontend Landing Page — Collections Grid</span>
+                Multi-column grid layout with clickable graphic cards for AARAMBH, Akshaya, Alnkar, Amara, Charms, and CHEVRON collections.
+            </div>
+        </div>
+
+        <div class="image-container">
+            <img src="extracted_media/image57.png" alt="Frontend - Blare Collection Hero" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Frontend Collection Details — Hero Section (Blare Collection)</span>
+            </div>
+        </div>
+
+        <div class="image-container">
+            <img src="extracted_media/image58.png" alt="Frontend - Blare Collection Alternate" loading="lazy" onclick="openLightbox(this)">
+        </div>
+
+        <div class="image-container">
+            <img src="extracted_media/image59.png" alt="Frontend - Blare Collection Editorial" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Frontend Collection Details — Editorial Content</span>
+                Transition from hero banner into structured editorial content with multi-paragraph text and split-screen design component.
+            </div>
+        </div>
+
+        <!-- PRICE MASTER -->
+        <h3 class="section-h3" id="price-master">Price Master</h3>
+        <p>I'm just sharing the reference of the price master. There will be multiple sectors:</p>
+        <ul class="submenu-list">
+            <li>Diamond Price Master</li>
+            <li>Metal Price Master</li>
+            <li>Gemstone Price Master</li>
+            <li>Pearl Price Master</li>
+            <li>Making Charges</li>
+        </ul>
+        <p>This price master is working for the <strong>Omnichannel</strong>, like a website, app, Meta Ads, and other panels. Also we need to build functionality where we can directly input all these data from the basic Excel and if required then we can also export in real time.</p>
+
+        <div class="image-container">
+            <img src="extracted_media/image60.png" alt="Price Master Dashboard" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Price Master — Main Dashboard</span>
+                The primary 'Price Master' dashboard listing Diamond Price Master, Metal Price Master, Gemstone Price Master, Pearl Price Master, and Making Charges. Includes CTAs for "Export Derivations", "Import Derivations", and "Update Price Master".
+            </div>
+        </div>
+
+        <!-- METAL PRICE MASTER -->
+        <h4 class="section-h4" id="metal-price-master">Metal Price Master</h4>
+        <p>For the metal calculations we already have the good systems where we just need to put the 24-carat gold value and the entire gold pricing for other purities like 22-carat, 18-karat, 14-karat, 9-karat gold is automatically calculated. Based on user requirement we can put the pricing manually also or connect the API to get live prices from the bullion market.</p>
+
+        <!-- DIAMOND PRICE MASTER -->
+        <h4 class="section-h4" id="diamond-price-master">Diamond Price Master</h4>
+        <p>Here we can do an enhancement where we can show the multiple tabs like: diamond setting type, diamond shapes, diamond size, default is all where we can see all listings.</p>
+
+        <div class="image-container">
+            <img src="extracted_media/image61.png" alt="Diamond Pricing Matrix" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Price Master — Diamond Pricing Matrix</span>
+                The 'Diamond Price Master' panel with tabs for 'All (2)', 'Diamond Setting Type (1)', 'Diamond Shape (1)', and 'Diamond Size (1)'. Data rows include "VVS-FG - Round" and "SI-HI - Round" classifications.
+            </div>
+        </div>
+
+        <p>When we click on the edit action, a new popup will open. For that particular diamond type (e.g., VVS FG), we have multiple ranges based on: size, minimum weight, maximum weight, the value, and price type (per Carat, Fixed Price, Percentage).</p>
+
+        <div class="image-container">
+            <img src="extracted_media/image62.png" alt="Diamond Price Configuration" loading="lazy" onclick="openLightbox(this)">
+        </div>
+
+        <div class="image-container">
+            <img src="extracted_media/image63.png" alt="Add Standard Modal" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Price Master — Standard Details Configuration Modal</span>
+                The "Add Standard" modal for establishing numeric pricing rules based on physical weight brackets. Each row contains fields for Size, Min Wt., Max Wt., Value, and Price Type, alongside a row-level delete icon. Includes "+ Add More Range" action link.
+            </div>
+        </div>
+
+        <!-- ======================== -->
+        <!-- LIVE PRICE -->
+        <!-- ======================== -->
+        <h2 class="section-h2" id="live-price">Live Price</h2>
+        <p>In this Panel, we can see the live active prices for the metal. Also you can look, we have two options for the sync manual prices and the second one is add rates.</p>
+
+        <div class="image-container">
+            <img src="extracted_media/image64.png" alt="Live Price Management Dashboard" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Live Price Management Dashboard</span>
+                The 'Live Price' dashboard with "Sync Manual Price" and "Add Rate" buttons. Tabs for 'All', 'Gold', and 'Silver'. The data table shows gold karat purities (9KT through 24KT) with corresponding INR values, Active status badges, and precise timestamps.
+            </div>
+        </div>
+
+        <!-- ======================== -->
+        <!-- THEME BUILDER -->
+        <!-- ======================== -->
+        <h2 class="section-h2" id="theme-builder">Theme Builder</h2>
+        <p>I am confused about this option. We need to create in this way or another way like SDUI. This is a part of the descriptions. Because with this panel we want to design both things separately:</p>
+        <ul>
+            <li>Website B2B</li>
+            <li>Mobile Application for B2B</li>
+            <li>Website for B2C</li>
+            <li>Mobile Application for B2C</li>
+        </ul>
+        <p>So the basic system is all working independently according to the theme, branding, and website layout. We need to manage domain URL and path accordingly, but the internal database is always the same.</p>
+        <p>Under this section we need to design an <strong>Assets Library</strong>. We already created it but we need to enhance it — there we just need to add a table where we can see the file name, the created date, and some actions like copy image URL. Every image has a particular CDN URL.</p>
+
+        <!-- ======================== -->
+        <!-- BANNERS -->
+        <!-- ======================== -->
+        <h2 class="section-h2" id="banners">Banners</h2>
+        <p>There we also have the section where we can manage the banners and graphics for the store.</p>
+
+        <div class="image-container">
+            <img src="extracted_media/image65.png" alt="Banner Management Dashboard" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Banner Management Dashboard — Primary View</span>
+                A grid-based card layout showing distinct promotional zones: Store, Kmr, Safegold, Design, Stylish, Featured-Collections, Search, Akshaya-Tritiya, Checkout, Videocall, Video-Call-Page, and Pip.
+            </div>
+        </div>
+
+        <div class="image-container">
+            <img src="extracted_media/image66.png" alt="Banner Management - Scrolled View" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Banner Management Dashboard — Scrolled View</span>
+                Additional frontend promotional zones including Herobanner, Pdp, Footer-Banner, and Leadpopup.
+            </div>
+        </div>
+
+        <div class="image-container">
+            <img src="extracted_media/image67.png" alt="Hero Banner Configuration" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Banner Detail — Hero Banner Configuration</span>
+                Detailed configuration view showing assigned banner assets with ACTIVE status indicators, status toggle switches, and overflow menu icons.
+            </div>
+        </div>
+
+        <p>When clicking on the banner we also get a popup where we can upload the banner for desktop view, mobile view, desktop thumbnail in the case of video and mobile thumbnail in case of the video. We also can make the banner enable and disable, and redirect the particular banner to another Landing Page.</p>
+
+        <div class="image-container">
+            <img src="extracted_media/image68.png" alt="Edit Banner Modal - Media Assets" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Edit Banner Modal — Media Assets</span>
+                Distinct dropzones for "Desktop media", "Mobile media", "Desktop Thumbnail (if video)", and "Mobile Thumbnail (if video)".
+            </div>
+        </div>
+
+        <div class="image-container">
+            <img src="extracted_media/image69.png" alt="Edit Banner Modal - Additional Details" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Edit Banner Modal — Additional Details</span>
+                Expanded section with Title, Redirect URL, and WYSIWYG Description editor fields.
+            </div>
+        </div>
+
+        <div class="image-container">
+            <img src="extracted_media/image70.png" alt="Frontend - Promotional Hero Banner" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Frontend Landing Page — Promotional Hero Banner</span>
+                The live frontend hero carousel showing "21st Anniversary" promotional banner with "Pure Diamond Elegance" headline and offer boxes.
+            </div>
+        </div>
+
+        <div class="image-container">
+            <img src="extracted_media/image71.png" alt="PLP Banner Configuration" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Banner Management — PLP Configuration</span>
+                Configuration view for Product Listing Page banners showing three active cards.
+            </div>
+        </div>
+
+        <div class="image-container">
+            <img src="extracted_media/image72.png" alt="Frontend PLP - In-Grid Banner" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Frontend PLP — In-Grid Promo Banner</span>
+                A large, double-width promotional banner integrated directly within the product grid alongside standard shoppable product cards.
+            </div>
+        </div>
+
+        <div class="image-container">
+            <img src="extracted_media/image73.png" alt="Frontend PLP - Dynamic Banner" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Frontend PLP — Dynamic Banner Display</span>
+                Alternate view showing a different in-grid promotional asset ("FOREVER Sparkling" campaign graphic), demonstrating dynamic CMS capability.
+            </div>
+        </div>
+
+        <!-- ======================== -->
+        <!-- CUSTOMERS -->
+        <!-- ======================== -->
+        <h2 class="section-h2" id="customers">Customers</h2>
+        <p>In this panel we have three options:</p>
+        <ul class="submenu-list">
+            <li>All Customers</li>
+            <li>User Group</li>
+            <li>Enquiries</li>
+        </ul>
+
+        <!-- ALL CUSTOMERS -->
+        <h3 class="section-h3" id="all-customer">All Customer</h3>
+        <p>Here also we can see all listed customers: active, inactive, archived, and blacklisted customers. If required we can easily select the customers based on the filters and can download from the export button. Also we can add or import customers from the normal CSV.</p>
+
+        <div class="image-container">
+            <img src="extracted_media/image74.png" alt="All Customers Dashboard" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">All Customers — Dashboard</span>
+                The 'All Customers' dashboard with tabs for 'All', 'Active', 'In-Active', 'Archived', and 'Blacklisted'. Includes filter dropdowns for Location, No of Orders, Total Spent, Status, and Sort.
+            </div>
+        </div>
+
+        <!-- USER GROUP -->
+        <h3 class="section-h3" id="user-group">User Group</h3>
+        <p>We can create policies based on the customer parameters: Customer Geographical Locations, Gender, Age, Marital Status, Order History, and More.</p>
+
+        <!-- ENQUIRIES -->
+        <h3 class="section-h3" id="enquires">Enquiries</h3>
+        <p>In the enquiry panels we can see the customer logs, import/export, and do the subject settings. The support system includes tabs for:</p>
+        <ul class="submenu-list">
+            <li>Support</li>
+            <li>Help & FAQ</li>
+            <li>Contact Support</li>
+            <li>Newsletter</li>
+            <li>Appointment</li>
+            <li>Return/Exchange</li>
+            <li>Cancel Requests</li>
+            <li>Lead</li>
+        </ul>
+
+        <div class="image-container">
+            <img src="extracted_media/image75.png" alt="Enquiries Dashboard - Support Tab" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Enquiries Dashboard — Support Tab</span>
+                The 'Support' tab showing table columns for ENQUIRY ID, CREATED ON, CUSTOMER, SUBJECT, MESSAGE, and ACTION.
+            </div>
+        </div>
+
+        <div class="image-container">
+            <img src="extracted_media/image76.png" alt="Enquiry Detail Modal" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Enquiry Detail — Modal Overlay</span>
+                Modal displaying ticket details: Enquiry ID, timestamp, Subject, Message, Image attachment, Customer Name, Email, and Phone number.
+            </div>
+        </div>
+
+        <h4 class="section-h4" id="help-faq">Help and FAQ</h4>
+        <h4 class="section-h4" id="contact-support">Contact Support</h4>
+        <h4 class="section-h4" id="newsletter">Newsletter</h4>
+        <h4 class="section-h4" id="appointment">Appointment</h4>
+        <p>Here if any customer wants to book an appointment to look at the products then we also can see in this tab.</p>
+
+        <div class="image-container">
+            <img src="extracted_media/image77.png" alt="Enquiries - Appointment Tab" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Enquiries Dashboard — Appointment Tab</span>
+                The 'Appointment' tab with columns for ENQUIRY ID, CREATED ON, PRODUCT (with thumbnail and SKU), CUSTOMER, SUBJECT ("Video Call"), MESSAGE, and ACTION.
+            </div>
+        </div>
+
+        <h4 class="section-h4" id="refund-exchange">Refund and Exchange</h4>
+        <h4 class="section-h4" id="cancel-request">Cancel Request</h4>
+
+        <div class="image-container">
+            <img src="extracted_media/image78.png" alt="Cancel Requests Tab" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Enquiries Dashboard — Cancel Requests Tab</span>
+            </div>
+        </div>
+
+        <h4 class="section-h4" id="lead">Lead</h4>
+
+        <div class="image-container">
+            <img src="extracted_media/image79.png" alt="Lead Tab" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption"><span class="caption-title">Enquiries Dashboard — Lead Tab</span></div>
+        </div>
+
+        <!-- ======================== -->
+        <!-- TEAMS -->
+        <!-- ======================== -->
+        <h2 class="section-h2" id="teams">Teams</h2>
+        <p>Teams — we can handle all kinds of permissions and roles so there we can easily manage the access and define the user role. Inside this panel we have the two sub-menus: <strong>Permission Role</strong> and <strong>Members</strong>.</p>
+
+        <!-- PERMISSION ROLE -->
+        <h3 class="section-h3" id="permission-role">Permission Role</h3>
+        <p>In this section we can create permission roles. Where we can define how much access a user has in that particular permission so nobody else can do the changes without permission.</p>
+
+        <div class="image-container">
+            <img src="extracted_media/image80.png" alt="Permissions Roles Dashboard" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Permissions Roles Management Dashboard</span>
+                The dashboard with columns for ROLE NAME, DESCRIPTION, PERMISSIONS (integer counts), ACCESS LEVEL ('Partial Access' badges), MODIFIED ON, and ACTIONS. Roles include Operations, Sales Support, and Accounts.
+            </div>
+        </div>
+
+        <!-- MEMBERS -->
+        <h3 class="section-h3" id="members">Members</h3>
+        <p>In the members option we can create the profiles, manage the profile credentials, member name and generic information, the role, and here we also can see the recent logs for that particular member.</p>
+
+        <!-- ======================== -->
+        <!-- SETTINGS -->
+        <!-- ======================== -->
+        <h2 class="section-h2" id="settings">Settings</h2>
+        <p>We already have the setting panels for the enterprises but still we can make it more enhanced. I am sharing some information from where we can directly manage:</p>
+        <ul>
+            <li>General settings</li>
+            <li>Website appearance settings</li>
+            <li>Shop settings</li>
+            <li>Checkout setting</li>
+            <li>3rd party application</li>
+            <li>Shipping partner settings</li>
+            <li>Advanced options</li>
+        </ul>
+        <p>Please analyze all these screenshots in the sequence. This setting will be globally applicable for that particular business enterprise.</p>
+
+        <!-- STORE CONFIGURATION -->
+        <h3 class="section-h3" id="store-config">Store Configuration</h3>
+
+        <!-- GENERAL SETTINGS -->
+        <h4 class="section-h4" id="general-settings">General Settings</h4>
+
+        <h5 class="section-h5" id="brand-profile">Brand Profile</h5>
+        <div class="image-container">
+            <img src="extracted_media/image81.png" alt="Brand Profile Settings" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">General Settings — Brand Profile</span>
+                Text input fields for Brand Name, About the Brand, Contact Address, Contact Email, Contact Mobile, Legal Business Name, Tax Number, Country, and Branch Code.
+            </div>
+        </div>
+
+        <h5 class="section-h5" id="brand-logo">Brand Logo</h5>
+        <p>For the brand logo kind of thing we already have the branding panel. We can enhance that.</p>
+        <div class="image-container">
+            <img src="extracted_media/image82.png" alt="Brand Logos" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">General Settings — Brand Logos</span>
+                Three upload dropzones: "Square Logo Image" (150×150px), "Wide Logo Image" (400×100px), and "Wide Logo Image For Dark Theme".
+            </div>
+        </div>
+
+        <h5 class="section-h5" id="social-media">Social Media</h5>
+        <p>Social media panel for Facebook, Instagram, LinkedIn, YouTube, X. Also we can manage WhatsApp chat options and upload OG images.</p>
+        <div class="image-container">
+            <img src="extracted_media/image83.png" alt="Social Media Settings" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">General Settings — Social Media & OG Metadata</span>
+                Input fields for social channels, WhatsApp Chat toggle, OG Image upload, OG Title, and OG Description.
+            </div>
+        </div>
+
+        <!-- APPEARANCE -->
+        <h4 class="section-h4" id="appearance">Appearance</h4>
+        <p>In Appearance we can provide options like Primary Theme Color and Secondary Theme Color.</p>
+
+        <div class="image-container">
+            <img src="extracted_media/image84.png" alt="Theme Colors" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption"><span class="caption-title">Appearance — Theme Colors</span></div>
+        </div>
+
+        <div class="image-container">
+            <img src="extracted_media/image85.png" alt="Product Display Toggles" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Appearance — Product Display Toggles</span>
+                Configuration for product title position, toggles for "Show Load More Products", "Hide Products With No Images", "Hide Title Bar In Mobile", and "Show Product Filters on Left Hand Side".
+            </div>
+        </div>
+
+        <div class="image-container">
+            <img src="extracted_media/image86.png" alt="Product Page Configuration" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Appearance — Product Page Configuration</span>
+                Settings for Product Layout on Desktop (4 Columns), Default Product Page Size (24 items), Product Image Display Fit (Crop Fit), and various toggle switches.
+            </div>
+        </div>
+
+        <div class="image-container">
+            <img src="extracted_media/image87.png" alt="Pop-up Settings" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Appearance — Pop-up Settings</span>
+                Floating Cart Popup toggle, Accept Cookies Popup toggle, media upload for popup graphic, Popup Event set to "Scroll-50%", and Popup Click URL field.
+            </div>
+        </div>
+
+        <div class="image-container">
+            <img src="extracted_media/image88.png" alt="Announcement Bar Settings" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Appearance — Announcement Bar Configuration</span>
+                Announcement Message, Announcement Style (Center), Announcement Color, Announcement Bar Color, and Announcement Bar URL fields.
+            </div>
+        </div>
+
+        <!-- SHOP SETTING -->
+        <h4 class="section-h4" id="shop-setting">Shop Setting</h4>
+
+        <!-- CHECKOUT -->
+        <h4 class="section-h4" id="checkout">Checkout</h4>
+        <div class="image-container">
+            <img src="extracted_media/image89.png" alt="Checkout Settings" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption"><span class="caption-title">Shop Settings — Checkout Configuration</span>
+                "Show Coupon List to Customer" toggle in active state.
+            </div>
+        </div>
+
+        <!-- THIRD-PARTY -->
+        <h4 class="section-h4" id="third-party">Third-Party</h4>
+        <p>Here we can provide multiple payment gateway options. The user just needs to select the payment gateway and provide the payment key and the security key.</p>
+
+        <div class="image-container">
+            <img src="extracted_media/image90.png" alt="Payment Gateway Settings" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">3rd Party — Payment Gateway Settings</span>
+                Settings for COD toggle, Online Payment toggle, Payment Gateway Name dropdown (PhonePe), Gateway Key ID, Gateway Secret, and Payment Logos Image.
+            </div>
+        </div>
+
+        <div class="image-container">
+            <img src="extracted_media/image91.png" alt="Payment Gateway Dropdown" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Payment Gateway Selection Dropdown</span>
+                Options: COD, RazorPay, Paytm, Cashfree, and Stripe with brand logo icons.
+            </div>
+        </div>
+
+        <p>Facebook Pixels, Google Analytics, Tag Manager, GA4 ID, Google reCAPTCHA Key — all are pre-integrated. Users just need to paste the key or tags.</p>
+
+        <div class="image-container">
+            <img src="extracted_media/image92.png" alt="Analytics Integration" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">3rd Party — Analytics Integration Settings</span>
+                Fields for Facebook Pixel ID, Google Analytics ID, Google Tag Manager ID, Google GA4 ID, google reCAPTCHA Key, and google reCAPTCHA Secret.
+            </div>
+        </div>
+
+        <!-- SHIPPING PARTNERS -->
+        <h4 class="section-h4" id="shipping-partners">Shipping Partners</h4>
+
+        <div class="image-container">
+            <img src="extracted_media/image93.png" alt="ShipRocket Authentication" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Shipping Partners — ShipRocket Authentication</span>
+                Available integrations: ShipRocket, Shyplite, Nimbuspost, BlueDart, ShipDelight, Delhivery, RSA, and EasyEcom. Simple authentication form with Email and Password fields.
+            </div>
+        </div>
+
+        <!-- ADVANCE -->
+        <h4 class="section-h4" id="advance">Advance</h4>
+        <p>In an advanced option we can provide the custom code option where the user can add HTML head, HTML in Body, Javascript In Page, robots.txt, Ads.txt or another required code.</p>
+
+        <div class="image-container">
+            <img src="extracted_media/image94.png" alt="Advanced Settings" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Advanced Settings — Miscellaneous Configurations</span>
+                Settings for Product Price Formula, Block search indexing, Form to Google Sheet URL, Error Page URL (404), Order Page Auto Refresh, Order Notification Sound, and Enable Out Of Stock Today toggle.
+            </div>
+        </div>
+
+        <!-- DOMAIN MAPPING -->
+        <h3 class="section-h3" id="domain-mapping">Map your Domain</h3>
+        <p>Here we need to find the advanced options which can help with domain mapping. We need to find a solution if we can do this automatically, like Shopify websites. Where our website or main IP address is automatically connected with the particular domain and the required DNS addresses for the A-records will be mapped between domain and server.</p>
+
+        <div class="image-container">
+            <img src="extracted_media/image95.png" alt="Domain Mapping Complete" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Advanced Settings — Domain Mapping Complete</span>
+                Domain setup wizard showing successful progression through Step 1 (Domain Name), Step 2 (Update DNS Records), and Step 3 (Activate Mapping) with a 'Congratulations!' confirmation and "Request Domain Removal" button.
+            </div>
+        </div>
+
+        <!-- SITEMAP -->
+        <h3 class="section-h3" id="sitemap">Sitemap</h3>
+
+        <div class="image-container">
+            <img src="extracted_media/image96.png" alt="XML Sitemap Management" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Store Settings — XML Sitemap Management</span>
+                A read-only text input with the XML catalog URL, accompanied by "Copy URL" and "Preview" buttons.
+            </div>
+        </div>
+
+        <!-- ENTERPRISE PROFILE -->
+        <h3 class="section-h3" id="enterprise-profile">Enterprise Profile</h3>
+
+        <div class="image-container">
+            <img src="extracted_media/image97.png" alt="Expanded Branding Assets" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">General Settings — Expanded Branding Assets</span>
+                Six unique deployment formats: Logo for White Background, Logo for Dark Background, Logo for Error Page, Square Logo Small, Square Logo Medium, and Favicon Logo with exact dimensional guidelines.
+            </div>
+        </div>
+
+        <div class="image-container">
+            <img src="extracted_media/image98.png" alt="Portal Login Splash Setup" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Store Customization — Portal Login Splash Setup</span>
+                Login Splash Screen (3000×4000px) upload with gradient graphic, Login Button Color configuration.
+            </div>
+        </div>
+
+        <div class="image-container">
+            <img src="extracted_media/image99.png" alt="Authentication & Mail Server" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Store Customization — Authentication & Mail Server Gateway</span>
+                Login Button colors, Terms of Service URL, SMTP Gateway settings (URL, Port, Username, Password, SSL toggle), and Email Template for Forgot Password WYSIWYG editor.
+            </div>
+        </div>
+
+        <!-- CLIENT LOGIN PANEL -->
+        <h4 class="section-h4" id="client-login">Client Login Panel</h4>
+        <p>We already created a login panel and are just sharing the reference. We can create the proper dedicated login panel for the clients. For that particular single client we can provide them the dedicated branding and images on the login panel so they can feel the personalized experience. We can use the global client CSS, from where we can upload these login panel colors and images.</p>
+
+        <div class="image-container">
+            <img src="extracted_media/image100.png" alt="Client Login Panel" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption"><span class="caption-title">Dedicated Client Login Panel</span></div>
+        </div>
+
+        <!-- ======================== -->
+        <!-- 11+1 SCHEME -->
+        <!-- ======================== -->
+        <h2 class="section-h2" id="scheme-11-1">11+1 Scheme</h2>
+
+        <div class="image-container">
+            <img src="extracted_media/image101.png" alt="11+1 Schemes Dashboard" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">11+1 Schemes Management Dashboard</span>
+                Dashboard showing "Swarna Lakshmi Yojana" (11+1 monthly gold savings scheme) with configuration metrics: TENURE (11+1), BONUS INSTALLMENTS (1), DISCOUNT 1st (25%), MIN AMOUNT (₹2,000), MAX AMOUNT (₹1,00,000), GRACE DAYS (5), and STATUS (Active).
+            </div>
+        </div>
+
+        <!-- ======================== -->
+        <!-- GENERIC THOUGHTS -->
+        <!-- ======================== -->
+        <h2 class="section-h2" id="generic-thoughts">Generic Thoughts</h2>
+        <div class="info-box">
+            <p>From the human team in the company we just required the information about how much inventory they have in their stock, product pricing, and the component pricing of the metal, diamond, making charges, and other things. Then our portal will automatically create and handle all kinds of queries.</p>
+        </div>
+        <div class="info-box important">
+            <p><strong>Import/Export Templates:</strong> Whenever we provide an option of import or export something, whenever we are importing, we always need to provide an import blank template. The user will know in which template they need to upload the file. We need to make sure as a default template we will implement in the entire portal.</p>
+        </div>
+
+        <!-- ======================== -->
+        <!-- EVENTS AND LOGS PANEL -->
+        <!-- ======================== -->
+        <h2 class="section-h2" id="events-logs">Events and Logs Panel</h2>
+        <p>In our portal we need to create events and a log for all required scenarios so we can justify who makes the changes. For example if someone changes the price master then we can know the responsible person. We track:</p>
+        <ul>
+            <li>The date and time of the event</li>
+            <li>Who made the changes</li>
+            <li>From which locations</li>
+            <li>IP address</li>
+            <li>The required changes made</li>
+        </ul>
+        <p>In any case nobody can blame anyone and we can find out the responsible person easily.</p>
+
+        <div class="image-container">
+            <img src="extracted_media/image102.png" alt="Global Notification Panel" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Global Notification Panel — Export Events</span>
+                Notification overlay logging "Product exported successfully" (5000 products) and "allEnquiry exported successfully" (342 records) with timestamps and download links.
+            </div>
+        </div>
+
+        <div class="image-container">
+            <img src="extracted_media/image103.png" alt="Category Audit Logs" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Parameters Module — Detailed Category Audit Logs</span>
+                Fully populated 'View Logs' audit panel with columns for User, Activity, and Date and Time. Activities include "Category (Mangalsutra Bracelets) updated operation occurs!" attributed to specific users.
+            </div>
+        </div>
+
+        <!-- ======================== -->
+        <!-- READY TO SHIP -->
+        <!-- ======================== -->
+        <h2 class="section-h2" id="ready-to-ship">Ready to Ship Solution</h2>
+        <p>Whenever a customer orders any products, our system verifies that according to the customer PIN code in which area and in which store the product is available to ship instantly — this is known as a <strong>ready-to-ship product</strong>. In case we don't have the product ready to ship then we raise the order for manufacturing.</p>
+
+        <!-- ======================== -->
+        <!-- EXTRA GOLD SOLUTION -->
+        <!-- ======================== -->
+        <h2 class="section-h2" id="extra-gold">Extra Gold Solution</h2>
+        <p>Whenever the user orders something then the system will check if the order is ready for shipping or we need to manufacture this. If the order is ready to ship then we need to make sure whatever metal weight we show on a website is the product real weight.</p>
+        <p>If the product gold weight in master inventory is <strong>3.5g</strong> but after production in store it is <strong>3.3g</strong>, then <strong>0.2g</strong> difference means we re-initiate the customer's payment as a refund.</p>
+        <p>If the store product is <strong>3.8g</strong> (0.3g extra), then we send a mail/WhatsApp to the customer informing them. If they agree to pay the difference, the order continues. If they decline, we initiate custom re-manufacturing.</p>
+        <div class="info-box important">
+            <p><strong>Disclaimer:</strong> We always will add the disclaimer — if there is a difference between the gold weight then an additional payment or refund will be applicable.</p>
+        </div>
+
+        <div class="image-container">
+            <img src="extracted_media/image104.png" alt="Inventory Bagging & Weight Reconciliation" loading="lazy" onclick="openLightbox(this)">
+            <div class="image-caption">
+                <span class="caption-title">Order Management — Inventory Bagging & Weight Reconciliation</span>
+                An active "Attach Inventory" modal with radio button options for 'Type' (Create or Fetch). Data table with Store Code, Company Code, Metal Wt, Bag Number, and Action columns. The underlying interface shows order details with "Regenerate Invoice", "Download Invoice", and "Manage Item Shipments" buttons.
+            </div>
+        </div>
+
+        <!-- ======================== -->
+        <!-- DEVELOPMENT -->
+        <!-- ======================== -->
+        <h2 class="section-h2" id="development">Development</h2>
+        <p>We can create a development panel where directly we can add some menus like: task management, system-routes, and roadmap. We already have some tabs like:</p>
+        <ul>
+            <li>Roadmap Ledger</li>
+            <li>Pseudo Code</li>
+            <li>Detailed Documentation</li>
+            <li>Auto QC and Diagnostics</li>
+        </ul>
+
+        <div class="info-box success">
+            <p><strong>Phase 2 Architecture:</strong> The Phase 2 system architecture utilizes a Hybrid Microservices stack: a FastAPI (Python) backend for heavy algorithmic logic/margin calculations, a Node.js layer for administrative CRUD routing, and a Next.js (React) frontend for the Server-Driven UI (SDUI) storefronts. Local automation pipelines (n8n/PowerShell) remain active.</p>
+        </div>
+
+        <p><strong>Dashboard Data Mapping</strong> — Create the underlying data files (JSON or MD) to feed the 5 core dashboard tabs:</p>
+        <ul>
+            <li><strong>ROADMAP_LASER:</strong> A hyper-focused ledger of current tasks, upcoming Phase 2 integrations, and business-impact KPIs.</li>
+            <li><strong>PSEUDOCODE:</strong> Plain-English, step-by-step logic flows for newly proposed frontend layouts or data routing functions.</li>
+            <li><strong>DETAILED_DOCUMENTATION:</strong> The technical SSoT consolidating ARCHITECTURE, DATA_STRUCTURE, and CONNECTIVITY.</li>
+            <li><strong>AUTO_QC:</strong> An automated checklist verifying every new code block against strict minimalist UI constraints.</li>
+            <li><strong>DIAGNOSE:</strong> A real-time ledger of system bottlenecks, known UI bugs, CORS conflicts, and error logs.</li>
+        </ul>
+
+        <hr>
+        <p style="text-align: center; color: var(--text-muted); font-size: 0.82rem; margin-top: 40px;">— End of Phase 2 Development Documentation —</p>
+
+    </div>
+</main>
+
+<!-- LIGHTBOX -->
+<div class="lightbox-overlay" id="lightbox" onclick="closeLightbox()">
+    <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+    <img id="lightbox-img" src="" alt="Enlarged view">
+</div>
+
+<!-- BACK TO TOP -->
+<button class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Back to top">↑</button>
+
+<script>
+    // ===== LIGHTBOX =====
+    function openLightbox(img) {
+        const overlay = document.getElementById('lightbox');
+        const lightboxImg = document.getElementById('lightbox-img');
+        lightboxImg.src = img.src;
+        lightboxImg.alt = img.alt;
+        overlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeLightbox() {
+        document.getElementById('lightbox').classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeLightbox();
+    });
+
+    // ===== BACK TO TOP =====
+    window.addEventListener('scroll', () => {
+        const btn = document.getElementById('backToTop');
+        if (window.scrollY > 400) {
+            btn.classList.add('visible');
+        } else {
+            btn.classList.remove('visible');
+        }
+    });
+
+    // ===== TOC SEARCH FILTER =====
+    function filterToc(query) {
+        const links = document.querySelectorAll('.toc a');
+        const sections = document.querySelectorAll('.toc .toc-section-title');
+        query = query.toLowerCase();
+
+        links.forEach(link => {
+            const text = link.textContent.toLowerCase();
+            if (query === '' || text.includes(query)) {
+                link.style.display = '';
+            } else {
+                link.style.display = 'none';
+            }
+        });
+    }
+
+    // ===== ACTIVE TOC HIGHLIGHTING =====
+    const tocLinks = document.querySelectorAll('.toc a');
+    const sections = [];
+
+    tocLinks.forEach(link => {
+        const id = link.getAttribute('href').substring(1);
+        const section = document.getElementById(id);
+        if (section) sections.push({ link, section });
+    });
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                tocLinks.forEach(l => l.classList.remove('active'));
+                const active = document.querySelector(`.toc a[href="#${entry.target.id}"]`);
+                if (active) active.classList.add('active');
+            }
+        });
+    }, { rootMargin: '-10% 0px -80% 0px' });
+
+    sections.forEach(({ section }) => observer.observe(section));
+
+    // ===== CLOSE SIDEBAR ON MOBILE LINK CLICK =====
+    tocLinks.forEach(link => {
+        link.addEventListener('click', () => {
+            if (window.innerWidth <= 1024) {
+                document.querySelector('.sidebar').classList.remove('open');
+            }
+        });
+    });
+</script>
+
+</body>
+</html>

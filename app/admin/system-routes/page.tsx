@@ -29,6 +29,7 @@ export default function SystemRoutesAuditor() {
     { path: '/admin/inventory/grid', label: 'Global Inventory Engine', type: 'Admin', status: 'Active' },
     { path: '/admin/inventory/fields', label: 'Inventory Metafields', type: 'Admin', status: 'Active' },
     { path: '/admin/inventory/import', label: 'Data Import Engine', type: 'Admin', status: 'Active' },
+    { path: '/admin/products/edit/[id]', label: 'Single Product Editor', type: 'Admin', status: 'Active' },
     { path: '/admin/discounts', label: 'Discount CRM', type: 'Admin', status: 'Active' },
     { path: '/admin/clients', label: 'Partner Network (CRM)', type: 'Admin', status: 'Active' },
     { path: '/admin/orders', label: 'PO Inbox & Kanban', type: 'Admin', status: 'Active' },

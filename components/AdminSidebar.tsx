@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation';
 import { signOut, useSession } from 'next-auth/react';
 import BrandLogo from './BrandLogo';
 
-export default function AdminSidebar({ isCollapsed = false, setIsCollapsed = () => {}, isDarkMode = false, setIsDarkMode = () => {} }: { isCollapsed?: boolean, setIsCollapsed?: (val: boolean) => void, isDarkMode?: boolean, setIsDarkMode?: (val: boolean) => void }) {
+export default function AdminSidebar({ isCollapsed = false, setIsCollapsed = () => { }, isDarkMode = false, setIsDarkMode = () => { } }: { isCollapsed?: boolean, setIsCollapsed?: (val: boolean) => void, isDarkMode?: boolean, setIsDarkMode?: (val: boolean) => void }) {
   const pathname = usePathname();
   const { data: session } = useSession();
   const user = session?.user as any;
@@ -15,12 +15,13 @@ export default function AdminSidebar({ isCollapsed = false, setIsCollapsed = () 
     {
       title: "Inventory & Assets",
       links: [
-        { 
-          name: "Products", 
-          path: "/admin/inventory", 
+        {
+          name: "Products",
+          path: "/admin/inventory",
           icon: "M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4",
           subLinks: [
-            { name: "Product Grid", path: "/admin/inventory/grid" },
+            { name: "Product Grid (Old)", path: "/admin/inventory/grid" },
+            { name: "Master Grid (New)", path: "/admin/inventory/master-grid" },
             { name: "Product MetaFields", path: "/admin/inventory/fields" },
             { name: "Import Products", path: "/admin/inventory/import" }
           ]
@@ -59,6 +60,16 @@ export default function AdminSidebar({ isCollapsed = false, setIsCollapsed = () 
       ]
     },
     {
+      title: "Parameters",
+      roles: ['ADMIN'],
+      links: [
+        { name: "Options", path: "/admin/parameters/options", icon: "M4 6h16M4 12h16M4 18h7" },
+        { name: "Option Sets", path: "/admin/parameters/options/sets", icon: "M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" },
+        { name: "Categories", path: "/admin/parameters/categories", icon: "M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" },
+        { name: "Collections", path: "/admin/parameters/collections", icon: "M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" }
+      ]
+    },
+    {
       title: "Dev & Tracking",
       roles: ['ADMIN'],
       links: [
@@ -70,10 +81,10 @@ export default function AdminSidebar({ isCollapsed = false, setIsCollapsed = () 
   ];
 
   return (
-    <div className={`${isCollapsed ? 'w-20' : 'w-64'} min-h-screen bg-[var(--bg-surface)] border-r border-[var(--border-color)] flex flex-col fixed left-0 top-0 z-[100] transition-all duration-300`}>
-      
+    <div className={`${isCollapsed ? 'w-20' : 'w-64'} h-[100dvh] bg-[var(--bg-surface)] border-r border-[var(--border-color)] flex flex-col fixed left-0 top-0 z-[100] transition-all duration-300`}>
+
       {/* GEMINI-STYLE COLLAPSE BUTTON */}
-      <button 
+      <button
         onClick={() => setIsCollapsed(!isCollapsed)}
         className="absolute -right-3 top-8 w-6 h-6 bg-[var(--bg-base)] border border-[var(--border-color)] rounded-full flex items-center justify-center shadow-sm hover:bg-[var(--text-muted)]/10 transition-all z-[110] text-[var(--text-muted)]"
       >
@@ -102,7 +113,7 @@ export default function AdminSidebar({ isCollapsed = false, setIsCollapsed = () 
             <div className="space-y-1">
               {group.links.map((link: any, lIdx) => {
                 const isActive = pathname?.startsWith(link.path);
-                
+
                 // If it's a parent link with no sublinks OR it's a sublink parent that is active, we use the active background
                 const isBgActive = isActive && !link.subLinks;
 
@@ -133,7 +144,7 @@ export default function AdminSidebar({ isCollapsed = false, setIsCollapsed = () 
           </div>
         ))}
       </div>
-      
+
       <div className={`p-4 border-t border-[var(--border-color)] flex flex-col gap-4 ${isCollapsed ? 'items-center' : ''}`}>
         {/* Theme Switcher */}
         <button onClick={() => setIsDarkMode(!isDarkMode)} title={isCollapsed ? (isDarkMode ? "Light Mode" : "Dark Mode") : ""} className={`flex items-center text-[var(--text-muted)] bg-[var(--text-muted)]/5 hover:bg-[var(--text-muted)]/10 rounded-xl transition-colors ${isCollapsed ? 'p-3 justify-center' : 'px-4 py-3 justify-between w-full'}`}>
@@ -155,7 +166,7 @@ export default function AdminSidebar({ isCollapsed = false, setIsCollapsed = () 
               </div>
             </div>
           )}
-          <button 
+          <button
             onClick={() => signOut({ callbackUrl: '/login' })}
             className={`text-[var(--text-muted)] hover:text-red-600 transition-colors ${isCollapsed ? 'p-2' : 'p-2 bg-[var(--text-muted)]/5 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg'}`}
             title="Secure Logout"

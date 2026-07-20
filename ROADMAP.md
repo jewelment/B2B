@@ -14,7 +14,16 @@ This document tracks major features, architectural updates, and tasks completed 
 - **Smart Downloading**: When a user right-clicks to "Save Image As...", the system forces the browser to save it using the exact original SKU file name (e.g., `NP0068_1`) and matches the extension (`.webp` or `.jpg`) depending on the optimization setting.
 - **Public Fallback Support**: Even if the secure proxy is disabled, turning on WebP optimization will still magically optimize the public URLs to ensure lightning-fast image delivery.
 
-### 2. [Add Previous Major Tasks Here]
+### 2. Phase 18.1: Single Product Editable Timeline (UI/UX)
+**Status**: Completed
+**Description**: Designed a multi-step timeline workflow for editing individual products, integrating a rich-text WYSIWYG editor, status toggles, advanced tags management, and a bespoke 12-hour modern calendar UI.
+**Key Capabilities for User Manual**:
+- **Bespoke Calendar Component**: A custom React-based 12-hour AM/PM scheduler that strictly enforces chronological integrity and inherits global UI CSS variables.
+- **Smart Tagging Input**: A highly responsive tag-pill input field mapping directly to the SEO/search engine recommendations list.
+- **Automated Draft Transitions**: Intelligent scheduling features that automatically restrict live publication for future-scheduled SKUs.
+- **Micro-Interaction UI/UX**: Fluid Framer Motion animations across active states, glassmorphism modal dialogs, and 'Ambient Occlusion' shadowing.
+
+### 3. [Add Previous Major Tasks Here]
 - *System foundation setup*
 - *Authentication and Role-Based Access Control*
 - *Inventory & Catalog APIs*

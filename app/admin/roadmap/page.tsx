@@ -292,7 +292,8 @@ export default function DevRoadmapDashboard() {
         { name: "18.2 Automated Variant Matrix UI", profile: "Admin", status: "Pending", progress: 0, url: "/admin/products" },
         { name: "18.3 Variant Media Upload Modal", profile: "Admin", status: "Pending", progress: 0, url: "/admin/products" },
         { name: "18.4 Inventory Store Allocation Grid", profile: "Manager", status: "Pending", progress: 0, url: "/admin/inventory" },
-        { name: "18.5 Product Reviews Workflow", profile: "Support", status: "Pending", progress: 0, url: "/admin/inventory" }
+        { name: "18.5 Product Reviews Workflow", profile: "Support", status: "Pending", progress: 0, url: "/admin/inventory" },
+        { name: "18.6 Master Inventory Grid", profile: "Admin", status: "Completed", progress: 100, url: "/admin/products" }
       ]
     },
     {
@@ -312,7 +313,8 @@ export default function DevRoadmapDashboard() {
         { name: "20.1 Banner Management Directory", profile: "Admin", status: "Pending", progress: 0, url: "/admin/banners" },
         { name: "20.2 Edit Banner Modal & Responsive Media Mapping", profile: "Admin", status: "Pending", progress: 0, url: "/admin/banners" },
         { name: "20.3 PLP In-Grid Promo Banner Integration", profile: "Admin", status: "Pending", progress: 0, url: "/admin/banners" },
-        { name: "20.4 Frontend Hero Landing Page Automation", profile: "System", status: "Pending", progress: 0, url: "/admin/banners" }
+        { name: "20.4 Frontend Hero Landing Page Automation", profile: "System", status: "Pending", progress: 0, url: "/admin/banners/landing" },
+        { name: "20.5 Theme Builder & Assets Library", profile: "Admin", status: "Pending", progress: 0, url: "/admin/theme-builder" }
       ]
     },
     {
@@ -323,7 +325,8 @@ export default function DevRoadmapDashboard() {
         { name: "21.2 Single Order Detail View & Timeline Logging", profile: "Sales", status: "Pending", progress: 0, url: "/admin/orders" },
         { name: "21.3 Inventory Bagging & Weight Reconciliation Tool", profile: "Admin", status: "Pending", progress: 0, url: "/admin/orders" },
         { name: "21.4 All Transactions & Payment Gateway Status", profile: "Finance", status: "Pending", progress: 0, url: "/admin/orders" },
-        { name: "21.5 11+1 Monthly Gold Savings Scheme Dashboard", profile: "Admin", status: "Pending", progress: 0, url: "/admin/schemes" }
+        { name: "21.5 11+1 Monthly Gold Savings Scheme Dashboard", profile: "Admin", status: "Pending", progress: 0, url: "/admin/schemes" },
+        { name: "21.6 Return Management (Reverse Pickup)", profile: "Support", status: "Pending", progress: 0, url: "/admin/returns" }
       ]
     },
     {
@@ -344,7 +347,15 @@ export default function DevRoadmapDashboard() {
         { name: "23.2 Appearance & Theme Colors Configuration", profile: "Admin", status: "Pending", progress: 0, url: "/admin/settings" },
         { name: "23.3 3rd Party Integrations", profile: "Super Admin", status: "Pending", progress: 0, url: "/admin/settings" },
         { name: "23.4 Advanced Configuration (Domain DNS Setup)", profile: "System", status: "Pending", progress: 0, url: "/admin/settings" },
-        { name: "23.5 Social Media & OG Image Routing", profile: "Admin", status: "Pending", progress: 0, url: "/admin/settings" }
+        { name: "23.5 Social Media & OG Image Routing", profile: "Admin", status: "Pending", progress: 0, url: "/admin/settings/social" }
+      ]
+    },
+    {
+      phase: "24.0 EXECUTIVE DASHBOARD & SYSTEM LOGS",
+      description: "Primary performance indicators and global audit logging to ensure operational accountability across all users.",
+      tasks: [
+        { name: "24.1 Executive Dashboard Analytics", profile: "Super Admin", status: "Completed", progress: 100, url: "/admin/dashboard" },
+        { name: "24.2 Global Events & Logs Panel", profile: "System", status: "Pending", progress: 0, url: "/admin/logs" }
       ]
     }
   ];
@@ -664,25 +675,45 @@ export default function DevRoadmapDashboard() {
                               {isExpanded && (
                                 <tr className="bg-black/5 dark:bg-white/5 border-b border-[var(--border-color)]">
                                   <td colSpan={5} className="px-6 py-6 border-l-4 border-[var(--brand-primary)] whitespace-normal">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                      <div className="bg-[var(--bg-base)] p-5 rounded-xl border border-[var(--border-color)]">
-                                        <h4 className="text-xs font-bold uppercase tracking-widest text-[var(--text-muted)] mb-3 flex items-center gap-2">
-                                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                          Implementation Details
-                                        </h4>
-                                        <p className="text-sm text-[var(--text-main)] mb-3 leading-relaxed">
-                                          {taskDetailsMap[task.name]?.description || "Architectural specification and pseudo-code definition based on roadmap guidelines."}
-                                        </p>
+                                    <div className="flex flex-col gap-6">
+                                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div className="bg-[var(--bg-base)] p-5 rounded-xl border border-[var(--border-color)]">
+                                          <h4 className="text-xs font-bold uppercase tracking-widest text-[var(--text-muted)] mb-3 flex items-center gap-2">
+                                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                            Implementation Details
+                                          </h4>
+                                          <p className="text-sm text-[var(--text-main)] mb-3 leading-relaxed">
+                                            {taskDetailsMap[task.name]?.description || "Architectural specification and pseudo-code definition based on roadmap guidelines."}
+                                          </p>
+                                        </div>
+                                        <div className="bg-amber-500/5 p-5 rounded-xl border border-amber-500/20">
+                                          <h4 className="text-xs font-bold uppercase tracking-widest text-amber-600 mb-3 flex items-center gap-2">
+                                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                            QA & Testing Pointers
+                                          </h4>
+                                          <ul className="list-disc pl-5 text-sm space-y-2 text-amber-700/80 dark:text-amber-400/80">
+                                            <li>{taskDetailsMap[task.name]?.howToTest || "Execute boundary tests on edge cases (e.g., invalid tokens, malformed POST payloads)."}</li>
+                                          </ul>
+                                        </div>
                                       </div>
-                                      <div className="bg-amber-500/5 p-5 rounded-xl border border-amber-500/20">
-                                        <h4 className="text-xs font-bold uppercase tracking-widest text-amber-600 mb-3 flex items-center gap-2">
-                                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                          QA & Testing Pointers
-                                        </h4>
-                                        <ul className="list-disc pl-5 text-sm space-y-2 text-amber-700/80 dark:text-amber-400/80">
-                                          <li>{taskDetailsMap[task.name]?.howToTest || "Execute boundary tests on edge cases (e.g., invalid tokens, malformed POST payloads)."}</li>
-                                        </ul>
-                                      </div>
+                                      {taskDetailsMap[task.name]?.images && (
+                                        <div className="bg-[var(--bg-base)] p-5 rounded-xl border border-[var(--border-color)]">
+                                          <h4 className="text-xs font-bold uppercase tracking-widest text-[var(--brand-primary)] mb-4 flex items-center gap-2">
+                                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                                            Visual Architecture & Layout References
+                                          </h4>
+                                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                                            {taskDetailsMap[task.name]?.images?.map((img, i) => (
+                                              <div key={i} className="flex flex-col gap-3 group">
+                                                <div className="relative rounded-lg overflow-hidden border border-[var(--border-color)] bg-black/5 dark:bg-white/5 shadow-sm group-hover:border-[var(--brand-primary)] transition-colors">
+                                                  <img src={img.src} alt={img.caption} className="w-full h-auto max-h-[300px] object-cover" />
+                                                </div>
+                                                <p className="text-xs font-mono text-[var(--text-muted)] text-center px-2">{img.caption}</p>
+                                              </div>
+                                            ))}
+                                          </div>
+                                        </div>
+                                      )}
                                     </div>
                                   </td>
                                 </tr>
@@ -771,25 +802,45 @@ export default function DevRoadmapDashboard() {
                                 {isExpanded && (
                                   <tr className="bg-black/5 dark:bg-white/5 border-b border-[var(--border-color)]">
                                     <td colSpan={5} className="px-6 py-6 border-l-4 border-emerald-500 whitespace-normal">
-                                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <div className="bg-[var(--bg-base)] p-5 rounded-xl border border-[var(--border-color)]">
-                                          <h4 className="text-xs font-bold uppercase tracking-widest text-[var(--text-muted)] mb-3 flex items-center gap-2">
-                                            <svg className="w-4 h-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-                                            Completed Module Details
-                                          </h4>
-                                          <p className="text-sm text-[var(--text-main)] mb-3 leading-relaxed">
-                                            {taskDetailsMap[task.name]?.description || "This module has been successfully integrated into the platform architecture and passed automated QA."}
-                                          </p>
+                                      <div className="flex flex-col gap-6">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                          <div className="bg-[var(--bg-base)] p-5 rounded-xl border border-[var(--border-color)]">
+                                            <h4 className="text-xs font-bold uppercase tracking-widest text-[var(--text-muted)] mb-3 flex items-center gap-2">
+                                              <svg className="w-4 h-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                                              Completed Module Details
+                                            </h4>
+                                            <p className="text-sm text-[var(--text-main)] mb-3 leading-relaxed">
+                                              {taskDetailsMap[task.name]?.description || "This module has been successfully integrated into the platform architecture and passed automated QA."}
+                                            </p>
+                                          </div>
+                                          <div className="bg-emerald-500/5 p-5 rounded-xl border border-emerald-500/20">
+                                            <h4 className="text-xs font-bold uppercase tracking-widest text-emerald-600 mb-3 flex items-center gap-2">
+                                              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                              Testing Instructions
+                                            </h4>
+                                            <ul className="list-disc pl-5 text-sm space-y-2 text-emerald-700/80 dark:text-emerald-400/80">
+                                              <li>{taskDetailsMap[task.name]?.howToTest || "Check the specific system route via the Open button to interact with it directly in the live environment."}</li>
+                                            </ul>
+                                          </div>
                                         </div>
-                                        <div className="bg-emerald-500/5 p-5 rounded-xl border border-emerald-500/20">
-                                          <h4 className="text-xs font-bold uppercase tracking-widest text-emerald-600 mb-3 flex items-center gap-2">
-                                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                            Testing Instructions
-                                          </h4>
-                                          <ul className="list-disc pl-5 text-sm space-y-2 text-emerald-700/80 dark:text-emerald-400/80">
-                                            <li>{taskDetailsMap[task.name]?.howToTest || "Check the specific system route via the Open button to interact with it directly in the live environment."}</li>
-                                          </ul>
-                                        </div>
+                                        {taskDetailsMap[task.name]?.images && (
+                                          <div className="bg-[var(--bg-base)] p-5 rounded-xl border border-[var(--border-color)]">
+                                            <h4 className="text-xs font-bold uppercase tracking-widest text-emerald-500 mb-4 flex items-center gap-2">
+                                              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                                              Deployed Visual Architecture
+                                            </h4>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                                              {taskDetailsMap[task.name]?.images?.map((img, i) => (
+                                                <div key={i} className="flex flex-col gap-3 group">
+                                                  <div className="relative rounded-lg overflow-hidden border border-[var(--border-color)] bg-black/5 dark:bg-white/5 shadow-sm group-hover:border-emerald-500/50 transition-colors">
+                                                    <img src={img.src} alt={img.caption} className="w-full h-auto max-h-[300px] object-cover" />
+                                                  </div>
+                                                  <p className="text-xs font-mono text-[var(--text-muted)] text-center px-2">{img.caption}</p>
+                                                </div>
+                                              ))}
+                                            </div>
+                                          </div>
+                                        )}
                                       </div>
                                     </td>
                                   </tr>

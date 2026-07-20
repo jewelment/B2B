@@ -24,7 +24,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }, [isDarkMode]);
 
   return (
-    <div className="flex h-screen bg-[var(--bg-base)] transition-colors duration-300 font-sans overflow-hidden">
+    <div className="flex min-h-screen bg-[var(--bg-base)] transition-colors duration-300 font-sans">
       {/* Sidebar Navigation */}
       <AdminSidebar 
         isDarkMode={isDarkMode} 
@@ -34,8 +34,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       />
 
       {/* Main Content Area */}
-      <div className={`flex flex-col flex-1 overflow-hidden relative bg-[var(--bg-base)] transition-all duration-300 p-8 ${isSidebarCollapsed ? 'ml-20' : 'ml-64'}`}>
-        <main className="flex-1 overflow-y-auto">
+      <div className={`flex flex-col flex-1 relative bg-[var(--bg-base)] transition-all duration-300 ${isSidebarCollapsed ? 'ml-20' : 'ml-64'}`}>
+        <main className="flex-1 p-4 sm:p-8">
           {children}
         </main>
       </div>

@@ -63,7 +63,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="bg-[#fcfcfc] text-gray-900 font-sans antialiased" suppressHydrationWarning>
+      <body className="bg-[var(--bg-base)] text-[var(--text-main)] font-sans antialiased" suppressHydrationWarning>
         <SessionProviderWrapper>
           {children}
           
