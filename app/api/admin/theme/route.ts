@@ -83,8 +83,8 @@ export async function POST(request: Request) {
     if (contentType.includes('multipart/form-data')) {
       const formData = await request.formData();
       
-      const assetType = formData.get('assetType') as string; // 'logoLight', 'logoDark', 'faviconLight', 'faviconDark', 'componentAsset'
-      const file = formData.get('file') as File;
+      const assetType = (formData as any).get('assetType') as string; // 'logoLight', 'logoDark', 'faviconLight', 'faviconDark', 'componentAsset'
+      const file = (formData as any).get('file') as File;
 
       if (!assetType || !file) {
         return NextResponse.json({ success: false, error: 'Missing file or assetType.' }, { status: 400 });

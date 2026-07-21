@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import React from 'react';
 import { renderToStream } from '@react-pdf/renderer';
-import { CatalogDocument } from './PdfTemplate';
+import { PdfTemplate } from './PdfTemplate';
 import { prisma } from '@/lib/prisma';
 
 
@@ -40,7 +40,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
 
     // 4. Generate PDF Stream using React.createElement so we don't need .tsx extension for the route
     const pdfStream = await renderToStream(
-      React.createElement(CatalogDocument, { catalog, products, config }) as any
+      React.createElement(PdfTemplate, { catalog, products, config, baseUrl: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000' }) as any
     );
 
     // 5. Convert Node Stream to Web ReadableStream

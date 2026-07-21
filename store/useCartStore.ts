@@ -27,6 +27,7 @@ interface CartStore {
   addSelection: (sku: string) => void;
   removeSelection: (sku: string) => void;
   updateMatrixQty: (sku: string, variantKey: string, qty: number) => void;
+  setMatrixQuantities: (quantities: Record<string, Record<string, number>>) => void;
   
   clearCart: () => void;
 }
@@ -102,6 +103,8 @@ export const useCartStore = create<CartStore>()(
           }
         };
       }),
+
+      setMatrixQuantities: (quantities) => set({ matrixQuantities: quantities }),
 
       // Clear all
       clearCart: () => set({ items: [], selectedItems: [], matrixQuantities: {} }),

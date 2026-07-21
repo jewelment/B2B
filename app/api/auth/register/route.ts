@@ -36,9 +36,15 @@ export async function POST(req: Request) {
     // Cryptographically hash the password (Cost Factor 12)
     const passwordHash = await bcrypt.hash(password, 12);
 
+    let tenant = await prisma.tenant.findFirst();
+    if (!tenant) {
+      tenant = await prisma.tenant.create({ data: { domain: 'default.localhost', name: 'Default Tenant' }});
+    }
+
     // Database Injection with complete commercial dataset
     const newUser = await prisma.user.create({
       data: {
+        tenantId: tenant.id,
         name,
         email: normalizedEmail,
         passwordHash,

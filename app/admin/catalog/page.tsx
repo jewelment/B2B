@@ -408,6 +408,7 @@ export default function AdminCatalogsDashboard() {
                               password: cat.configuration.password || '',
                               frontCover: cat.configuration.frontCover || '',
                               backCover: cat.configuration.backCover || '',
+                              backCoverText: cat.configuration.backCoverText || '',
                               viewerBackground: cat.configuration.viewerBackground || 'WOOD',
                               lifestyleInserts: cat.configuration.lifestyleInserts || []
                             });

@@ -25,10 +25,10 @@ export default function CategoriesDashboard() {
 
   const getStatusColor = (status: string) => {
     switch(status) {
-      case 'Active': return 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20';
-      case 'Draft': return 'bg-amber-500/10 text-amber-600 border-amber-500/20';
-      case 'Inactive': return 'bg-red-500/10 text-red-600 border-red-500/20';
-      default: return 'bg-gray-500/10 text-gray-600 border-gray-500/20';
+      case 'Active': return 'bg-[#00B060]/10 text-[#00B060] border-[#00B060]/20 shadow-sm';
+      case 'Draft': return 'bg-amber-500/10 text-amber-600 border-amber-500/20 shadow-sm';
+      case 'Inactive': return 'bg-red-500/10 text-red-600 border-red-500/20 shadow-sm';
+      default: return 'bg-[var(--text-muted)]/10 text-[var(--text-muted)] border-[var(--text-muted)]/20 shadow-sm';
     }
   };
 
@@ -42,14 +42,14 @@ export default function CategoriesDashboard() {
             <h1 className="text-2xl font-bold tracking-tight">Categories</h1>
             <p className="text-sm text-[var(--text-muted)] mt-1">Manage product taxonomy tree and nested sub-categories.</p>
           </div>
-          <button className="px-5 py-2.5 bg-[var(--brand-primary)] text-white rounded-lg text-xs font-bold uppercase tracking-widest shadow-lg shadow-[var(--brand-primary)]/20 hover:opacity-90 transition-all flex items-center gap-2">
+          <button className="px-5 py-2.5 bg-[var(--brand-primary)] text-[var(--brand-text)] rounded-lg text-xs font-bold uppercase tracking-widest transition-all flex items-center gap-2 shadow-sm shimmer-hover">
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
             Add Category
           </button>
         </div>
 
         {/* MAIN PANEL */}
-        <div className="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-xl shadow-sm overflow-hidden">
+        <div className="surface-panel overflow-hidden mt-8">
           
           {/* TABS */}
           <div className="flex overflow-x-auto border-b border-[var(--border-color)] scrollbar-hide">
@@ -122,7 +122,7 @@ export default function CategoriesDashboard() {
                     <td className="p-4 text-center font-mono text-sm text-[var(--text-muted)]">{cat.products.toLocaleString()}</td>
                     <td className="p-4 text-center font-mono text-sm text-[var(--text-muted)]">{cat.subCategories}</td>
                     <td className="p-4 text-center">
-                      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border ${getStatusColor(cat.status)}`}>
+                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border ${getStatusColor(cat.status)}`}>
                         {cat.status}
                       </span>
                     </td>

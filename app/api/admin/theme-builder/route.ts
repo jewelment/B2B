@@ -37,7 +37,7 @@ export async function GET(req: Request) {
       }
     }
 
-    const defaultLayout = {
+    const defaultLayout: any = {
       web: { draft: { "/": [] }, staging: { "/": [] }, prod: { "/": [] } },
       app: { draft: { "/": [] }, staging: { "/": [] }, prod: { "/": [] } }
     };

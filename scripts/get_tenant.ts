@@ -8,7 +8,7 @@ async function main() {
     tenant = await prisma.tenant.create({
       data: {
         name: 'Default Tenant',
-        subdomain: 'wholesale'
+        domain: 'wholesale.localhost'
       }
     });
     console.log('Created new Tenant:', tenant.id);

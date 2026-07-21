@@ -11,8 +11,19 @@ export async function submitAccessRequest(formData: FormData) {
   }
 
   try {
+    let tenant = await prisma.tenant.findFirst();
+    if (!tenant) {
+      tenant = await prisma.tenant.create({
+        data: {
+          domain: 'default.localhost',
+          name: 'Default Tenant',
+        }
+      });
+    }
+
     await prisma.accessRequest.create({
       data: {
+        tenantId: tenant.id,
         gstin,
         salesCode: salesCode || null,
       }

@@ -16,7 +16,7 @@ type Product = {
 };
 
 export default function MasterInventoryGrid() {
-  const premiumEasing = [0.16, 1, 0.3, 1];
+  const premiumEasing = [0.16, 1, 0.3, 1] as any;
   const [data, setData] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 

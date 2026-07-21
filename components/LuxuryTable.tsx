@@ -25,7 +25,7 @@ export function LuxuryTable<TData, TValue>({
   });
 
   // Custom high-inertia cubic-bezier for luxury feel
-  const premiumEasing = [0.16, 1, 0.3, 1];
+  const premiumEasing = [0.16, 1, 0.3, 1] as const;
 
   const rowVariants = {
     hidden: { opacity: 0, y: 10 },

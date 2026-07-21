@@ -24,8 +24,8 @@ export async function POST(req: Request) {
     }
 
     const formData = await req.formData();
-    const syncMode = formData.get('syncMode') as string || 'APPEND';
-    const files = formData.getAll('files') as File[];
+    const syncMode = (formData as any).get('syncMode') as string || 'APPEND';
+    const files = (formData as any).getAll('files') as File[];
 
     if (!files || files.length === 0) {
       return NextResponse.json({ success: false, message: 'No media files provided.' }, { status: 400 });

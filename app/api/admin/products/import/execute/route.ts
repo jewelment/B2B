@@ -16,11 +16,20 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    let tenantId = (session.user as any).tenantId;
+    if (!tenantId) {
+      let tenant = await prisma.tenant.findFirst();
+      if (!tenant) {
+        tenant = await prisma.tenant.create({ data: { domain: 'default.localhost', name: 'Default Tenant' }});
+      }
+      tenantId = tenant.id;
+    }
+
     // 2. Parse the Multipart FormData payload
     const formData = await req.formData();
-    const csvFile = formData.get('csv') as File;
-    const mediaZip = formData.get('mediaBulk') as File | null;
-    const conflictRule = formData.get('conflictRule') as string || 'SKIP';
+    const csvFile = (formData as any).get('csv') as File;
+    const mediaZip = (formData as any).get('mediaBulk') as File | null;
+    const conflictRule = (formData as any).get('conflictRule') as string || 'SKIP';
 
     if (!csvFile) {
       return NextResponse.json({ error: 'CSV payload missing.' }, { status: 400 });
@@ -43,7 +52,7 @@ export async function POST(req: NextRequest) {
 
       // Upsert Core Product Model
       const product = await prisma.product.upsert({
-        where: { designCode },
+        where: { tenantId_designCode: { tenantId, designCode } },
         update: {
           title: row['Title'] || undefined,
           description: row['Description'] || row['Body (HTML)'] || undefined,
@@ -51,6 +60,7 @@ export async function POST(req: NextRequest) {
           category: row['Category'] || row['Type'] || undefined,
         },
         create: {
+          tenantId,
           handle: row['Handle'] || designCode.toLowerCase(),
           designCode,
           title: row['Title'] || 'Untitled SKU',
@@ -101,7 +111,7 @@ export async function POST(req: NextRequest) {
           const sequence = parseInt(match[2], 10);
           
           // Find the product by DesignCode
-          const product = await prisma.product.findUnique({ where: { designCode: sku } });
+          const product = await prisma.product.findUnique({ where: { tenantId_designCode: { tenantId, designCode: sku } } });
           
           if (product) {
             // Write the physical file to the local server

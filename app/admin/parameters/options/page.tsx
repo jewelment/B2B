@@ -31,10 +31,10 @@ export default function OptionsDashboard() {
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold tracking-tight">Options</h1>
           <div className="flex items-center gap-3">
-            <button className="px-4 py-2 bg-[var(--bg-surface)] border border-[var(--border-color)] text-[var(--text-main)] rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-black/5 transition-colors">
+            <button className="px-4 py-2 bg-[var(--bg-surface)] border border-[var(--border-color)] text-[var(--text-main)] rounded-lg text-xs font-bold uppercase tracking-widest hover:border-[var(--brand-primary)] hover:text-[var(--brand-primary)] transition-all shadow-sm shimmer-hover">
               Export
             </button>
-            <button className="px-4 py-2 bg-[var(--brand-primary)] text-white rounded-lg text-xs font-bold uppercase tracking-widest hover:opacity-90 transition-opacity">
+            <button className="px-4 py-2 bg-[var(--brand-primary)] text-[var(--brand-text)] rounded-lg text-xs font-bold uppercase tracking-widest transition-all shadow-sm shimmer-hover">
               + Create Options
             </button>
           </div>
@@ -57,7 +57,7 @@ export default function OptionsDashboard() {
         </div>
 
         {/* SEARCH & DATA TABLE */}
-        <div className="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-xl shadow-sm overflow-hidden">
+        <div className="surface-panel overflow-hidden mt-8">
           <div className="p-4 border-b border-[var(--border-color)]">
             <div className="relative max-w-md">
               <input 

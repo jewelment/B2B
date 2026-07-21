@@ -13,9 +13,18 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: 'Unauthorized. Admin access required.' }, { status: 403 });
     }
 
+    let tenantId = (session.user as any).tenantId;
+    if (!tenantId) {
+      let tenant = await prisma.tenant.findFirst();
+      if (!tenant) {
+        tenant = await prisma.tenant.create({ data: { domain: 'default.localhost', name: 'Default Tenant' }});
+      }
+      tenantId = tenant.id;
+    }
+
     // 2. Extract the uploaded CSV file
     const formData = await req.formData();
-    const file = formData.get('file') as File;
+    const file = (formData as any).get('file') as File;
 
     if (!file) {
       return NextResponse.json({ message: 'No file provided.' }, { status: 400 });
@@ -52,7 +61,7 @@ export async function POST(req: Request) {
       const imageSrc = row['Image Src'] || null;
 
       await prisma.product.upsert({
-        where: { handle },
+        where: { tenantId_handle: { tenantId, handle } },
         update: {
           title: row['Title'],
           // description: row['Body (HTML)'], (omitted, description is used for imageSrc)
@@ -65,6 +74,7 @@ export async function POST(req: Request) {
           ...(imageSrc && { description: imageSrc }), 
         },
         create: {
+          tenantId,
           handle,
           designCode,
           title: row['Title'],

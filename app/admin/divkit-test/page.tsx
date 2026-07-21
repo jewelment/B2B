@@ -1,6 +1,7 @@
 "use client";
 
 import React from 'react';
+// @ts-ignore
 import { DivKit } from '@divkitframework/react';
 
 const mockJson = {

@@ -70,7 +70,7 @@ export default function DashboardCatalog() {
     loadData(1, filter);
   }, [filter]);
 
-  const lastElementRef = useCallback((node: HTMLDivElement | null) => {
+  const lastElementRef = useCallback((node: HTMLAnchorElement | null) => {
     if (loading) return;
     if (observer.current) observer.current.disconnect();
     observer.current = new IntersectionObserver(entries => {

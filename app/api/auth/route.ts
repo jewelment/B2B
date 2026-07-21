@@ -27,8 +27,14 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: 'Invalid international mobile number format.' }, { status: 400 });
       }
 
+      let tenant = await prisma.tenant.findFirst();
+      if (!tenant) {
+        tenant = await prisma.tenant.create({ data: { domain: 'default.localhost', name: 'Default Tenant' }});
+      }
+
       const newUser = await prisma.user.create({
         data: {
+          tenantId: tenant.id,
           email,
           passwordHash: password, 
           companyName,

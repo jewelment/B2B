@@ -78,7 +78,7 @@ export default function ThemeSettingsPage() {
       });
       const data = await res.json();
       if (data.success) {
-        setSettings(prev => ({ ...prev, [assetType]: data.url }));
+        setSettings((prev: any) => ({ ...prev, [assetType]: data.url }));
         showToast(`Asset uploaded successfully!`);
       } else {
         showToast("Upload failed.", "error");

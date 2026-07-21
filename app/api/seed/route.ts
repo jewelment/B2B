@@ -4,6 +4,12 @@ import { prisma } from '@/lib/prisma';
 
 export async function GET() {
   try {
+    let tenant = await prisma.tenant.findFirst();
+    if (!tenant) {
+      tenant = await prisma.tenant.create({ data: { domain: 'default.localhost', name: 'Default Tenant' }});
+    }
+    const tenantId = tenant.id;
+
     // 1. Clear existing test catalogs to prevent duplicates during testing
     await prisma.catalogItem.deleteMany({});
     await prisma.catalog.deleteMany({});
@@ -12,6 +18,7 @@ export async function GET() {
     // 2. Inject Luxury Jewelry SKUs
     const product1 = await prisma.product.create({
       data: {
+        tenantId,
         handle: 'classic-gold-solitaire-ring',
         designCode: 'AJ-R-1001',
         title: 'Classic 18K Gold Solitaire Ring',
@@ -25,6 +32,7 @@ export async function GET() {
 
     const product2 = await prisma.product.create({
       data: {
+        tenantId,
         handle: 'emerald-cut-diamond-studs',
         designCode: 'AJ-E-2050',
         title: 'Emerald Cut Diamond Stud Earrings',
@@ -38,6 +46,7 @@ export async function GET() {
 
     const product3 = await prisma.product.create({
       data: {
+        tenantId,
         handle: 'rose-gold-floral-pendant',
         designCode: 'AJ-P-3022',
         title: 'Rose Gold Floral Leaf Pendant',
@@ -52,6 +61,7 @@ export async function GET() {
     // 3. Create a Flipbook Catalog
     const masterCatalog = await prisma.catalog.create({
       data: {
+        tenantId,
         name: 'Summer Wholesale Master Collection',
         theme: 'LIGHT',
         itemsPerPage: 4,

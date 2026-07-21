@@ -8,7 +8,7 @@ export async function POST(req: Request) {
   try {
     // 1. Intercept Multipart FormData
     const formData = await req.formData();
-    const editsString = formData.get('edits') as string;
+    const editsString = (formData as any).get('edits') as string;
     
     if (!editsString) {
       return NextResponse.json({ error: 'Empty payload.' }, { status: 400 });
@@ -40,7 +40,7 @@ export async function POST(req: Request) {
           
           if (typeof item === 'string' && item.startsWith('UPLOADED:')) {
             const fieldName = item.replace('UPLOADED:', '');
-            const file = formData.get(fieldName) as File;
+            const file = (formData as any).get(fieldName) as File;
             
             if (file) {
               const bytes = await file.arrayBuffer();

@@ -14,7 +14,7 @@ export async function POST(req: Request) {
     }
 
     const formData = await req.formData();
-    const file = formData.get('file') as File;
+    const file = (formData as any).get('file') as File;
     
     if (!file) {
       console.log('[UPLOAD API] No file received in form data');

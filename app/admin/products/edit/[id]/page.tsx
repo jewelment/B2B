@@ -304,6 +304,56 @@ export default function SingleProductEditAccurateUI({ params }: { params: { id: 
   const [seoTitle, setSeoTitle] = useState("Buy Gradiant Triangle Diamond Design Ring | Ashok Jewels");
   const [seoDesc, setSeoDesc] = useState("Shop Gradiant Triangle Diamond Ring online at Ashok Jewels. Premium diamond jewellery crafted for elegance. Explore authentic Design with secure shopping.");
 
+  // Option Sets State (Phase 18.2)
+  const [isSingleVariant, setIsSingleVariant] = useState(false);
+  const [optionSet, setOptionSet] = useState<any>({
+    name: "Ladies Diamond Rings 6-20 All Os",
+    options: [
+      { name: "Metal", values: ["Gold", "Platinum"] },
+      { name: "Diamond", values: ["SI-HI", "VVS-FG"] },
+      { name: "Size", values: ["7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"] }
+    ]
+  });
+  const [isImportOptionsModalOpen, setIsImportOptionsModalOpen] = useState(false);
+  
+  // Generated Variants (Phase 18.2)
+  const [variants, setVariants] = useState<any[]>([]);
+
+  // Combinatorial Generator
+  useEffect(() => {
+    if (isSingleVariant || !optionSet.options) {
+      setVariants([]);
+      return;
+    }
+    
+    // Recursive combination generator
+    const generateCombinations = (options: any[], currentIndex = 0, currentCombo: string[] = []): any[] => {
+      if (currentIndex === options.length) {
+        return [currentCombo];
+      }
+      const currentOption = options[currentIndex];
+      const combinations: any[] = [];
+      for (const value of currentOption.values) {
+        combinations.push(...generateCombinations(options, currentIndex + 1, [...currentCombo, value]));
+      }
+      return combinations;
+    };
+    
+    const combos = generateCombinations(optionSet.options);
+    
+    const generatedVariants = combos.map((combo, i) => ({
+      id: `var-${i}`,
+      name: combo.join(' • '),
+      sku: `KFLR-${combo.join('-').substring(0, 8).toUpperCase()}`,
+      netWeight: (3.5 + Math.random()).toFixed(3),
+      grossWeight: (4.0 + Math.random()).toFixed(3),
+      price: Math.floor(15000 + Math.random() * 50000),
+      discount: '10%'
+    }));
+    
+    setVariants(generatedVariants);
+  }, [optionSet, isSingleVariant]);
+
   // Preview State Sync (Now filtered by Color!)
   const [mainImageIdx, setMainImageIdx] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -461,7 +511,9 @@ export default function SingleProductEditAccurateUI({ params }: { params: { id: 
           </div>
 
           {/* TITLE & STATUS */}
-          <div className="flex gap-8 items-end">
+          {activeStep === 1 && (
+            <div className="space-y-8 animate-in fade-in duration-300">
+              <div className="flex gap-8 items-end">
             <div className="flex-1">
               <label className="block font-bold text-[var(--text-muted)] mb-2 tracking-wider uppercase text-[10px]">Title <span className="text-red-500">*</span> <IconInfo text="The primary product title shown on the storefront and B2B ordering catalogs." /></label>
               <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} className="w-full bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-xl px-4 py-3 text-sm text-[var(--text-main)] font-semibold focus:outline-none focus:ring-1 focus:ring-[var(--brand-primary)] focus:border-[var(--brand-primary)] transition-all shadow-sm" />
@@ -708,7 +760,7 @@ export default function SingleProductEditAccurateUI({ params }: { params: { id: 
                 {tags.map(tag => (
                   <span key={tag} className="bg-[var(--bg-base)] border border-[var(--border-color)] text-[var(--text-main)] text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-2 hover:border-[var(--brand-primary)] transition-colors">
                     {tag} 
-                    <IconClose className="cursor-pointer hover:text-red-500 transition-colors" onClick={(e) => { e.stopPropagation(); setTags(tags.filter(t => t !== tag)); }} />
+                    <IconClose className="cursor-pointer hover:text-red-500 transition-colors" onClick={(e: any) => { e.stopPropagation(); setTags(tags.filter(t => t !== tag)); }} />
                   </span>
                 ))}
                 <input 
@@ -881,6 +933,128 @@ export default function SingleProductEditAccurateUI({ params }: { params: { id: 
               )}
             </div>
           </div>
+          </div>
+          )}
+
+          {/* STEP 2: OPTIONS */}
+          {activeStep === 2 && (
+            <div className="space-y-8 animate-in fade-in duration-300">
+              <div className="surface-panel p-6">
+                <div className="flex justify-between items-center mb-6 border-b border-[var(--border-color)] pb-4">
+                  <div>
+                    <h2 className="text-base font-bold text-[var(--text-main)] tracking-wide">Options</h2>
+                    <p className="text-xs text-[var(--text-muted)] mt-1 font-medium">Map and manage variant combinations</p>
+                  </div>
+                  <label className="flex items-center gap-2 cursor-pointer group">
+                    <input type="checkbox" checked={isSingleVariant} onChange={(e) => setIsSingleVariant(e.target.checked)} className="w-4 h-4 rounded border-gray-300 text-[var(--brand-primary)] focus:ring-[var(--brand-primary)] cursor-pointer" />
+                    <span className="text-xs font-semibold text-[var(--text-muted)] group-hover:text-[var(--text-main)] transition-colors">Single variant</span>
+                  </label>
+                </div>
+                
+                {!isSingleVariant && optionSet.options ? (
+                  <div className="bg-[var(--bg-base)] border border-[var(--border-color)] rounded-xl p-5 shadow-inner mb-6">
+                    <div className="flex justify-between items-center mb-5">
+                      <h3 className="text-sm font-bold text-[var(--brand-primary)] tracking-wide">{optionSet.name}</h3>
+                      <button onClick={() => setOptionSet({})} className="text-xs font-bold text-red-500 hover:text-red-700 transition-colors focus:outline-none">Remove Option Set</button>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      {optionSet.options.map((opt: any, index: number) => (
+                        <div key={index} className="flex flex-col sm:flex-row sm:items-center gap-4 py-3 border-t border-[var(--border-color)]">
+                          <div className="w-40 shrink-0 font-bold text-sm text-[var(--text-main)]">{opt.name}</div>
+                          <div className="flex flex-wrap gap-2">
+                            {opt.values.map((v: string) => (
+                              <span key={v} className="bg-[var(--bg-surface)] border border-[var(--border-color)] px-3 py-1 rounded-full text-xs font-bold text-[var(--text-muted)] shadow-sm">{v}</span>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : !isSingleVariant && (
+                  <div className="flex flex-col items-center justify-center p-12 bg-[var(--bg-base)] border border-[var(--border-color)] border-dashed rounded-xl mb-6">
+                    <svg className="w-12 h-12 text-[var(--text-muted)] opacity-50 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+                    <p className="text-sm font-bold text-[var(--text-main)] mb-1">No Option Sets Configured</p>
+                    <p className="text-xs text-[var(--text-muted)] mb-6">Import an existing option set or create a new one to generate variants.</p>
+                    <div className="flex gap-4">
+                      <button onClick={() => console.log('Create Option Set pending')} className="px-5 py-2.5 bg-[var(--bg-surface)] text-[var(--text-main)] border border-[var(--border-color)] hover:border-[var(--brand-primary)] hover:text-[var(--brand-primary)] font-bold text-xs uppercase tracking-widest rounded-full transition-all shadow-sm">Create Option Set</button>
+                      <button onClick={() => setIsImportOptionsModalOpen(true)} className="px-5 py-2.5 bg-[var(--brand-primary)] text-[var(--brand-text)] font-bold text-xs uppercase tracking-widest rounded-full hover:opacity-90 transition-opacity shadow-sm">Import Option Set</button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* STEP 4: VARIANTS */}
+          {activeStep === 4 && (
+            <div className="space-y-8 animate-in fade-in duration-300">
+              <div className="surface-panel p-6">
+                <div className="flex justify-between items-center mb-6 border-b border-[var(--border-color)] pb-4">
+                  <div>
+                    <h2 className="text-base font-bold text-[var(--text-main)] tracking-wide">Variant Master Matrix</h2>
+                    <p className="text-xs text-[var(--text-muted)] mt-1 font-medium">Manage {variants.length} automatically generated product permutations</p>
+                  </div>
+                  <div className="flex gap-3">
+                    <CustomSelect 
+                      value="India (INR)" 
+                      onChange={() => {}} 
+                      options={['India (INR)', 'USA (USD)', 'UK (GBP)', 'UAE (AED)']} 
+                      className="bg-[var(--bg-surface)] py-1.5 px-3 min-w-[140px]" 
+                      size="sm"
+                    />
+                    <button className="px-4 py-2 bg-[var(--bg-surface)] text-[var(--text-main)] border border-[var(--border-color)] hover:border-[var(--brand-primary)] hover:text-[var(--brand-primary)] font-bold text-[10px] tracking-widest uppercase rounded-lg shadow-sm transition-colors">Edit All</button>
+                  </div>
+                </div>
+                
+                {variants.length > 0 ? (
+                  <div className="w-full overflow-x-auto rounded-xl border border-[var(--border-color)] shadow-inner bg-[var(--bg-surface)]" style={{ maxHeight: '600px' }}>
+                    <table className="w-full text-left text-sm whitespace-nowrap relative">
+                      <thead className="bg-[var(--bg-base)] text-[var(--text-muted)] sticky top-0 z-10 border-b border-[var(--border-color)] shadow-sm">
+                        <tr>
+                          <th className="py-3 px-4 font-bold text-[10px] uppercase tracking-wider">VARIANTS</th>
+                          <th className="py-3 px-4 font-bold text-[10px] uppercase tracking-wider text-center">MEDIAS</th>
+                          <th className="py-3 px-4 font-bold text-[10px] uppercase tracking-wider text-center">METAL N.W (GMS)</th>
+                          <th className="py-3 px-4 font-bold text-[10px] uppercase tracking-wider text-center">GROSS W.W (GMS)</th>
+                          <th className="py-3 px-4 font-bold text-[10px] uppercase tracking-wider text-center">PRICE (₹)</th>
+                          <th className="py-3 px-4 font-bold text-[10px] uppercase tracking-wider text-center">DISCOUNT</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-[var(--border-color)]">
+                        {variants.map((variant) => (
+                          <tr key={variant.id} className="hover:bg-black/5 dark:hover:bg-white/5 transition-colors group">
+                            <td className="py-3 px-4 border-r border-[var(--border-color)]/50">
+                              <p className="font-bold text-xs text-[var(--text-main)] mb-1">{variant.name}</p>
+                              <p className="text-[10px] text-[var(--text-muted)] font-mono">{variant.sku}</p>
+                            </td>
+                            <td className="py-3 px-4 text-center border-r border-[var(--border-color)]/50 align-middle">
+                              <div className="w-8 h-8 rounded-lg bg-[var(--bg-base)] border border-[var(--border-color)] mx-auto flex items-center justify-center text-[var(--text-muted)] cursor-pointer hover:border-[var(--brand-primary)] hover:text-[var(--brand-primary)] transition-all shadow-sm">
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                              </div>
+                            </td>
+                            <td className="py-3 px-4 text-center border-r border-[var(--border-color)]/50 text-xs font-semibold">{variant.netWeight}</td>
+                            <td className="py-3 px-4 text-center border-r border-[var(--border-color)]/50 text-xs font-semibold">{variant.grossWeight}</td>
+                            <td className="py-3 px-4 text-center border-r border-[var(--border-color)]/50">
+                              <input type="text" defaultValue={variant.price.toLocaleString('en-IN')} className="w-24 bg-transparent border border-transparent focus:border-[var(--brand-primary)] focus:ring-1 focus:ring-[var(--brand-primary)] rounded px-2 py-1 text-center font-bold text-sm text-[var(--text-main)] hover:bg-black/5 dark:hover:bg-white/5 transition-all outline-none" />
+                            </td>
+                            <td className="py-3 px-4 text-center">
+                              <input type="text" defaultValue={variant.discount} className="w-16 bg-transparent border border-transparent focus:border-[var(--brand-primary)] focus:ring-1 focus:ring-[var(--brand-primary)] rounded px-2 py-1 text-center font-semibold text-xs text-[var(--text-main)] hover:bg-black/5 dark:hover:bg-white/5 transition-all outline-none" />
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center p-12 bg-[var(--bg-base)] border border-[var(--border-color)] border-dashed rounded-xl mb-6">
+                    <svg className="w-12 h-12 text-[var(--text-muted)] opacity-50 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H8a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H8a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
+                    <p className="text-sm font-bold text-[var(--text-main)] mb-1">No Variants Generated</p>
+                    <p className="text-xs text-[var(--text-muted)]">Configure Options first to automatically generate variants.</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
         </div>
 
@@ -977,6 +1151,54 @@ export default function SingleProductEditAccurateUI({ params }: { params: { id: 
         </div>
 
       </div>
+
+      {/* IMPORT OPTION SET MODAL */}
+      <AnimatePresence>
+        {isImportOptionsModalOpen && (
+          <motion.div 
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1 }} 
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] bg-black/60 flex items-center justify-center p-4 backdrop-blur-sm" 
+          >
+            <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }} className="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
+              <div className="flex justify-between items-center px-6 py-5 border-b border-[var(--border-color)] bg-[var(--bg-base)]">
+                <h3 className="text-lg font-bold text-[var(--text-main)] tracking-tight">Import Option Sets</h3>
+                <button onClick={() => setIsImportOptionsModalOpen(false)} className="p-2 bg-[var(--bg-surface)] rounded-full hover:brightness-95 dark:hover:brightness-125 transition-colors border border-[var(--border-color)] shadow-sm"><IconClose /></button>
+              </div>
+              <div className="p-6 bg-[var(--bg-surface)]">
+                <div className="relative mb-6">
+                  <svg className="absolute left-4 top-3.5 w-5 h-5 text-[var(--text-muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                  <input type="text" placeholder="Search master option sets..." className="w-full bg-[var(--bg-base)] border border-[var(--border-color)] rounded-xl pl-11 pr-4 py-3 text-sm text-[var(--text-main)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-1 focus:ring-[var(--brand-primary)] focus:border-[var(--brand-primary)] shadow-sm" />
+                </div>
+                <div className="space-y-3 max-h-[60vh] overflow-y-auto">
+                  <div 
+                    onClick={() => {
+                      setOptionSet({
+                        name: "Ladies Diamond Rings 6-20 All Os",
+                        options: [
+                          { name: "Metal", values: ["Gold", "Platinum"] },
+                          { name: "Diamond", values: ["SI-HI", "VVS-FG"] },
+                          { name: "Size", values: ["7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"] }
+                        ]
+                      });
+                      setIsImportOptionsModalOpen(false);
+                    }} 
+                    className="p-4 border border-[var(--border-color)] rounded-xl hover:border-[var(--brand-primary)] hover:bg-[var(--brand-primary)]/5 cursor-pointer transition-colors"
+                  >
+                    <h4 className="font-bold text-sm text-[var(--text-main)]">Ladies Diamond Rings 6-20 All Os</h4>
+                    <p className="text-xs text-[var(--text-muted)] mt-1">Metal (2) • Diamond (2) • Size (14)</p>
+                  </div>
+                  <div className="p-4 border border-[var(--border-color)] rounded-xl hover:border-[var(--brand-primary)] hover:bg-[var(--brand-primary)]/5 cursor-pointer transition-colors">
+                    <h4 className="font-bold text-sm text-[var(--text-main)]">Pendants Standard O-Sets</h4>
+                    <p className="text-xs text-[var(--text-muted)] mt-1">Metal (2) • Diamond (3)</p>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* FULLSCREEN LIGHTBOX OVERLAY */}
       <AnimatePresence>

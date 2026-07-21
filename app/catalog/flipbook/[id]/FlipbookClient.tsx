@@ -622,12 +622,8 @@ export default function FlipbookClient({ catalog }: { catalog: any }) {
       {showPOMatrix && activeProductData && (
         <AdvancedMatrixModal
           products={previewCatalog.items?.map((i: any) => i.product) || []}
-          selectedItems={selectedItems}
           activeMatrixSku={activeMatrixSku!}
           setActiveMatrixSku={setActiveMatrixSku}
-          matrixQuantities={matrixQuantities}
-          setMatrixQuantities={setMatrixQuantities}
-          handleRemoveSkuFromCart={handleRemoveSkuFromCart}
           closeMatrix={closeMatrix}
           catalogId={previewCatalog.id}
           clientId={previewCatalog.clientId}

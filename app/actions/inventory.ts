@@ -21,6 +21,13 @@ export async function processInventoryCSV(formData: FormData) {
     const rows = parsed.data as any[];
     let processedCount = 0;
 
+    let tenant = await prisma.tenant.findFirst();
+    if (!tenant) {
+      tenant = await prisma.tenant.create({
+        data: { domain: 'default.localhost', name: 'Default Tenant' }
+      });
+    }
+
     // Loop through each row in your CSV
     for (const row of rows) {
       // 1. Setup metadata from your specific columns
@@ -53,7 +60,12 @@ export async function processInventoryCSV(formData: FormData) {
       // 3. Write/Update the Database
       // Using upsert so it updates existing products instead of creating duplicates
       await prisma.product.upsert({
-        where: { designCode: designCode },
+        where: { 
+          tenantId_designCode: {
+            tenantId: tenant.id,
+            designCode: designCode
+          }
+        },
         update: {
           title: row['Title'] || designCode,
           estimatedPrice: parseFloat(row['Price']) || 0,
@@ -61,6 +73,7 @@ export async function processInventoryCSV(formData: FormData) {
           ...(localImagePath && { description: localImagePath }) // Temporarily storing image path in description for UI rendering
         },
         create: {
+          tenantId: tenant.id,
           handle: designCode.toLowerCase(),
           designCode: designCode,
           title: row['Title'] || `Jewelry Piece ${designCode}`,

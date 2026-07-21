@@ -19,7 +19,7 @@ const TableInput = ({ value, onChange, type = "text", align = "left", isEditing 
       step={type === 'number' ? "any" : undefined}
       value={value} 
       onChange={onChange} 
-      className={`w-full h-full min-h-[36px] px-3 py-2 bg-transparent outline-none focus:bg-white focus:ring-2 focus:ring-[var(--brand-primary)]/50 focus:z-10 relative transition-all ${align === 'right' ? 'text-right' : align === 'center' ? 'text-center' : 'text-left'}`}
+      className={`w-full h-full min-h-[36px] px-3 py-2 bg-transparent outline-none focus:bg-[var(--bg-surface)] focus:ring-1 focus:ring-[var(--brand-primary)] focus:shadow-inner focus:scale-[0.98] focus:z-10 relative transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] text-[var(--text-main)] ${align === 'right' ? 'text-right' : align === 'center' ? 'text-center' : 'text-left'}`}
     />
   );
 };
@@ -268,19 +268,19 @@ export default function AdminPricingPanel() {
       <div className="max-w-7xl mx-auto space-y-10">
         
         {/* HEADER & GLOBAL SYNC */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-end bg-[var(--bg-surface)] p-8 rounded-[2rem] border border-[var(--glass-border)] shadow-sm backdrop-blur-xl">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end surface-panel p-8">
           <div>
             <h1 className="text-3xl font-light tracking-wide text-[var(--text-main)]">Master Pricing Engine</h1>
             <p className="text-sm text-[var(--text-muted)] mt-2">Control global metal baselines, component rates, and synchronization triggers.</p>
           </div>
           <div className="mt-6 md:mt-0 flex flex-col items-end space-y-3">
             <div className="flex items-center space-x-3">
-              <select value={syncSchedule} onChange={(e) => setSyncSchedule(e.target.value)} className="bg-[var(--bg-base)] border border-[var(--border-color)] text-[var(--text-main)] text-sm font-medium px-5 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]/20 shadow-sm cursor-pointer transition-all">
+              <select value={syncSchedule} onChange={(e) => setSyncSchedule(e.target.value)} className="bg-[var(--bg-base)] border border-[var(--border-color)] text-[var(--text-main)] text-sm font-medium px-5 py-3 rounded-xl focus:outline-none focus:ring-1 focus:ring-[var(--brand-primary)] shadow-sm cursor-pointer transition-all">
                 <option value="OFF">Schedule: OFF</option>
                 <option value="1H">Sync Every 1 Hour</option>
                 <option value="1800">Sync Daily @ 18:00 IST</option>
               </select>
-              <button onClick={handleForceSync} disabled={isSyncing} className="flex items-center px-8 py-3 bg-[var(--brand-primary)] text-[var(--brand-text)] text-sm font-semibold tracking-wide rounded-xl shadow-md hover:opacity-90 hover:-translate-y-0.5 disabled:opacity-70 disabled:hover:translate-y-0 transition-all">
+              <button onClick={handleForceSync} disabled={isSyncing} className="flex items-center px-8 py-3 bg-[var(--brand-primary)] text-[var(--brand-text)] text-sm font-semibold tracking-wide rounded-xl shadow-md shimmer-hover disabled:opacity-70 transition-all">
                 {isSyncing ? 'Pushing DB Updates...' : 'Apply & Sync Global Rates'}
               </button>
             </div>
@@ -289,15 +289,15 @@ export default function AdminPricingPanel() {
         </div>
 
         {/* SECTION 1: METALS & PURITY MATRIX */}
-        <div className="bg-[var(--bg-surface)] border border-[var(--glass-border)] rounded-[2rem] p-8 shadow-sm">
+        <div className="surface-panel p-8 mt-8">
           <div className="flex justify-between items-center mb-8 border-b border-[var(--border-color)] pb-6">
             <div>
               <h2 className="text-xl font-light tracking-wide">Precious Metal Rates</h2>
               <p className="text-sm text-[var(--text-muted)] mt-1">Updates cascade down to all active karatages instantly.</p>
             </div>
             <div className="flex bg-[var(--bg-base)] p-1.5 rounded-xl border border-[var(--border-color)] shadow-inner">
-              <button onClick={() => setPricingMode('MANUAL')} className={`px-6 py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition-all ${pricingMode === 'MANUAL' ? 'bg-[var(--brand-primary)] text-[var(--brand-text)] shadow-md' : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'}`}>Manual Base</button>
-              <button onClick={() => setPricingMode('LIVE_API')} className={`px-6 py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition-all ${pricingMode === 'LIVE_API' ? 'bg-emerald-600 text-white shadow-md' : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'}`}>Live API Base</button>
+              <button onClick={() => setPricingMode('MANUAL')} className={`px-6 py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition-all ${pricingMode === 'MANUAL' ? 'bg-[var(--brand-primary)] text-[var(--brand-text)] shadow-md shimmer-hover' : 'text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-black/5 dark:hover:bg-white/5'}`}>Manual Base</button>
+              <button onClick={() => setPricingMode('LIVE_API')} className={`px-6 py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition-all ${pricingMode === 'LIVE_API' ? 'bg-[#00B060] text-white shadow-md shimmer-hover' : 'text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-black/5 dark:hover:bg-white/5'}`}>Live API Base</button>
             </div>
           </div>
 
@@ -310,7 +310,7 @@ export default function AdminPricingPanel() {
                 </div>
                 <div className="relative group">
                   <span className="absolute left-5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] font-medium">₹</span>
-                  <input type="number" value={pricingMode === 'LIVE_API' ? liveGold : baseGold24k} onChange={(e) => setBaseGold24k(Number(e.target.value))} disabled={pricingMode === 'LIVE_API'} className={`w-full pl-10 pr-5 py-4 text-2xl font-light font-mono rounded-xl border border-[var(--border-color)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]/20 transition-all ${pricingMode === 'LIVE_API' ? 'bg-[var(--bg-base)] text-emerald-600 border-emerald-500/30' : 'bg-[var(--bg-surface)] hover:border-[var(--brand-primary)]/50 text-[var(--text-main)]'}`} />
+                  <input type="number" value={pricingMode === 'LIVE_API' ? liveGold : baseGold24k} onChange={(e) => setBaseGold24k(Number(e.target.value))} disabled={pricingMode === 'LIVE_API'} className={`w-full pl-10 pr-5 py-4 text-2xl font-light font-mono rounded-xl border border-[var(--border-color)] focus:outline-none focus:ring-1 focus:ring-[var(--brand-primary)] focus:shadow-inner transition-all duration-300 ${pricingMode === 'LIVE_API' ? 'bg-[var(--bg-base)] text-[#00B060] border-emerald-500/30' : 'bg-[var(--bg-surface)] hover:border-[var(--brand-primary)]/50 text-[var(--text-main)]'}`} />
                 </div>
               </div>
 
@@ -321,7 +321,7 @@ export default function AdminPricingPanel() {
                 </div>
                 <div className="relative group">
                   <span className="absolute left-5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] font-medium">₹</span>
-                  <input type="number" value={pricingMode === 'LIVE_API' ? liveSilver : baseSilver925} onChange={(e) => setBaseSilver925(Number(e.target.value))} disabled={pricingMode === 'LIVE_API'} className={`w-full pl-10 pr-5 py-4 text-2xl font-light font-mono rounded-xl border border-[var(--border-color)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]/20 transition-all ${pricingMode === 'LIVE_API' ? 'bg-[var(--bg-base)] text-emerald-600 border-emerald-500/30' : 'bg-[var(--bg-surface)] hover:border-[var(--brand-primary)]/50 text-[var(--text-main)]'}`} />
+                  <input type="number" value={pricingMode === 'LIVE_API' ? liveSilver : baseSilver925} onChange={(e) => setBaseSilver925(Number(e.target.value))} disabled={pricingMode === 'LIVE_API'} className={`w-full pl-10 pr-5 py-4 text-2xl font-light font-mono rounded-xl border border-[var(--border-color)] focus:outline-none focus:ring-1 focus:ring-[var(--brand-primary)] focus:shadow-inner transition-all duration-300 ${pricingMode === 'LIVE_API' ? 'bg-[var(--bg-base)] text-[#00B060] border-emerald-500/30' : 'bg-[var(--bg-surface)] hover:border-[var(--brand-primary)]/50 text-[var(--text-main)]'}`} />
                 </div>
               </div>
             </div>
@@ -331,7 +331,7 @@ export default function AdminPricingPanel() {
                 <h3 className="text-sm font-semibold tracking-wide">Purity & Markup Matrix</h3>
                 <button 
                   onClick={() => setIsEditingKarat(!isEditingKarat)} 
-                  className={`flex items-center text-xs font-semibold px-4 py-1.5 rounded-lg transition-all ${isEditingKarat ? 'bg-emerald-600 text-white' : 'bg-[var(--text-muted)]/10 text-[var(--text-main)] hover:bg-[var(--text-muted)]/20'}`}
+                  className={`flex items-center text-xs font-semibold px-4 py-1.5 rounded-lg transition-all ${isEditingKarat ? 'bg-[var(--brand-primary)] text-[var(--brand-text)] shadow-sm shimmer-hover' : 'bg-[var(--text-muted)]/10 text-[var(--text-main)] hover:bg-[var(--text-muted)]/20'}`}
                 >
                   {!isEditingKarat && (
                     <svg className="w-3.5 h-3.5 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
@@ -359,10 +359,10 @@ export default function AdminPricingPanel() {
                             <span className="font-semibold text-[var(--text-main)]">{row.id}</span>
                             <span className="ml-2 text-[10px] bg-[var(--text-muted)]/10 text-[var(--text-muted)] px-2 py-0.5 rounded-md uppercase tracking-wide">{row.metal}</span>
                           </td>
-                          <td className={`p-0 border border-[var(--border-color)] w-24 ${isEditingKarat ? 'bg-white text-black' : 'bg-transparent text-[var(--text-main)]'}`}>
+                          <td className={`p-0 border border-[var(--border-color)] w-24 transition-colors ${isEditingKarat ? 'bg-[var(--bg-base)]' : 'bg-transparent text-[var(--text-main)]'}`}>
                             <TableInput value={row.purity} onChange={(e: any) => handleKaratChange(index, 'purity', e.target.value)} type="number" align="center" isEditing={isEditingKarat} />
                           </td>
-                          <td className={`p-0 border border-[var(--border-color)] w-24 ${isEditingKarat ? 'bg-amber-50 text-black' : 'bg-transparent text-[var(--text-main)]'}`}>
+                          <td className={`p-0 border border-[var(--border-color)] w-24 transition-colors ${isEditingKarat ? 'bg-[var(--bg-base)]' : 'bg-transparent text-[var(--text-main)]'}`}>
                             <TableInput value={row.markup} onChange={(e: any) => handleKaratChange(index, 'markup', e.target.value)} type="number" align="center" isEditing={isEditingKarat} />
                           </td>
                           <td className="px-6 py-3 border-b border-[var(--border-color)] text-right font-mono text-base text-[var(--brand-primary)] font-medium">
@@ -379,7 +379,7 @@ export default function AdminPricingPanel() {
         </div>
 
         {/* SECTION 2: COMPONENT SPREADSHEETS */}
-        <div className="bg-[var(--bg-surface)] border border-[var(--glass-border)] rounded-[2rem] p-8 shadow-sm overflow-hidden">
+        <div className="surface-panel p-8 mt-8 overflow-hidden">
           <div className="mb-8 flex justify-between items-end">
             <div>
               <h2 className="text-xl font-light tracking-wide">Component Matrix Rules</h2>
