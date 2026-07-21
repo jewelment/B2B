@@ -31,10 +31,10 @@ export default function OptionsDashboard() {
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold tracking-tight">Options</h1>
           <div className="flex items-center gap-3">
-            <button className="px-4 py-2 bg-[var(--bg-surface)] border border-[var(--border-color)] text-[var(--text-main)] rounded-lg text-xs font-bold uppercase tracking-widest hover:border-[var(--brand-primary)] hover:text-[var(--brand-primary)] transition-all shadow-sm shimmer-hover">
+            <button className="px-5 py-2.5 rounded-full bg-[var(--bg-surface)] text-[var(--text-main)] border border-[var(--border-color)] hover:border-[var(--brand-primary)] hover:text-[var(--brand-primary)] transition-all shadow-sm shimmer-hover text-xs font-bold uppercase tracking-wide">
               Export
             </button>
-            <button className="px-4 py-2 bg-[var(--brand-primary)] text-[var(--brand-text)] rounded-lg text-xs font-bold uppercase tracking-widest transition-all shadow-sm shimmer-hover">
+            <button className="px-5 py-2.5 rounded-full bg-[var(--brand-primary)] text-[var(--brand-text)] border border-[var(--brand-primary)] hover:opacity-90 transition-all shadow-md shimmer-hover text-xs font-bold uppercase tracking-wide">
               + Create Options
             </button>
           </div>

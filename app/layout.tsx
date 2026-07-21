@@ -37,7 +37,10 @@ export async function generateMetadata(): Promise<Metadata> {
     : await prisma.storeSettings.findFirst();
 
   return {
-    title: settings?.brandName || 'B2B Wholesale Portal',
+    title: {
+      template: `${settings?.brandName || 'AJ B2B'} | %s`,
+      default: settings?.brandName || 'AJ B2B',
+    },
     description: settings?.brandDescription || 'Exclusive Wholesale Partner Portal',
     icons: {
       icon: [

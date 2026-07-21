@@ -34,6 +34,11 @@ model Tenant {
   analyticsEvents AnalyticsEvent[]
   productOptions  ProductOption[]
   optionSets      OptionSet[]
+  
+  categories      Category[]
+  collections     Collection[]
+  tags            Tag[]
+  vendors         Vendor[]
 }
 
 // ======================================================
@@ -83,6 +88,20 @@ model Product {
   components        Component[]
   customFieldValues ProductFieldValue[] // Links to dynamic custom attributes
   media             ProductMedia[]      // The localized Asset Pipeline
+  
+  categoryId        String?
+  categoryModel     Category?           @relation("ProductToCategory", fields: [categoryId], references: [id])
+
+  collectionId      String?
+  collectionModel   Collection?         @relation("ProductToCollection", fields: [collectionId], references: [id])
+
+  vendorId          String?
+  vendorModel       Vendor?             @relation("ProductToVendor", fields: [vendorId], references: [id])
+
+  productTags       ProductTag[]
+
+  optionSets        ProductOptionSet[]
+  variants          ProductVariant[]
 
   @@unique([tenantId, handle])
   @@unique([tenantId, designCode])
@@ -467,6 +486,7 @@ model OptionValue {
   parentId    String?
   parent      OptionValue?  @relation("NestedValues", fields: [parentId], references: [id])
   children    OptionValue[] @relation("NestedValues")
+  variantValues VariantOptionValue[]
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -481,6 +501,7 @@ model OptionSet {
   isSingleVariant Boolean  @default(false)
 
   items           OptionSetItem[]
+  productSets     ProductOptionSet[]
   
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
@@ -498,4 +519,130 @@ model OptionSetItem {
   selectedValuesJson String? 
 
   @@unique([optionSetId, optionId])
+}
+
+// ======================================================
+// 10. CATEGORIES, COLLECTIONS, TAGS, VENDORS
+// ======================================================
+
+model Category {
+  id          String   @id @default(cuid())
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  name        String
+  handle      String
+  description String?
+  
+  parentId    String?
+  parent      Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id])
+  children    Category[] @relation("CategoryHierarchy")
+  
+  products    Product[]  @relation("ProductToCategory")
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@unique([tenantId, handle])
+}
+
+model Collection {
+  id          String   @id @default(cuid())
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  name        String
+  handle      String
+  description String?
+
+  products    Product[] @relation("ProductToCollection")
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@unique([tenantId, handle])
+}
+
+model Tag {
+  id          String   @id @default(cuid())
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  name        String
+
+  products    ProductTag[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([tenantId, name])
+}
+
+model ProductTag {
+  id        String  @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  tagId     String
+  tag       Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, tagId])
+}
+
+model Vendor {
+  id          String   @id @default(cuid())
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  name        String
+  email       String?
+  phone       String?
+
+  products    Product[] @relation("ProductToVendor")
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// ======================================================
+// 11. PRODUCT VARIANTS (AUTO-GENERATED MATRIX)
+// ======================================================
+
+model ProductOptionSet {
+  id          String    @id @default(cuid())
+  productId   String
+  product     Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  optionSetId String
+  optionSet   OptionSet @relation(fields: [optionSetId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, optionSetId])
+}
+
+model ProductVariant {
+  id             String    @id @default(cuid())
+  productId      String
+  product        Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  sku            String?   // E.g., RING-18K-VVS-12
+  price          Float     @default(0)
+  compareAtPrice Float?
+  weightGrams    Float?
+  
+  status         String    @default("ACTIVE") // ACTIVE, DRAFT
+  
+  optionValues   VariantOptionValue[]
+
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+model VariantOptionValue {
+  id            String         @id @default(cuid())
+  variantId     String
+  variant       ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  
+  optionValueId String
+  optionValue   OptionValue    @relation(fields: [optionValueId], references: [id], onDelete: Cascade)
+
+  @@unique([variantId, optionValueId])
 }

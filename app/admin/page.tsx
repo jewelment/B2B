@@ -1,6 +1,10 @@
-import { redirect } from 'next/navigation';
+import { Metadata } from 'next';
+import DashboardClient from './DashboardClient';
 
-export default function AdminIndex() {
-  // Redirect root /admin directly to the CRM clients page
-  redirect('/admin/clients');
+export const metadata: Metadata = {
+  title: 'Dashboard',
+};
+
+export default function AdminPage() {
+  return <DashboardClient />;
 }

@@ -127,19 +127,19 @@ export default function ImportProductsWizard() {
               }`}
             >
               <div className="relative flex items-center space-x-5 z-10">
-                <div className={`h-12 w-12 rounded-full font-medium text-sm flex items-center justify-center transition-all duration-500 shadow-sm ${
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-500 ${
                   currentStep === s.num 
-                    ? 'bg-[#4e080f] text-white shadow-[#4e080f]/20' 
+                    ? 'bg-[var(--brand-primary)] text-[var(--brand-text)] shadow-[0_4px_20px_rgba(0,0,0,0.1)]' 
                     : currentStep > s.num 
-                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-100'
-                      : 'bg-[var(--bg-surface)] text-[var(--text-muted)] border border-[var(--border-color)]'
+                      ? 'bg-[var(--bg-base)] text-[var(--text-main)] border border-[var(--border-color)]'
+                      : 'bg-transparent text-[var(--text-muted)] border border-[var(--border-color)]'
                 }`}>
                   {currentStep > s.num ? (
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
                   ) : s.num}
                 </div>
                 <div>
-                  <p className={`text-[11px] font-bold tracking-widest uppercase transition-colors ${currentStep === s.num ? 'text-[#4e080f]' : 'text-[var(--text-muted)]'}`}>
+                  <p className={`text-[11px] font-bold tracking-widest uppercase transition-colors ${currentStep === s.num ? 'text-[var(--brand-primary)]' : 'text-[var(--text-muted)]'}`}>
                     {s.title}
                   </p>
                   <p className={`text-sm font-light mt-1 transition-colors ${currentStep === s.num ? 'text-[var(--text-main)]' : 'text-[var(--text-muted)]'}`}>
@@ -177,17 +177,17 @@ export default function ImportProductsWizard() {
               </p>
               
               <div className="flex flex-col sm:flex-row gap-4 mb-auto">
-                <button onClick={() => handleDownloadTemplate('empty')} className="py-4 px-6 bg-[var(--bg-surface)] border border-[var(--border-color)] shadow-sm rounded-xl text-[10px] font-bold uppercase tracking-widest text-[var(--text-main)] hover:bg-[var(--bg-base)] hover:border-[var(--border-color)] transition-all">
+                <button onClick={() => handleDownloadTemplate('empty')} className="py-4 px-6 bg-[var(--bg-surface)] border border-[var(--border-color)] shadow-sm rounded-full text-[10px] font-bold uppercase tracking-widest text-[var(--text-main)] hover:bg-[var(--bg-base)] hover:border-[var(--border-color)] transition-all">
                   Download Blank Template
                 </button>
-                <button onClick={() => handleDownloadTemplate('data')} className="py-4 px-6 bg-[var(--bg-base)] border border-[var(--border-color)] shadow-sm rounded-xl text-[10px] font-bold uppercase tracking-widest text-[var(--text-main)] hover:bg-[var(--bg-surface)] transition-all">
+                <button onClick={() => handleDownloadTemplate('data')} className="py-4 px-6 bg-[var(--bg-base)] border border-[var(--border-color)] shadow-sm rounded-full text-[10px] font-bold uppercase tracking-widest text-[var(--text-main)] hover:bg-[var(--bg-surface)] transition-all">
                   Export Active Data
                 </button>
               </div>
 
               {/* NEXT STEP BUTTON FOR STEP 1 */}
               <div className="mt-12 pt-8 border-t border-[var(--border-color)] flex justify-end">
-                 <button onClick={() => setCurrentStep(2)} className="py-3 px-8 bg-[#4e080f] text-white shadow-md shadow-[#4e080f]/20 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:opacity-90 hover:-translate-y-0.5 transition-all">
+                 <button onClick={() => setCurrentStep(2)} className="py-3 px-8 bg-[var(--brand-primary)] text-[var(--brand-text)] shadow-[0_4px_20px_rgba(0,0,0,0.1)] rounded-full text-[10px] font-bold uppercase tracking-widest shimmer-hover hover:-translate-y-0.5 transition-all">
                   Next Step →
                 </button>
               </div>
@@ -206,7 +206,7 @@ export default function ImportProductsWizard() {
                 onDrop={(e) => handleDrop(e, 'csv')}
                 onClick={() => csvInputRef.current?.click()}
                 className={`flex-1 relative flex flex-col items-center justify-center p-12 rounded-2xl cursor-pointer transition-all duration-300 ease-out border-2 border-dashed
-                  ${isDragging ? 'border-[#4e080f] bg-[#4e080f]/5 scale-[1.02]' 
+                  ${isDragging ? 'border-[var(--brand-primary)] bg-[var(--brand-primary)]/5 scale-[1.02]' 
                     : csvFile ? 'border-emerald-200 bg-emerald-50/40 hover:bg-emerald-50/60' 
                     : 'border-[var(--border-color)] bg-[var(--bg-base)] hover:bg-[var(--bg-surface)]'
                   }
@@ -225,7 +225,7 @@ export default function ImportProductsWizard() {
                 ) : (
                   <div className="text-center pointer-events-none">
                      <div className={`mx-auto flex items-center justify-center h-16 w-16 rounded-xl transition-colors duration-300 mb-6 border
-                      ${isDragging ? 'bg-[#4e080f] text-white border-[#4e080f]' : 'bg-[var(--bg-surface)] text-[var(--text-muted)] border-[var(--border-color)] shadow-sm'}
+                      ${isDragging ? 'bg-[var(--brand-primary)] text-[var(--brand-text)] border-[var(--brand-primary)]' : 'bg-[var(--bg-surface)] text-[var(--text-muted)] border-[var(--border-color)] shadow-sm'}
                     `}>
                       <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>
                     </div>
@@ -236,11 +236,11 @@ export default function ImportProductsWizard() {
               </div>
               
               <div className="mt-8 flex justify-between items-center">
-                 <button onClick={() => setCurrentStep(1)} className="py-3 px-6 bg-[var(--bg-surface)] border border-[var(--border-color)] shadow-sm rounded-xl text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] hover:bg-[var(--bg-base)] transition-all flex items-center gap-2">
+                 <button onClick={() => setCurrentStep(1)} className="py-3 px-6 bg-[var(--bg-surface)] border border-[var(--border-color)] shadow-sm rounded-full text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] hover:bg-[var(--bg-base)] transition-all flex items-center gap-2">
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
                   Back
                 </button>
-                 <button onClick={() => setCurrentStep(3)} disabled={!csvFile} className="py-3 px-8 bg-[#4e080f] text-white shadow-md shadow-[#4e080f]/20 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:opacity-90 hover:-translate-y-0.5 transition-all disabled:opacity-30 disabled:cursor-not-allowed">
+                 <button onClick={() => setCurrentStep(3)} disabled={!csvFile} className="py-3 px-8 bg-[var(--brand-primary)] text-[var(--brand-text)] shadow-[0_4px_20px_rgba(0,0,0,0.1)] rounded-full text-[10px] font-bold uppercase tracking-widest shimmer-hover hover:-translate-y-0.5 transition-all disabled:opacity-30 disabled:cursor-not-allowed">
                   Next Step →
                 </button>
               </div>
@@ -258,8 +258,8 @@ export default function ImportProductsWizard() {
                 onDragLeave={handleDragLeave}
                 onDrop={(e) => handleDrop(e, 'media')}
                 onClick={() => mediaInputRef.current?.click()}
-                className={`relative flex flex-col items-center justify-center p-8 rounded-2xl cursor-pointer transition-all duration-300 ease-out border-2 border-dashed mb-8
-                  ${isDragging ? 'border-[#4e080f] bg-[#4e080f]/5' 
+                className={`flex-1 relative flex flex-col items-center justify-center p-8 rounded-2xl cursor-pointer transition-all duration-300 ease-out border-2 border-dashed mb-8
+                  ${isDragging ? 'border-[var(--brand-primary)] bg-[var(--brand-primary)]/5' 
                     : mediaFile ? 'border-emerald-200 bg-emerald-50/40' 
                     : 'border-[var(--border-color)] bg-[var(--bg-base)] hover:bg-[var(--bg-surface)]'
                   }
@@ -293,17 +293,19 @@ export default function ImportProductsWizard() {
                       onClick={() => setConflictRule(rule.id as any)}
                       className={`p-4 rounded-xl border cursor-pointer transition-all duration-200 ${
                         conflictRule === rule.id 
-                          ? 'border-[#4e080f] bg-[#4e080f]/5 shadow-sm' 
+                          ? 'border-[var(--brand-primary)] bg-[var(--brand-primary)]/5 shadow-sm' 
                           : 'border-[var(--border-color)] bg-[var(--bg-surface)] hover:border-[var(--border-color)] hover:bg-[var(--bg-base)]'
                       }`}
                     >
                       <div className="flex items-center justify-between mb-1">
-                        <span className={`text-[11px] font-bold uppercase tracking-widest ${conflictRule === rule.id ? 'text-[#4e080f]' : 'text-[var(--text-main)]'}`}>
+                        <span className={`text-[11px] font-bold uppercase tracking-widest ${conflictRule === rule.id ? 'text-[var(--brand-primary)]' : 'text-[var(--text-main)]'}`}>
                           {rule.title}
                         </span>
-                        {conflictRule === rule.id && (
-                          <div className="w-2 h-2 rounded-full bg-[#4e080f]"></div>
-                        )}
+                        <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-colors ${conflictRule === rule.id ? 'border-[var(--brand-primary)] bg-[var(--brand-primary)]/10' : 'border-[var(--border-color)]'}`}>
+                          {conflictRule === rule.id && (
+                            <div className="w-2 h-2 rounded-full bg-[var(--brand-primary)]"></div>
+                          )}
+                        </div>
                       </div>
                       <p className="text-xs text-[var(--text-muted)]">{rule.desc}</p>
                     </div>
@@ -312,14 +314,14 @@ export default function ImportProductsWizard() {
               </div>
 
               <div className="mt-8 flex justify-between items-center">
-                 <button onClick={() => setCurrentStep(2)} className="py-3 px-6 bg-[var(--bg-surface)] border border-[var(--border-color)] shadow-sm rounded-xl text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] hover:bg-[var(--bg-base)] transition-all flex items-center gap-2">
+                 <button onClick={() => setCurrentStep(2)} className="py-3 px-6 bg-[var(--bg-surface)] border border-[var(--border-color)] shadow-sm rounded-full text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] hover:bg-[var(--bg-base)] transition-all flex items-center gap-2">
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
                   Back
                 </button>
                 <button 
                   onClick={handleFinalExecution} 
                   disabled={isUploading} 
-                  className="py-3 px-8 bg-[#4e080f] text-white shadow-md shadow-[#4e080f]/20 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:opacity-90 hover:-translate-y-0.5 transition-all flex items-center disabled:opacity-50 disabled:transform-none"
+                  className="py-3 px-8 bg-[var(--brand-primary)] text-[var(--brand-text)] shadow-[0_4px_20px_rgba(0,0,0,0.1)] rounded-full text-[10px] font-bold uppercase tracking-widest shimmer-hover hover:-translate-y-0.5 transition-all flex items-center disabled:opacity-50 disabled:transform-none"
                 >
                   {isUploading && (
                     <svg className="animate-spin -ml-1 mr-3 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">

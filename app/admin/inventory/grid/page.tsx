@@ -4,7 +4,7 @@ import React, { useEffect, useState, useMemo, useCallback } from 'react';
 
 // --- SVGs ---
 const IconSearch = () => <svg className="w-4 h-4 text-[var(--text-muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>;
-const IconRefresh = () => <svg className="w-4 h-4 text-[var(--text-main)]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>;
+const IconRefresh = ({ className = "" }: { className?: string }) => <svg className={`w-4 h-4 text-[var(--text-main)] ${className}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>;
 const IconTrash = () => <svg className="w-4 h-4 text-[var(--text-muted)] hover:text-red-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>;
 const IconSort = () => <svg className="w-3 h-3 text-[var(--text-muted)] inline-block ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" /></svg>;
 const IconPencil = () => <svg className="w-3 h-3 text-[var(--text-main)]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>;
@@ -25,6 +25,7 @@ interface CatalogProduct {
 export default function MasterCatalogSpreadsheet() {
   const [products, setProducts] = useState<CatalogProduct[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isReloading, setIsReloading] = useState(false);
   const [isSavingAll, setIsSavingAll] = useState(false);
   const [notification, setNotification] = useState<{type: 'success' | 'error', message: string} | null>(null);
 
@@ -396,8 +397,11 @@ export default function MasterCatalogSpreadsheet() {
               />
             </div>
 
-            <button onClick={() => window.location.reload()} className="p-2 border border-[var(--border-color)] rounded-lg bg-[var(--bg-surface)] hover:brightness-95 dark:hover:brightness-125 transition-all shadow-sm">
-              <IconRefresh />
+            <button 
+              onClick={() => { setIsReloading(true); window.location.reload(); }} 
+              className="p-2 border border-[var(--border-color)] rounded-lg bg-[var(--bg-surface)] hover:brightness-95 dark:hover:brightness-125 transition-all shadow-sm"
+            >
+              <IconRefresh className={isReloading ? "animate-spin" : ""} />
             </button>
           </div>
         </div>
@@ -407,7 +411,7 @@ export default function MasterCatalogSpreadsheet() {
           <div className="bg-[var(--bg-surface)] rounded-xl overflow-x-auto custom-scrollbar shadow-sm border border-[var(--border-color)]">
             {isLoading ? (
               <div className="p-12 text-center text-sm text-[var(--text-muted)] flex items-center justify-center gap-2">
-                 <IconRefresh /> Loading catalog matrix...
+                 <IconRefresh className="animate-spin" /> Loading catalog matrix...
               </div>
             ) : (
               <table className="w-full text-left border-collapse whitespace-nowrap select-none bg-[var(--bg-surface)]">

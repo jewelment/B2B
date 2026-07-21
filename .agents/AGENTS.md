@@ -7,6 +7,7 @@ When generating UI layers, blend modern micro-interactions with structured data 
 - **Glassmorphism & Tactile Maximalism (Liquid Glass):** Use subtle background blurs (backdrop-filter: blur), ultra-thin border treatments (1px translucent borders), and deep, multi-layered box shadows. This creates a high-end "liquid glass" look, giving elements depth and a tangible, tactile physical quality.
 - **Immersive 3D, Spatial Computing, & Purposeful Motion:** UI transitions must feel natural, not abrupt. Use subtle parallax, micro-rotations, and 3D spatial transitions on card hover interactions. Motion must be functional—such as tracing a user's cursor or smoothly animating state changes—to guide focus without adding performance latency.
 - **Scrollytelling & Intentional Imperfection:** Avoid dynamic structural shifts that disrupt reading. Instead, use controlled scrollytelling to gracefully reveal complex data as the user moves down the page. Incorporate intentional visual imperfections—such as off-center brand accents or organic layout asymmetries—to evoke a premium, bespoke artisan feel.
+- **CTA Typography Standardization:** CTA (Call to Action) buttons must default to ALL CAPS (uppercase lettering) unless specifically instructed otherwise by the user. Maintain consistent capitalization across the entire application interface.
 
 ---
 
@@ -69,3 +70,7 @@ When executing tasks or interacting within this project workspace, you must adhe
 - Explicitly declare what was done and provide clear testing points in your command outputs so the user can easily review the state of the project.
 - Always provide immediate Testing URLs, Profiles, and Credentials for rapid cross-checking.
 - Consistently build using global standards and adhere to the high-level UI trends established for this portal.
+
+### 4. Layout Architecture & Metadata Rules
+- Automatically utilize the usePathname hook within a global ClientLayout for dynamic page titles instead of defining redundant metadata across client components.
+- When designing data-dense matrices, embed CSS nimate-spin on refresh action buttons paired with global state to handle async latency visually.

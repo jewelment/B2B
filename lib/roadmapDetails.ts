@@ -679,5 +679,22 @@ export const taskDetailsMap: Record<string, TaskDetail> = {
     images: [
       { src: "/extracted_media/image102.png", caption: "Global Notification Panel — Export Events" }
     ]
+  },
+  
+  // Phase 18 & 19
+  "18.1 Grid Architecture": {
+    description: "Built the dual inventory grid structures: Master Grid (server-side data density) and Product Grid (client-side). Implemented dynamic pathname reading in the layout to ensure accurate and scalable browser tab titles across all inventory tools. Added automated spin animations on matrix loading states.",
+    howToTest: "Navigate to /admin/inventory/grid. Verify the browser tab dynamically updates to 'AJ B2B | Product Grid'. Click the refresh icon to see it spin.",
+    testPath: "/admin/inventory/grid"
+  },
+  "19.1 Live Metal Price Dashboard": {
+    description: "Lifted the Export/Import controls out of individual components and embedded them in the global Master Pricing Engine panel. Custom-styled the native Schedule dropdown.",
+    howToTest: "Navigate to /admin/pricing/live-rates. Check the glowing hover states on the Schedule dropdown options and ensure the main header reflects all global actions.",
+    testPath: "/admin/pricing/live-rates"
+  },
+  "19.2 Diamond & Gemstone Price Master Matrix": {
+    description: "Standardized the matrix layouts. Diagnosed the 'addListener' hydration error as an extension-injected script blocker.",
+    howToTest: "Load any master matrix panel in an incognito window to verify extension conflicts.",
+    testPath: "/admin/pricing"
   }
 };

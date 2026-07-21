@@ -105,7 +105,7 @@ export default function BrandLogo({
   // Handlers
   const handleLeftClick = (e: React.MouseEvent) => {
     if (menuPos) return; // Prevent redirect if menu is open
-    router.push('/dashboard');
+    router.push('/admin');
   };
 
   const handleRightClick = (e: React.MouseEvent) => {

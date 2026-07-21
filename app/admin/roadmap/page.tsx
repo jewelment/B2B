@@ -97,7 +97,7 @@ export default function DevRoadmapDashboard() {
   }
   const roadmapData = [
     {
-      phase: "1.0 ADMIN CATALOG INFRASTRUCTURE",
+      ticket: "1.0 ADMIN CATALOG INFRASTRUCTURE",
       description: "Core database, PIM, and mass-ingestion tools.",
       tasks: [
         { name: "1.1 Interactive PIM Grid", profile: "Admin", status: "Completed", progress: 100, url: "/admin/catalog" },
@@ -109,7 +109,7 @@ export default function DevRoadmapDashboard() {
       ]
     },
     {
-      phase: "2.0 GATEWAY & ACCESS CONTROL (RBAC)",
+      ticket: "2.0 GATEWAY & ACCESS CONTROL (RBAC)",
       description: "Securing the platform and segregating user profiles.",
       tasks: [
         { name: "2.1 NextAuth JWT Setup", profile: "All", status: "Completed", progress: 100, url: "/api/auth" },
@@ -119,7 +119,7 @@ export default function DevRoadmapDashboard() {
       ]
     },
     {
-      phase: "3.0 B2B PRESENTATION LAYER",
+      ticket: "3.0 B2B PRESENTATION LAYER",
       description: "The luxury digital showroom and curation tools.",
       tasks: [
         { name: "3.1 Master Lookbook Grid", profile: "Business Owner", status: "Completed", progress: 100, url: "/dashboard" },
@@ -129,7 +129,7 @@ export default function DevRoadmapDashboard() {
       ]
     },
     {
-      phase: "4.0 UNIFIED PO MATRIX & CART",
+      ticket: "4.0 UNIFIED PO MATRIX & CART",
       description: "Frictionless wholesale ordering and cart logic.",
       tasks: [
         { name: "4.1 Global Cart & PDP Pages", profile: "Business Owner", status: "Completed", progress: 100, url: "/dashboard/product" },
@@ -139,7 +139,7 @@ export default function DevRoadmapDashboard() {
       ]
     },
     {
-      phase: "5.0 MARGIN AUTOMATION & INTERNAL CRM",
+      ticket: "5.0 MARGIN AUTOMATION & INTERNAL CRM",
       description: "Protecting profitability and empowering field sales.",
       tasks: [
         { name: "5.1 MCX Live Bullion Sync", profile: "Admin", status: "Completed", progress: 100, url: "/api/pricing/mcx" },
@@ -152,7 +152,7 @@ export default function DevRoadmapDashboard() {
       ]
     },
     {
-      phase: "6.0 FULFILLMENT & ERP ECOSYSTEM",
+      ticket: "6.0 FULFILLMENT & ERP ECOSYSTEM",
       description: "Finalizing the operational loop and notifications.",
       tasks: [
         { name: "6.1 PO Inbox & Triage Kanban", profile: "Admin", status: "Completed", progress: 100, url: "/admin/orders" },
@@ -161,7 +161,7 @@ export default function DevRoadmapDashboard() {
       ]
     },
     {
-      phase: "7.0 GLOBAL THEME CUSTOMIZATION",
+      ticket: "7.0 GLOBAL THEME CUSTOMIZATION",
       description: "Admin panel for dynamic styling, branding, and color schemas.",
       tasks: [
         { name: "7.1 Theme Configuration Store", profile: "Admin", status: "Completed", progress: 100, url: "/admin/settings/theme" },
@@ -170,7 +170,7 @@ export default function DevRoadmapDashboard() {
       ]
     },
     {
-      phase: "8.0 V2: MULTI-TENANT ISOLATION (SAAS PIVOT)",
+      ticket: "8.0 V2: MULTI-TENANT ISOLATION (SAAS PIVOT)",
       description: "Database migration to PostgreSQL & Next.js Subdomain Middleware.",
       tasks: [
         { name: "8.1 PostgreSQL Tenant Schema", profile: "Super Admin", status: "Completed", progress: 100, url: "prisma/schema.prisma" },
@@ -181,7 +181,7 @@ export default function DevRoadmapDashboard() {
       ]
     },
     {
-      phase: "9.0 V2: SERVER-DRIVEN UI & NATIVE APP",
+      ticket: "9.0 V2: SERVER-DRIVEN UI & NATIVE APP",
       description: "Decoupling API for React Native Expo App & Dynamic Builders.",
       tasks: [
         { name: "9.1 Admin SDUI Layout Builder", profile: "Super Admin, Admin", status: "Completed", progress: 100, url: "/admin/layout-builder" },
@@ -191,7 +191,7 @@ export default function DevRoadmapDashboard() {
       ]
     },
     {
-      phase: "10.0 V2: OTA SCALE & SUPER ADMIN COMMAND",
+      ticket: "10.0 V2: OTA SCALE & SUPER ADMIN COMMAND",
       description: "Automated scaling, APK deployment, and multi-tenant troubleshooting.",
       tasks: [
         { name: "10.1 Bulk Sync Data Validation", profile: "Super Admin, Admin", status: "Completed", progress: 100, url: "/admin/inventory/import" },
@@ -200,7 +200,7 @@ export default function DevRoadmapDashboard() {
       ]
     },
     {
-      phase: "12.0 V2: FLIPBOOK ANALYTICS & TELEMETRY",
+      ticket: "12.0 V2: FLIPBOOK ANALYTICS & TELEMETRY",
       description: "Tracking catalog impressions, page views, and user engagement metrics.",
       tasks: [
         { name: "12.1 Flipbook Telemetry Engine", profile: "Admin", status: "Completed", progress: 100, url: "/catalog/flipbook/[id]" },
@@ -209,7 +209,7 @@ export default function DevRoadmapDashboard() {
       ]
     },
     {
-      phase: "11.0 V2: ENTERPRISE INFRASTRUCTURE & BACKUPS",
+      ticket: "11.0 V2: ENTERPRISE INFRASTRUCTURE & BACKUPS",
       description: "Custom DNS mapping, BYODB Enterprise Tiers, and PITR cloud backups.",
       tasks: [
         { name: "11.1 Custom Domain DNS Resolver", profile: "Super Admin", status: "Completed", progress: 100, url: "middleware.ts" },
@@ -219,7 +219,7 @@ export default function DevRoadmapDashboard() {
       ]
     },
     {
-      phase: "12.0 AGILE TICKETING & DEVELOPMENT HUB",
+      ticket: "12.0 AGILE TICKETING & DEVELOPMENT HUB",
       description: "Jira-style Kanban boards for clients to report issues and developers to track resolutions.",
       tasks: [
         { name: "12.1 Client Ticket Submission UI", profile: "Admin", status: "Completed", progress: 100, url: "/dashboard/support" },
@@ -229,7 +229,7 @@ export default function DevRoadmapDashboard() {
       ]
     },
     {
-      phase: "13.0 V3: ELEMENTOR-STYLE SDUI THEME BUILDER",
+      ticket: "13.0 V3: ELEMENTOR-STYLE SDUI THEME BUILDER",
       description: "Advanced drag-and-drop template builder with liquidity forms (Shopify/Elementor style).",
       tasks: [
         { name: "13.1 Dynamic Component Engine", profile: "Admin", status: "Completed", progress: 100, url: "/admin/theme-builder" },
@@ -241,14 +241,14 @@ export default function DevRoadmapDashboard() {
       ]
     },
     {
-      phase: "14.0 INVENTORY SYNC & TESTING",
+      ticket: "14.0 INVENTORY SYNC & TESTING",
       description: "Testing real-world data import via CSV to validate system stability.",
       tasks: [
         { name: "14.1 Real Inventory CSV Import Test", profile: "Admin", status: "Completed", progress: 100, url: "/admin/inventory/import" }
       ]
     },
     {
-      phase: "15.0 SECURE MEDIA PROXY & OPTIMIZATION",
+      ticket: "15.0 SECURE MEDIA PROXY & OPTIMIZATION",
       description: "Dynamic image proxy to securely serve product images and optimize them on-the-fly.",
       tasks: [
         { name: "15.1 Secure Media Proxy Engine", profile: "System", status: "Completed", progress: 100, url: "/api/media/[id]" },
@@ -258,7 +258,7 @@ export default function DevRoadmapDashboard() {
       ]
     },
     {
-      phase: "16.0 V3: UPCOMING BUSINESS SCOPES & ENHANCEMENTS",
+      ticket: "16.0 V3: UPCOMING BUSINESS SCOPES & ENHANCEMENTS",
       description: "Enterprise onboarding, flipbook optimizations, sidebar overhaul, matrix segregation, auto QC, and SDUI platform.",
       tasks: [
         { name: "16.1 Enterprise Onboarding Workflow", profile: "Super Admin", status: "Pending", progress: 0, url: "/admin/onboarding" },
@@ -274,40 +274,40 @@ export default function DevRoadmapDashboard() {
       ]
     },
     {
-      phase: "17.0 PARAMETERS & DYNAMIC VARIANT ENGINE",
+      ticket: "17.0 PARAMETERS & DYNAMIC VARIANT ENGINE",
       description: "Advanced product configuration architecture, managing specific component variants (metal, size, gem) through hierarchical option sets and categories.",
       tasks: [
-        { name: "17.1 Options Master Grid", profile: "Admin", status: "Completed", progress: 100, url: "/admin/parameters/options" },
-        { name: "17.2 Option Sets Hierarchy Builder", profile: "Admin", status: "Pending", progress: 0, url: "/admin/parameters/options" },
-        { name: "17.3 Product Categories Management", profile: "Admin", status: "Pending", progress: 0, url: "/admin/parameters" },
-        { name: "17.4 Collections Matrix (Manual & Rule-Based)", profile: "Admin", status: "Pending", progress: 0, url: "/admin/parameters" },
-        { name: "17.5 Collection Sub-Section Media Architecture", profile: "Admin", status: "Pending", progress: 0, url: "/admin/parameters" }
+        { name: "17.1 Options Master Grid", profile: "Admin", status: "Completed", progress: 100, url: "/admin/parameters/options", lastModified: "2026-07-21T10:15:00", isRecent: true },
+        { name: "17.2 Option Sets Hierarchy Builder", profile: "Admin", status: "Completed", progress: 100, url: "/admin/parameters/options", lastModified: "2026-07-21T10:30:00", isRecent: true },
+        { name: "17.3 Product Categories Management", profile: "Admin", status: "Completed", progress: 100, url: "/admin/parameters/categories" },
+        { name: "17.4 Collections Matrix (Manual & Rule-Based)", profile: "Admin", status: "Completed", progress: 100, url: "/admin/parameters/collections" },
+        { name: "17.5 Collection Sub-Section Media Architecture", profile: "Admin", status: "Completed", progress: 100, url: "/admin/parameters/collections" }
       ]
     },
     {
-      phase: "18.0 MASTER CATALOG & INVENTORY",
+      ticket: "18.0 MASTER CATALOG & INVENTORY",
       description: "Extensive product-level configuration, displaying a segmented timeline editor for pricing, multi-level variants, and stock store allocation.",
       tasks: [
-        { name: "18.1 Single Product Editable Timeline", profile: "Admin", status: "Completed", progress: 100, url: "/admin/products/edit/[id]" },
-        { name: "18.2 Automated Variant Matrix UI", profile: "Admin", status: "Pending", progress: 0, url: "/admin/products" },
-        { name: "18.3 Variant Media Upload Modal", profile: "Admin", status: "Pending", progress: 0, url: "/admin/products" },
-        { name: "18.4 Inventory Store Allocation Grid", profile: "Manager", status: "Pending", progress: 0, url: "/admin/inventory" },
-        { name: "18.5 Product Reviews Workflow", profile: "Support", status: "Pending", progress: 0, url: "/admin/inventory" },
-        { name: "18.6 Master Inventory Grid", profile: "Admin", status: "Completed", progress: 100, url: "/admin/products" }
+        { name: "18.1 Single Product Editable Timeline", profile: "Admin", status: "Completed", progress: 100, url: "/admin/products/edit/[id]", lastModified: "2026-07-21T10:45:00", isRecent: false },
+        { name: "18.2 Automated Variant Matrix UI", profile: "Admin", status: "Completed", progress: 100, url: "/admin/products", lastModified: "2026-07-21T11:15:00", isRecent: false },
+        { name: "18.3 Variant Media Upload Modal", profile: "Admin", status: "Completed", progress: 100, url: "/admin/products/edit/[id]", lastModified: "2026-07-21T11:45:00", isRecent: true },
+        { name: "18.4 Inventory Store Allocation Grid", profile: "Manager", status: "Completed", progress: 100, url: "/admin/inventory/stores", lastModified: "2026-07-21T11:45:00", isRecent: true },
+        { name: "18.5 Product Reviews Workflow", profile: "Support", status: "Completed", progress: 100, url: "/admin/inventory/reviews", lastModified: "2026-07-21T11:45:00", isRecent: true },
+        { name: "18.6 Master Inventory Grid", profile: "Admin", status: "Completed", progress: 100, url: "/admin/products", lastModified: "2026-07-21T11:18:00", isRecent: false }
       ]
     },
     {
-      phase: "19.0 OMNICHANNEL PRICING & LIVE RATES",
+      ticket: "19.0 OMNICHANNEL PRICING & LIVE RATES",
       description: "Core algorithmic pricing module syncing live MCX bullion rates and calculating specific gemstone, pearl, and labor making charges.",
       tasks: [
-        { name: "19.1 Live Metal Price Dashboard", profile: "System", status: "Pending", progress: 0, url: "/admin/pricing" },
-        { name: "19.2 Diamond & Gemstone Price Master Matrix", profile: "Admin", status: "Pending", progress: 0, url: "/admin/pricing" },
-        { name: "19.3 Standard Details Configuration Modal", profile: "Admin", status: "Pending", progress: 0, url: "/admin/pricing" },
-        { name: "19.4 Making Charges & Pearl Price Matrices", profile: "Admin", status: "Pending", progress: 0, url: "/admin/pricing" }
+        { name: "19.1 Live Metal Price Dashboard", profile: "System", status: "Completed", progress: 100, url: "/admin/pricing", lastModified: new Date().toISOString(), isRecent: true },
+        { name: "19.2 Diamond & Gemstone Price Master Matrix", profile: "Admin", status: "Completed", progress: 100, url: "/admin/pricing", lastModified: new Date().toISOString(), isRecent: true },
+        { name: "19.3 Standard Details Configuration Modal", profile: "Admin", status: "Completed", progress: 100, url: "/admin/pricing", lastModified: new Date().toISOString(), isRecent: true },
+        { name: "19.4 Making Charges & Pearl Price Matrices", profile: "Admin", status: "Completed", progress: 100, url: "/admin/pricing", lastModified: new Date().toISOString(), isRecent: true }
       ]
     },
     {
-      phase: "20.0 ADVANCED SDUI & BANNER MERCHANDISING",
+      ticket: "20.0 ADVANCED SDUI & BANNER MERCHANDISING",
       description: "Visual directory for routing high-fidelity promotional banners directly into storefront landing pages and PLP catalog grids.",
       tasks: [
         { name: "20.1 Banner Management Directory", profile: "Admin", status: "Pending", progress: 0, url: "/admin/banners" },
@@ -318,7 +318,7 @@ export default function DevRoadmapDashboard() {
       ]
     },
     {
-      phase: "21.0 ORDER RECONCILIATION & 11+1 SCHEMES",
+      ticket: "21.0 ORDER RECONCILIATION & 11+1 SCHEMES",
       description: "Tracking engine for comprehensive order lifecycle events, advanced log filtering, inventory weight bagging, and gold savings schemes.",
       tasks: [
         { name: "21.1 All Orders & Ecom Orders Advanced Filters", profile: "Sales", status: "Pending", progress: 0, url: "/admin/orders" },
@@ -330,7 +330,7 @@ export default function DevRoadmapDashboard() {
       ]
     },
     {
-      phase: "22.0 CRM, ENQUIRIES & TEAM PERMISSIONS",
+      ticket: "22.0 CRM, ENQUIRIES & TEAM PERMISSIONS",
       description: "Centralized support hub for tracking video appointments, resolving client tickets, and establishing internal enterprise HR roles.",
       tasks: [
         { name: "22.1 All Customers & User Group Policy routing", profile: "Sales", status: "Pending", progress: 0, url: "/admin/customers" },
@@ -340,7 +340,7 @@ export default function DevRoadmapDashboard() {
       ]
     },
     {
-      phase: "23.0 ENTERPRISE SETTINGS & DOMAIN MAPPING",
+      ticket: "23.0 ENTERPRISE SETTINGS & DOMAIN MAPPING",
       description: "Global multi-tenant configuration establishing unique SaaS brand identities, typography, domain DNS mapping, and 3rd-party software routing.",
       tasks: [
         { name: "23.1 Brand Profile & Logo Asset Management", profile: "Super Admin", status: "Pending", progress: 0, url: "/admin/settings" },
@@ -351,7 +351,7 @@ export default function DevRoadmapDashboard() {
       ]
     },
     {
-      phase: "24.0 EXECUTIVE DASHBOARD & SYSTEM LOGS",
+      ticket: "24.0 EXECUTIVE DASHBOARD & SYSTEM LOGS",
       description: "Primary performance indicators and global audit logging to ensure operational accountability across all users.",
       tasks: [
         { name: "24.1 Executive Dashboard Analytics", profile: "Super Admin", status: "Pending", progress: 0, url: "/admin/dashboard" },
@@ -381,7 +381,7 @@ export default function DevRoadmapDashboard() {
 
   // Process data for the new layout
   const allIncompleteTasks: any[] = [];
-  const completedPhases: any[] = [];
+  const completedTickets: any[] = [];
 
   roadmapData.forEach((phase, pIdx) => {
     const incomplete = phase.tasks.filter(t => t.status !== 'Completed');
@@ -390,24 +390,24 @@ export default function DevRoadmapDashboard() {
     if (incomplete.length > 0) {
       // Assign priority based on phase for now
       let priority = 'Medium';
-      if (phase.phase.startsWith('9.') || phase.phase.startsWith('12.')) priority = 'High';
-      if (phase.phase.startsWith('11.')) priority = 'Low';
+      if (phase.ticket.startsWith('9.') || phase.ticket.startsWith('12.')) priority = 'High';
+      if (phase.ticket.startsWith('11.')) priority = 'Low';
 
       incomplete.forEach((t) => {
         allIncompleteTasks.push({
           ...t,
-          phaseName: phase.phase,
+          ticketName: phase.ticket,
           priority,
-          originalPhaseIdx: pIdx,
+          originalTicketIdx: pIdx,
           originalTaskIdx: phase.tasks.indexOf(t)
         });
       });
     }
 
     if (complete.length > 0) {
-      completedPhases.push({
+      completedTickets.push({
         ...phase,
-        originalPhaseIdx: pIdx,
+        originalTicketIdx: pIdx,
         tasks: complete.map(t => ({ ...t, originalTaskIdx: phase.tasks.indexOf(t) }))
       });
     }
@@ -431,7 +431,7 @@ export default function DevRoadmapDashboard() {
           <div className="relative z-10 space-y-6">
             <div>
               <h1 className="text-4xl md:text-5xl font-light tracking-tight text-[var(--text-main)] mb-2 flex items-center gap-4">
-                Project <strong className="font-bold bg-[var(--brand-primary)] text-white px-3 py-1 rounded-lg shadow-sm">Master</strong> Ledger
+                Project <strong className="font-bold bg-[var(--brand-primary)] text-[var(--brand-text)] px-3 py-1 rounded-lg shadow-sm">Master</strong> Ledger
               </h1>
               <p className="text-[var(--text-muted)] font-mono text-sm">Jewelment B2B Architecture</p>
             </div>
@@ -557,10 +557,10 @@ export default function DevRoadmapDashboard() {
               </div>
             </div>
 
-            {/* Metric 4: Dev Phase (Purple Tinted Glass) */}
+            {/* Metric 4: Dev Ticket (Purple Tinted Glass) */}
             <div className="relative overflow-hidden bg-gradient-to-br from-purple-500/10 to-purple-500/5 backdrop-blur-2xl border border-purple-500/20 p-5 rounded-2xl shadow-sm flex flex-col justify-between group transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:border-purple-500/40">
               <div className="absolute -top-10 -left-10 w-32 h-32 bg-purple-500 opacity-10 rounded-full blur-xl group-hover:opacity-20 transition-opacity"></div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-purple-600 dark:text-purple-400">Current Phase</p>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-purple-600 dark:text-purple-400">Current Ticket</p>
               <div className="mt-4 flex items-end justify-between relative z-10">
                 <div className="flex items-center gap-3">
                   <div className="text-3xl lg:text-4xl font-bold text-purple-600 dark:text-purple-400 tracking-tighter">v2.0</div>
@@ -619,23 +619,27 @@ export default function DevRoadmapDashboard() {
                       <thead>
                         <tr className="bg-black/5 dark:bg-white/5 border-b border-[var(--border-color)]">
                           <th className="py-4 px-6 text-xs font-bold text-[var(--brand-primary)] tracking-wider uppercase w-[30%]">Task Name</th>
-                          <th className="py-4 px-6 text-xs font-bold text-[var(--brand-primary)] tracking-wider uppercase w-[15%]">Phase</th>
-                          <th className="py-4 px-6 text-xs font-bold text-[var(--brand-primary)] tracking-wider uppercase w-[15%] text-center">Priority</th>
-                          <th className="py-4 px-6 text-xs font-bold text-[var(--brand-primary)] tracking-wider uppercase w-[20%] text-center">Progress</th>
-                          <th className="py-4 px-6 text-xs font-bold text-[var(--brand-primary)] tracking-wider uppercase w-[20%] text-right">Actions</th>
+                          <th className="py-4 px-6 text-xs font-bold text-[var(--brand-primary)] tracking-wider uppercase w-[15%]">Ticket / Epic</th>
+                          <th className="py-4 px-6 text-xs font-bold text-[var(--brand-primary)] tracking-wider uppercase w-[10%] text-center">Priority</th>
+                          <th className="py-4 px-6 text-xs font-bold text-[var(--brand-primary)] tracking-wider uppercase w-[15%] text-center">Last Modified</th>
+                          <th className="py-4 px-6 text-xs font-bold text-[var(--brand-primary)] tracking-wider uppercase w-[15%] text-center">Progress</th>
+                          <th className="py-4 px-6 text-xs font-bold text-[var(--brand-primary)] tracking-wider uppercase w-[15%] text-right">Actions</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-[var(--border-color)]">
                         {allIncompleteTasks.map((task, idx) => {
-                          const taskId = `${task.originalPhaseIdx}-${task.originalTaskIdx}`;
+                          const taskId = `${task.originalTicketIdx}-${task.originalTaskIdx}`;
                           const isExpanded = expandedTask === taskId;
                           return (
                             <React.Fragment key={taskId}>
                               <tr className={`hover:bg-black/5 dark:hover:bg-white/5 transition-colors ${isExpanded ? 'bg-black/5 dark:bg-white/5' : ''}`}>
-                                <td className="py-4 px-6 text-sm font-bold text-[var(--text-main)]">{task.name}</td>
+                                <td className="py-4 px-6 text-sm font-bold text-[var(--text-main)] flex items-center gap-2">
+                                  {task.name}
+                                  {task.isRecent && <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] uppercase tracking-widest font-bold bg-[var(--brand-primary)] text-[var(--brand-text)] animate-pulse shadow-sm">Recent</span>}
+                                </td>
                                 <td className="py-4 px-6">
                                   <span className="text-[10px] font-bold text-[var(--text-muted)] truncate max-w-[150px] inline-block">
-                                    {task.phaseName}
+                                    {task.ticketName}
                                   </span>
                                 </td>
                                 <td className="py-4 px-6 text-center">
@@ -645,6 +649,9 @@ export default function DevRoadmapDashboard() {
                                     }`}>
                                     {task.priority}
                                   </span>
+                                </td>
+                                <td className="py-4 px-6 text-center text-[10px] font-mono text-[var(--text-muted)]">
+                                  {task.lastModified ? new Date(task.lastModified).toLocaleDateString('en-GB') : '--'}
                                 </td>
                                 <td className="py-4 px-6 align-middle">
                                   <div className="flex items-center gap-3">
@@ -665,7 +672,7 @@ export default function DevRoadmapDashboard() {
                                     href={task.url.startsWith('/') ? task.url : `/${task.url}`}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="inline-flex items-center text-[10px] uppercase font-bold tracking-widest px-3 py-1.5 rounded-lg border border-transparent bg-[var(--brand-primary)] text-white hover:opacity-90 transition-opacity"
+                                    className="inline-flex items-center text-[10px] uppercase font-bold tracking-widest px-3 py-1.5 rounded-lg border border-transparent bg-[var(--brand-primary)] text-[var(--brand-text)] hover:opacity-90 transition-opacity"
                                   >
                                     Open
                                     <svg className="w-3 h-3 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
@@ -738,10 +745,10 @@ export default function DevRoadmapDashboard() {
                 <p className="text-sm text-[var(--text-muted)] mt-1">Successfully deployed architecture and modules.</p>
               </div>
 
-              {completedPhases.map((phase) => (
-                <div key={phase.originalPhaseIdx} className="space-y-4 mb-8">
+              {completedTickets.map((ticket) => (
+                <div key={ticket.originalTicketIdx} className="space-y-4 mb-8">
                   <div>
-                    <h3 className="text-lg font-bold tracking-tight text-[var(--text-main)]">{phase.phase}</h3>
+                    <h3 className="text-lg font-bold tracking-tight text-[var(--text-main)]">{ticket.ticket}</h3>
                   </div>
 
                   <div className="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-xl shadow-sm overflow-hidden">
@@ -750,20 +757,24 @@ export default function DevRoadmapDashboard() {
                         <thead>
                           <tr className="bg-black/5 dark:bg-white/5 border-b border-[var(--border-color)]">
                             <th className="py-3 px-6 text-xs font-bold text-[var(--text-muted)] tracking-wider uppercase w-[30%]">Task Name</th>
-                            <th className="py-3 px-6 text-xs font-bold text-[var(--text-muted)] tracking-wider uppercase w-[15%]">Profile</th>
-                            <th className="py-3 px-6 text-xs font-bold text-[var(--text-muted)] tracking-wider uppercase w-[15%] text-center">Status</th>
-                            <th className="py-3 px-6 text-xs font-bold text-[var(--text-muted)] tracking-wider uppercase w-[20%] text-center">Progress</th>
-                            <th className="py-3 px-6 text-xs font-bold text-[var(--text-muted)] tracking-wider uppercase w-[20%] text-right">Actions</th>
+                            <th className="py-3 px-6 text-xs font-bold text-[var(--text-muted)] tracking-wider uppercase w-[15%]">Ticket</th>
+                            <th className="py-3 px-6 text-xs font-bold text-[var(--text-muted)] tracking-wider uppercase w-[10%] text-center">Status</th>
+                            <th className="py-3 px-6 text-xs font-bold text-[var(--text-muted)] tracking-wider uppercase w-[15%] text-center">Last Modified</th>
+                            <th className="py-3 px-6 text-xs font-bold text-[var(--text-muted)] tracking-wider uppercase w-[15%] text-center">Progress</th>
+                            <th className="py-3 px-6 text-xs font-bold text-[var(--text-muted)] tracking-wider uppercase w-[15%] text-right">Actions</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-[var(--border-color)]">
-                          {phase.tasks.map((task: any) => {
-                            const taskId = `${phase.originalPhaseIdx}-${task.originalTaskIdx}`;
+                          {ticket.tasks.map((task: any) => {
+                            const taskId = `${ticket.originalTicketIdx}-${task.originalTaskIdx}`;
                             const isExpanded = expandedTask === taskId;
                             return (
                               <React.Fragment key={taskId}>
                                 <tr className={`hover:bg-black/5 dark:hover:bg-white/5 transition-colors ${isExpanded ? 'bg-black/5 dark:bg-white/5' : ''}`}>
-                                  <td className="py-3 px-6 text-sm font-medium text-[var(--text-main)]">{task.name}</td>
+                                  <td className="py-3 px-6 text-sm font-medium text-[var(--text-main)] flex items-center gap-2">
+                                    {task.name}
+                                    {task.isRecent && <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] uppercase tracking-widest font-bold bg-[var(--brand-primary)] text-[var(--brand-text)] animate-pulse shadow-sm">Recent</span>}
+                                  </td>
                                   <td className="py-3 px-6">
                                     <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest px-2 py-1 bg-[var(--bg-base)] border border-[var(--border-color)] rounded-md shadow-sm">
                                       {task.profile}
@@ -773,6 +784,9 @@ export default function DevRoadmapDashboard() {
                                     <span className={`inline-flex items-center justify-center px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border ${getStatusColor(task.status)}`}>
                                       {task.status}
                                     </span>
+                                  </td>
+                                  <td className="py-3 px-6 text-center text-[10px] font-mono text-[var(--text-muted)]">
+                                    {task.lastModified ? new Date(task.lastModified).toLocaleDateString('en-GB') : '--'}
                                   </td>
                                   <td className="py-3 px-6 align-middle">
                                     <div className="flex items-center gap-3">
@@ -793,7 +807,7 @@ export default function DevRoadmapDashboard() {
                                       href={task.url.startsWith('/') ? task.url : `/${task.url}`}
                                       target="_blank"
                                       rel="noopener noreferrer"
-                                      className="inline-flex items-center text-[10px] uppercase font-bold tracking-widest px-3 py-1 rounded-lg border border-transparent bg-[var(--bg-base)] text-[var(--text-main)] hover:bg-[var(--brand-primary)] hover:text-white transition-colors border-[var(--border-color)] shadow-sm"
+                                      className="inline-flex items-center text-[10px] uppercase font-bold tracking-widest px-3 py-1 rounded-lg border border-transparent bg-[var(--bg-base)] text-[var(--text-main)] hover:bg-[var(--brand-primary)] hover:text-[var(--brand-text)] transition-colors border-[var(--border-color)] shadow-sm"
                                     >
                                       Open
                                     </a>
@@ -1051,6 +1065,7 @@ async function handleDragEnd(event) {
                 <li><a href="#section-3" className="hover:underline flex items-center gap-2"><span className="text-[var(--text-muted)]">03.</span> Ordering via Wholesale Matrix Cart</a></li>
                 <li><a href="#section-4" className="hover:underline flex items-center gap-2"><span className="text-[var(--text-muted)]">04.</span> Tracking Purchase Orders & History</a></li>
                 <li><a href="#section-5" className="hover:underline flex items-center gap-2"><span className="text-[var(--text-muted)]">05.</span> Client Support & Ticketing</a></li>
+                <li><a href="#section-6" className="hover:underline flex items-center gap-2"><span className="text-[var(--text-muted)]">06.</span> Product Variant & Parameters Engine</a></li>
               </ul>
             </div>
 
@@ -1159,6 +1174,24 @@ async function handleDragEnd(event) {
                   </ul>
                   <div className="mt-6 p-4 h-32 bg-slate-100 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 text-xs">
                     [Screenshot: Support Ticketing Interface]
+                  </div>
+                </div>
+              </div>
+
+              {/* SECTION 6 */}
+              <div id="section-6" className="space-y-4 pt-4 border-t border-[var(--border-color)] scroll-mt-20">
+                <h3 className="text-xl font-bold flex items-center gap-3"><span className="w-8 h-8 rounded-lg bg-[var(--brand-primary)] text-white flex items-center justify-center text-sm shadow-sm">6</span> Product Variant & Parameters Engine</h3>
+                <div className="bg-[var(--bg-base)] border border-[var(--border-color)] rounded-xl p-6 shadow-sm">
+                  <p className="text-sm leading-relaxed text-[var(--text-main)] mb-4">
+                    The backbone of our jewelry catalog is the Dynamic Variant Engine. This allows for complex hierarchical generation of permutations like Gold Purity, Size, and Gemstone.
+                  </p>
+                  <ul className="list-disc pl-5 text-sm space-y-2 text-[var(--text-muted)] mt-2">
+                    <li><strong>Global Parameters:</strong> Admins define raw elements (e.g., 14K Gold, SI Diamond) in the Options Master Grid.</li>
+                    <li><strong>Option Sets:</strong> Combine these parameters into logic sets (e.g., "Diamond Ring Standards") which dictate how thousands of child variants are automatically built.</li>
+                    <li><strong>The Variant Matrix:</strong> Within any specific product detail page, a master grid renders every possible combination with dedicated toggles to upload specific visual assets (like Rose Gold images) mapped directly to that variant string.</li>
+                  </ul>
+                  <div className="mt-6 p-4 h-32 bg-slate-100 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 text-xs">
+                    [Screenshot: Variant Matrix Editing Workspace]
                   </div>
                 </div>
               </div>

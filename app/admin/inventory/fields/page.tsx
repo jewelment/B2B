@@ -98,7 +98,7 @@ export default function ProductFieldsManager() {
           </div>
           <button 
             onClick={() => setIsAdding(!isAdding)}
-            className="flex items-center gap-2 px-5 py-2.5 bg-[var(--text-main)] text-[var(--bg-base)] rounded-lg text-sm font-medium hover:opacity-90 transition-opacity"
+            className="flex items-center gap-2 px-6 py-2.5 bg-[var(--brand-primary)] text-[var(--brand-text)] rounded-full text-xs font-bold uppercase tracking-widest shadow-[0_4px_20px_rgba(0,0,0,0.1)] shimmer-hover transition-all"
           >
             <IconPlus /> Add New Field
           </button>
