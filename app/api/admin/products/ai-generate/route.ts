@@ -26,7 +26,7 @@ export async function POST(request: Request) {
       6. Use elegant paragraphs <p> and bold tags <strong> for emphasis. Do NOT use bullet points for specifications.
     `;
 
-    const parts: any[] = [prompt];
+    const parts: any[] = [{ text: prompt }];
     if (imageBase64) {
       parts.push({
         inlineData: {
@@ -45,7 +45,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ description: htmlContent });
 
   } catch (error: any) {
-    console.error('AI Generation Error:', error);
+    console.error('AI Generation Error:', error.message || error);
     // Fallback if API key is invalid or rate limited
     const fallbackHtml = `
       <p>This magnificent <strong>${title || 'Jewelry Piece'}</strong> is a true masterpiece of elegant design.</p>

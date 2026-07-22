@@ -1,4 +1,4 @@
-export type ComponentType = 'HeroBanner' | 'ProductCarousel' | 'TextBlock' | 'BentoGrid' | 'ProductGrid';
+export type ComponentType = 'HeroBanner' | 'PromoBanner' | 'ProductCarousel' | 'TextBlock' | 'BentoGrid' | 'ProductGrid';
 
 export interface SDUIComponent {
   id: string;
@@ -64,6 +64,32 @@ export function compileToDivKit(components: SDUIComponent[]): any {
           text_color: "#333333",
           text_alignment_horizontal: comp.props.align || "center",
           margins: { top: 16, bottom: 16, left: 16, right: 16 }
+        };
+
+      case 'PromoBanner':
+        return {
+          type: "container",
+          orientation: "vertical",
+          background: [
+            {
+              type: "image",
+              image_url: comp.props.imageUrl || "https://placehold.co/1200x400/1a1a1a/D4AF37?text=Promo+Banner",
+              content_alignment_vertical: "center",
+              content_alignment_horizontal: "center",
+              scale: "fill"
+            }
+          ],
+          items: [
+            {
+              type: "text",
+              text: comp.props.title || "Promotional Banner",
+              font_size: 24,
+              font_weight: "bold",
+              text_color: "#D4AF37", // Gold
+              text_alignment_horizontal: "center",
+              margins: { bottom: 16, top: 24 }
+            }
+          ]
         };
 
       case 'ProductCarousel':

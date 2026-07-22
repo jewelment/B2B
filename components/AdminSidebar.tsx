@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { signOut, useSession } from 'next-auth/react';
@@ -10,6 +10,41 @@ export default function AdminSidebar({ isCollapsed = false, setIsCollapsed = () 
   const pathname = usePathname();
   const { data: session } = useSession();
   const user = session?.user as any;
+  const [expandedMenus, setExpandedMenus] = React.useState<string[]>([]);
+  const [pendingWithdrawals, setPendingWithdrawals] = useState(0);
+
+  React.useEffect(() => {
+    if (!pathname) return;
+    setExpandedMenus(prev => {
+      const activeGroups = navGroups.flatMap(g => g.links)
+        .filter(l => l.subLinks && (pathname.startsWith(l.path) || l.subLinks.some(s => pathname.startsWith(s.path))))
+        .map(l => l.name);
+      
+      const newExpanded = new Set([...prev, ...activeGroups]);
+      return Array.from(newExpanded);
+    });
+  }, [pathname]);
+
+  useEffect(() => {
+    const fetchPending = async () => {
+      try {
+        const res = await fetch('/api/admin/schemes/withdrawals');
+        const data = await res.json();
+        if (data.success && data.withdrawals) {
+          const count = data.withdrawals.filter((w: any) => w.status === 'WITHDRAWAL_REQUESTED').length;
+          setPendingWithdrawals(count);
+        }
+      } catch (err) {}
+    };
+    fetchPending();
+    const interval = setInterval(fetchPending, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const toggleMenu = (menuName: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    setExpandedMenus(prev => prev.includes(menuName) ? prev.filter(n => n !== menuName) : [...prev, menuName]);
+  };
 
   const navGroups = [
     {
@@ -27,11 +62,20 @@ export default function AdminSidebar({ isCollapsed = false, setIsCollapsed = () 
           icon: "M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4",
           subLinks: [
             { name: "All Orders", path: "/admin/orders/all" },
-            { name: "E-com Orders", path: "/admin/orders/ecommerce" },
-            { name: "Store Orders", path: "/admin/orders/store" },
             { name: "All Transactions", path: "/admin/orders/transactions" },
             { name: "All POs", path: "/admin/orders/all-pos" },
             { name: "PO Inbox", path: "/admin/orders" }
+          ]
+        },
+        { 
+          name: "11+1 Scheme", 
+          path: "/admin/schemes", 
+          icon: "M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z",
+          subLinks: [
+            { name: "Schemes", path: "/admin/schemes" },
+            { name: "Enrollments", path: "/admin/schemes/enrollments" },
+            { name: "Withdrawals", path: "/admin/schemes/withdrawals", badge: pendingWithdrawals > 0 },
+            { name: "Calculator (Customer View)", path: "/admin/schemes/calculator" }
           ]
         },
         { 
@@ -100,7 +144,8 @@ export default function AdminSidebar({ isCollapsed = false, setIsCollapsed = () 
       roles: ['ADMIN'],
       links: [
         { name: "Web Pages Manager", path: "/admin/pages", icon: "M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" },
-        { name: "Mobile App Screens", path: "/admin/app-screens", icon: "M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" }
+        { name: "Mobile App Screens", path: "/admin/app-screens", icon: "M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" },
+        { name: "Banner Merchandising", path: "/admin/banners", icon: "M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" }
       ]
     },
     {
@@ -156,28 +201,54 @@ export default function AdminSidebar({ isCollapsed = false, setIsCollapsed = () 
             <div className="space-y-1">
               {group.links.map((link: any, lIdx) => {
                 const isActive = pathname?.startsWith(link.path) || (link.subLinks && link.subLinks.some((sub: any) => pathname?.startsWith(sub.path)));
+                const isExpanded = expandedMenus.includes(link.name);
 
                 // If it's a parent link with no sublinks OR it's a sublink parent that is active, we use the active background
                 const isBgActive = isActive && !link.subLinks;
 
                 return (
                   <div key={lIdx} className="flex flex-col">
-                    <Link href={link.subLinks ? link.subLinks[0].path : link.path} title={isCollapsed ? link.name : ''} className={`flex items-center rounded-xl text-sm font-medium transition-all duration-200 group ${isCollapsed ? 'justify-center p-3 mb-2' : 'px-4 py-2.5'} ${isBgActive ? 'bg-[var(--brand-primary)]/10 text-[var(--brand-primary)] shadow-sm border border-[var(--brand-primary)]/10' : 'text-[var(--text-muted)] hover:bg-[var(--text-muted)]/10 hover:text-[var(--brand-primary)] hover:translate-x-1 border border-transparent'} ${isActive && link.subLinks ? 'text-[var(--brand-primary)] font-bold' : ''}`}>
-                      <svg className={`w-5 h-5 transition-colors ${isActive ? 'text-[var(--brand-primary)]' : 'text-[var(--text-muted)] group-hover:text-[var(--brand-primary)]'} ${!isCollapsed && 'mr-3'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={link.icon} />
-                      </svg>
-                      {!isCollapsed && link.name}
-                    </Link>
-                    {link.subLinks && isActive && !isCollapsed && (
-                      <div className="pl-11 pr-4 py-2 space-y-1">
-                        {link.subLinks.map((sub: any, sIdx: number) => {
-                          const isSubActive = pathname === sub.path;
-                          return (
-                            <Link key={sIdx} href={sub.path} className={`block px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${isSubActive ? 'bg-[var(--brand-primary)]/10 text-[var(--brand-primary)] font-bold shadow-sm' : 'text-[var(--text-muted)] hover:text-[var(--brand-primary)] hover:bg-[var(--bg-base)]'}`}>
-                              {sub.name}
-                            </Link>
-                          );
-                        })}
+                    {link.subLinks ? (
+                      <button onClick={(e) => toggleMenu(link.name, e)} title={isCollapsed ? link.name : ''} className={`flex items-center justify-between rounded-xl text-sm font-medium transition-all duration-200 group w-full ${isCollapsed ? 'justify-center p-3 mb-2' : 'px-4 py-2.5'} ${isBgActive ? 'bg-[var(--brand-primary)]/10 text-[var(--brand-primary)] shadow-sm border border-[var(--brand-primary)]/10' : 'text-[var(--text-muted)] hover:bg-[var(--text-muted)]/10 hover:text-[var(--brand-primary)] hover:translate-x-1 border border-transparent'} ${isActive ? 'text-[var(--brand-primary)] font-bold' : ''}`}>
+                        <div className="flex items-center">
+                          <svg className={`w-5 h-5 transition-colors ${isActive ? 'text-[var(--brand-primary)]' : 'text-[var(--text-muted)] group-hover:text-[var(--brand-primary)]'} ${!isCollapsed && 'mr-3'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={link.icon} />
+                          </svg>
+                          {!isCollapsed && link.name}
+                        </div>
+                        {!isCollapsed && (
+                          <svg className={`w-4 h-4 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''} ${isActive ? 'text-[var(--brand-primary)]' : 'text-[var(--text-muted)] group-hover:text-[var(--brand-primary)]'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                          </svg>
+                        )}
+                      </button>
+                    ) : (
+                      <Link href={link.path} title={isCollapsed ? link.name : ''} className={`flex items-center rounded-xl text-sm font-medium transition-all duration-200 group ${isCollapsed ? 'justify-center p-3 mb-2' : 'px-4 py-2.5'} ${isBgActive ? 'bg-[var(--brand-primary)]/10 text-[var(--brand-primary)] shadow-sm border border-[var(--brand-primary)]/10' : 'text-[var(--text-muted)] hover:bg-[var(--text-muted)]/10 hover:text-[var(--brand-primary)] hover:translate-x-1 border border-transparent'}`}>
+                        <svg className={`w-5 h-5 transition-colors ${isActive ? 'text-[var(--brand-primary)]' : 'text-[var(--text-muted)] group-hover:text-[var(--brand-primary)]'} ${!isCollapsed && 'mr-3'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={link.icon} />
+                        </svg>
+                        {!isCollapsed && link.name}
+                      </Link>
+                    )}
+                    
+                    {link.subLinks && !isCollapsed && (
+                      <div className={`overflow-hidden transition-all duration-300 ease-in-out`} style={{ maxHeight: isExpanded ? `${link.subLinks.length * 40 + 20}px` : '0px', opacity: isExpanded ? 1 : 0 }}>
+                        <div className="pl-11 pr-4 py-2 space-y-1">
+                          {link.subLinks.map((sub: any, sIdx: number) => {
+                            const isSubActive = pathname === sub.path;
+                            return (
+                              <Link key={sIdx} href={sub.path} className={`flex items-center justify-between px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${isSubActive ? 'bg-[var(--brand-primary)]/10 text-[var(--brand-primary)] font-bold shadow-sm' : 'text-[var(--text-muted)] hover:text-[var(--brand-primary)] hover:bg-[var(--bg-base)]'}`}>
+                                {sub.name}
+                                {sub.badge && (
+                                  <span className="flex h-2 w-2 relative">
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                                  </span>
+                                )}
+                              </Link>
+                            );
+                          })}
+                        </div>
                       </div>
                     )}
                   </div>

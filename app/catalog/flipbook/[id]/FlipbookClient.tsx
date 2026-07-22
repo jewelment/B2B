@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import HTMLFlipBook from 'react-pageflip';
 import AdvancedMatrixModal from '@/components/AdvancedMatrixModal';
+import HeadlessMatrixModal from '@/components/HeadlessMatrixModal';
 import { useCartStore } from '@/store/useCartStore';
 
 // --- Consistent High-Quality Icons ---
@@ -141,6 +142,7 @@ export default function FlipbookClient({ catalog }: { catalog: any }) {
 
 
   const [showPOMatrix, setShowPOMatrix] = useState(false);
+  const [showDynamicMatrix, setShowDynamicMatrix] = useState(false);
   const [activeMatrixSku, setActiveMatrixSku] = useState<string | null>(null);
   const [validationError, setValidationError] = useState<string | null>(null);
 
@@ -170,6 +172,7 @@ export default function FlipbookClient({ catalog }: { catalog: any }) {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!bookRef.current) return;
+      if (showPOMatrix || showDynamicMatrix) return; // Prevent flipbook navigation when modals are open
       if (e.key === 'ArrowRight') {
         bookRef.current.pageFlip().flipNext();
       } else if (e.key === 'ArrowLeft') {
@@ -178,7 +181,7 @@ export default function FlipbookClient({ catalog }: { catalog: any }) {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  }, [showPOMatrix, showDynamicMatrix]);
 
   const handleToggleCart = (code: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -608,13 +611,26 @@ export default function FlipbookClient({ catalog }: { catalog: any }) {
               <p className={`text-sm font-semibold ${isDark ? 'text-white' : 'text-black'}`}>{selectedItems.length} SKUs Staged</p>
             </div>
           </div>
-          <button
-            onClick={handlePORequest}
-            style={{ backgroundColor: '#4e080f', color: '#ffffff' }}
-            className="px-8 py-3 text-[10px] whitespace-nowrap font-bold uppercase tracking-widest rounded-full hover:shadow-lg hover:-translate-y-0.5 active:scale-95 transition-all"
-          >
-            {config.poMatrix ? 'Review Pricing Breakup' : 'Request Direct PO'}
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={handlePORequest}
+              style={{ backgroundColor: '#4e080f', color: '#ffffff' }}
+              className="px-8 py-3 text-[10px] whitespace-nowrap font-bold uppercase tracking-widest rounded-full hover:shadow-lg hover:-translate-y-0.5 active:scale-95 transition-all"
+            >
+              {config.poMatrix ? 'Review Pricing Breakup' : 'Request Direct PO'}
+            </button>
+            <button
+              onClick={() => {
+                if (selectedItems.length > 0) {
+                  setActiveMatrixSku(selectedItems[0]);
+                  setShowDynamicMatrix(true);
+                }
+              }}
+              className="px-8 py-3 text-[10px] whitespace-nowrap font-bold uppercase tracking-widest rounded-full hover:shadow-lg hover:-translate-y-0.5 active:scale-95 transition-all bg-[var(--brand-primary)] text-[var(--brand-text)] shadow-[0_0_15px_rgba(212,175,55,0.4)]"
+            >
+              Dynamic PO Matrix (New)
+            </button>
+          </div>
         </div>
       </div>
 
@@ -627,6 +643,17 @@ export default function FlipbookClient({ catalog }: { catalog: any }) {
           closeMatrix={closeMatrix}
           catalogId={previewCatalog.id}
           clientId={previewCatalog.clientId}
+        />
+      )}
+
+      {/* NEW DYNAMIC MATRIX MODAL */}
+      {showDynamicMatrix && activeProductData && (
+        <HeadlessMatrixModal
+          product={activeProductData}
+          products={previewCatalog.items?.map((i: any) => i.product) || []}
+          activeMatrixSku={activeMatrixSku!}
+          setActiveMatrixSku={setActiveMatrixSku}
+          onClose={() => setShowDynamicMatrix(false)}
         />
       )}
     </div>

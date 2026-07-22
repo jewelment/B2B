@@ -13,6 +13,7 @@ export default function DashboardCatalog() {
   const [filter, setFilter] = useState<string>('ALL');
   
   const [layout, setLayout] = useState<any[]>([]);
+  const [promoBanners, setPromoBanners] = useState<any[]>([]);
   
   // Pagination and Infinite Scroll
   const [page, setPage] = useState(1);
@@ -24,9 +25,10 @@ export default function DashboardCatalog() {
   const loadData = async (pageNum: number, currentFilter: string) => {
     setLoading(true);
     try {
-      const [invRes, layoutRes] = await Promise.all([
+      const [invRes, layoutRes, bannerRes] = await Promise.all([
         fetch(`/api/inventory?page=${pageNum}&limit=24&purity=${currentFilter}`),
-        pageNum === 1 ? fetch('/api/sdui/page?path=/&platform=WEB&environment=PRODUCTION') : Promise.resolve(null)
+        pageNum === 1 ? fetch('/api/sdui/page?path=/&platform=WEB&environment=PRODUCTION') : Promise.resolve(null),
+        pageNum === 1 ? fetch('/api/storefront/banners') : Promise.resolve(null)
       ]);
       
       if (invRes.ok) {
@@ -57,6 +59,13 @@ export default function DashboardCatalog() {
         } else if (pageNum === 1) {
           // Fallback to default layout only on initial load
           setLayout([{ id: 'default-grid', type: 'ProductGrid', props: { title: 'Master Inventory', showFilters: true } }]);
+        }
+      }
+
+      if (bannerRes && bannerRes.ok) {
+        const bannerData = await bannerRes.json();
+        if (bannerData.success) {
+          setPromoBanners(bannerData.data);
         }
       }
     } catch (error) {
@@ -211,12 +220,58 @@ export default function DashboardCatalog() {
     </div>
   );
 
+  const renderPromoBanner = (props: any) => {
+    // Determine which banner to show based on the placement requested in props
+    const targetPlacement = props.placement || 'HERO';
+    // If fetching dynamically, grab the first active banner that matches the placement
+    const activeBanner = props.fetchDynamic && promoBanners.length > 0 
+      ? promoBanners.find(b => b.placement === targetPlacement || targetPlacement === 'ANY') || promoBanners[0]
+      : null;
+
+    const finalTitle = activeBanner?.title || props.title;
+    const finalImage = activeBanner?.imageUrl || props.imageUrl;
+    const finalMobileImage = activeBanner?.mobileImageUrl || activeBanner?.imageUrl || props.imageUrl;
+    const finalLink = activeBanner?.linkUrl || props.linkUrl || '#';
+
+    if (!finalImage) return null;
+
+    return (
+      <Link href={finalLink} className="relative block w-full h-[300px] md:h-[400px] rounded-[2rem] overflow-hidden group mt-10 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-500 border border-[var(--border-color)]">
+        {/* Mobile Image */}
+        <div className="absolute inset-0 md:hidden">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={finalMobileImage} alt={finalTitle} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+        </div>
+        {/* Desktop Image */}
+        <div className="absolute inset-0 hidden md:block">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={finalImage} alt={finalTitle} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+        </div>
+        
+        {/* Luxury Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+        <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.03] mix-blend-overlay"></div>
+        
+        <div className="absolute bottom-0 left-0 w-full p-8 md:p-12 flex justify-between items-end">
+          <div>
+            <h2 className="text-3xl md:text-5xl font-light tracking-wide text-white mb-2">{finalTitle}</h2>
+            {targetPlacement !== 'ANY' && <p className="text-[10px] font-bold tracking-[0.2em] text-[#D4AF37] uppercase">{targetPlacement} PROMOTION</p>}
+          </div>
+          <div className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 group-hover:bg-white group-hover:text-black transition-colors">
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+          </div>
+        </div>
+      </Link>
+    );
+  };
+
   return (
     <div className="max-w-[1400px] mx-auto relative z-10 animate-in fade-in duration-500 pb-20">
       
       {layout.map((comp) => {
         switch(comp.type) {
           case 'HeroBanner': return <div key={comp.id}>{renderHeroBanner(comp.props)}</div>;
+          case 'PromoBanner': return <div key={comp.id}>{renderPromoBanner(comp.props)}</div>;
           case 'ProductGrid': return <div key={comp.id}>{renderProductGrid(comp.props)}</div>;
           case 'TextBlock': return <div key={comp.id}>{renderTextBlock(comp.props)}</div>;
           default: return null;

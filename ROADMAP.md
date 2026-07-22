@@ -2,6 +2,18 @@
 
 This document tracks major features, architectural updates, and tasks completed in the B2B portal. Use this as a reference when writing user manuals or tracking project progress.
 
+## Currently In Progress
+
+### 11+1 Customer Schemes Module (Partial Completion)
+**Status**: In Progress
+**Description**: Implemented the foundational database architecture, basic Admin scheme creation, Customer Scheme Dashboard (`/dashboard/schemes`), and Admin Analytics tracking for early withdrawal requests. 
+**Key Capabilities Built So Far**:
+- Custom mathematical calculator mapping tenure lengths and dynamic bonus percentages.
+- Interactive chronological payment timeline for customers.
+- Early withdrawal workflows with dynamic account freezing and admin-side real-time red-dot notifications.
+- Admin Analytics single-page view containing KPIs and individual customer status ledger.
+**Pending**: Finalizing logic adjustments, additional edge cases, robust testing, and full integration as per client feedback.
+
 ## Recently Completed Features
 
 ### 1. 100% Offline AI-Free "Auto Magic" Image Sorting
@@ -42,7 +54,16 @@ This document tracks major features, architectural updates, and tasks completed 
 - **Unified Action Architecture**: Implemented a globally consistent `OrderActionMenu` across all tables, ensuring secure, one-click access to download invoices or view transaction summaries.
 - **Payment Link Conditioning**: Order Summary dashboards now dynamically display 'Send Payment Link' functionalities based exclusively on active 'Processing' states.
 
-### 4. [Add Previous Major Tasks Here]
+### 4. Phase 21.2: Single Order Detail View & Timelines
+**Status**: Completed
+**Description**: Implemented the detailed internal functionality for the Single Order Detail View (`/admin/orders/[id]`).
+**Key Capabilities for User Manual**:
+- **Dynamic Context**: Parses the exact order ID from the URL and maps it to the primary interface dynamically.
+- **Interactive Notes System**: The sidebar includes a fully functional, smooth-animated Notes posting system that tracks real-time inputs natively.
+- **Payment Lifecycle Filtering**: Connected the primary order ledger to 'All Transactions', 'Markets', and 'Paid' tabs for instant client-side ledger filtering.
+- **Simulated Transaction Injections**: Wired the 'Add Transaction' module to simulate injecting new randomized transaction receipts seamlessly with success state updates.
+
+### 5. [Add Previous Major Tasks Here]
 - *System foundation setup*
 - *Authentication and Role-Based Access Control*
 - *Inventory & Catalog APIs*

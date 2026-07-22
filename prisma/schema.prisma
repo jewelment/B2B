@@ -40,6 +40,10 @@ model Tenant {
   tags            Tag[]
   vendors         Vendor[]
   systemLogs      SystemLog[]
+  
+  // Schemes Module
+  savingsSchemes  SavingsScheme[]
+  enrollments     Enrollment[]
 }
 
 // ======================================================
@@ -254,6 +258,9 @@ model User {
   assignedTickets Ticket[] @relation("AssignedTickets")
   ticketMessages  TicketMessage[]
   analyticsEvents AnalyticsEvent[]
+  
+  // Schemes Module
+  enrollments     Enrollment[]
 
   @@unique([tenantId, email])
 }
@@ -661,4 +668,100 @@ model VariantOptionValue {
   optionValue   OptionValue    @relation(fields: [optionValueId], references: [id], onDelete: Cascade)
 
   @@unique([variantId, optionValueId])
+}
+
+// ======================================================
+// 12. MARKETING & MERCHANDISING
+// ======================================================
+
+model Banner {
+  id              String   @id @default(cuid())
+  title           String
+  imageUrl        String
+  mobileImageUrl  String?
+  linkUrl         String?
+  placement       String   @default("HERO")
+  status          String   @default("ACTIVE")
+  tenantId        String?
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+// ======================================================
+// 13. SCHEMES & ENROLLMENTS (SAVINGS MODULE)
+// ======================================================
+
+model SavingsScheme {
+  id                  String   @id @default(cuid())
+  tenantId            String
+  tenant              Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  name                String
+  status              String   @default("DRAFT") // DRAFT, ACTIVE, INACTIVE
+  
+  // Financials
+  totalTenureMonths   Int      @default(12)
+  bonusInstallments   Int      @default(1)
+  shortDescription    String?
+  minInstallment      Float    @default(1000)
+  maxInstallment      Float    @default(100000)
+  bonusDiscountPct    Float    @default(100.0)
+  gracePeriodDays     Int      @default(7)
+
+  // JSON fields for complex data
+  termsAndConditions  String?  @db.Text
+  faqs                String?  @db.Text // JSON Array of Q&A
+  
+  // Media
+  desktopBannerUrl    String?
+  mobileBannerUrl     String?
+
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  
+  enrollments         Enrollment[]
+}
+
+model Enrollment {
+  id                  String   @id @default(cuid())
+  tenantId            String
+  tenant              Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  schemeId            String
+  scheme              SavingsScheme @relation(fields: [schemeId], references: [id])
+  
+  clientId            String
+  client              User     @relation(fields: [clientId], references: [id])
+  
+  monthlyInstallment  Float
+  status              String   @default("ACTIVE") // ACTIVE, MATURED, CLOSED
+  totalPaid           Float    @default(0)
+  
+  startDate           DateTime @default(now())
+  maturityDate        DateTime?
+  
+  autoReminders       Boolean  @default(true)
+  
+  installments        Installment[]
+  
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+model Installment {
+  id                  String   @id @default(cuid())
+  enrollmentId        String
+  enrollment          Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  
+  monthNumber         Int
+  amount              Float
+  dueDate             DateTime
+  status              String   @default("PENDING") // PENDING, PAID, OVERDUE, BONUS
+  paidDate            DateTime?
+  transactionId       String?
+  receiptUrl          String?
+  
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
 }

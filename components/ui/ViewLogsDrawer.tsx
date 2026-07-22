@@ -33,6 +33,19 @@ export const ViewLogsDrawer: React.FC<ViewLogsDrawerProps> = ({ isOpen, onClose,
     }
   }, [isOpen]);
 
+  // Click outside to close (without backdrop)
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (isOpen && drawerRef.current && !drawerRef.current.contains(event.target as Node)) {
+        onClose();
+      }
+    };
+    
+    // Use mousedown to catch the click before other element clicks potentially navigate away
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isOpen, onClose]);
+
   const filteredLogs = logs.filter(l => 
     l.activity.toLowerCase().includes(logSearch.toLowerCase()) || 
     l.user.toLowerCase().includes(logSearch.toLowerCase())
@@ -43,7 +56,7 @@ export const ViewLogsDrawer: React.FC<ViewLogsDrawerProps> = ({ isOpen, onClose,
       {/* Drawer Overlay (No backdrop per Rule #11) */}
       <div 
         ref={drawerRef}
-        className={`fixed top-0 right-0 bottom-0 z-50 w-[480px] bg-[var(--bg-surface)] border-l border-[var(--border-color)] shadow-[-10px_0_30px_rgba(0,0,0,0.1)] dark:shadow-[-20px_0_50px_rgba(0,0,0,0.7)] flex flex-col transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${isOpen ? 'translate-x-0' : 'translate-x-[100%]'}`}
+        className={`fixed top-0 right-0 bottom-0 z-50 w-[480px] bg-[var(--bg-surface)] border-l border-[var(--border-color)] shadow-[-10px_0_30px_rgba(0,0,0,0.1)] dark:shadow-[-20px_0_50px_rgba(0,0,0,0.7)] flex flex-col transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${isOpen ? 'translate-x-0' : 'translate-x-[100%]'}`}
       >
           {/* Drawer Header */}
           <div className="flex justify-between items-center p-5 border-b border-[var(--border-color)]">

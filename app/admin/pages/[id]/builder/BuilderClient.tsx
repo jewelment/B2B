@@ -56,6 +56,14 @@ function SortableItem(props: { id: string; comp: SDUIComponent; isSelected: bool
           )}
         </div>
       )}
+
+      {props.comp.type === 'PromoBanner' && (
+        <div className="bg-[#1a1a1a] border border-[#D4AF37]/30 rounded-xl p-4 text-center text-[#D4AF37] relative overflow-hidden h-24 flex items-center justify-center shadow-inner">
+          <div className="absolute inset-0 bg-gradient-to-r from-[#D4AF37]/10 via-transparent to-[#D4AF37]/10"></div>
+          <h3 className="relative z-10 text-sm font-bold tracking-[0.2em] uppercase">{(props.comp.props as any).title || 'Promo Banner'}</h3>
+          <div className="absolute bottom-2 right-3 text-[8px] opacity-50 uppercase tracking-widest">Dynamic Placements</div>
+        </div>
+      )}
       
       {props.comp.type === 'ProductGrid' && (
         <div className="bg-slate-100 dark:bg-slate-800/50 rounded-xl p-4 border border-slate-200 dark:border-slate-700">
@@ -198,6 +206,8 @@ export default function BuilderClient({ pageData }: { pageData: any }) {
       props = variant === 'Luxury Minimalist' 
         ? { title: 'Elegance Redefined', subtitle: 'Explore the minimal collection.', imageUrl: 'https://placehold.co/800x400/1a1a1a/FFF' }
         : { title: 'Summer Collection', subtitle: 'Shop now', imageUrl: 'https://placehold.co/400x800/e2e8f0/000' };
+    } else if (type === 'PromoBanner') {
+      props = { title: 'Promotional Banner', placement: 'HERO', fetchDynamic: true };
     } else if (type === 'TextBlock') {
       props = { title: 'About Us', content: 'We craft luxury experiences.' };
     } else if (type === 'ProductGrid') {
@@ -255,6 +265,23 @@ export default function BuilderClient({ pageData }: { pageData: any }) {
                       </div>
                     </DraggableSidebarBlock>
                   </div>
+                </div>
+
+                <div>
+                  <h3 className="text-[10px] font-bold text-[#D4AF37] uppercase tracking-widest mb-4 flex items-center gap-2 mt-8">
+                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" /></svg>
+                    Merchandising
+                  </h3>
+                  <DraggableSidebarBlock type="PromoBanner" variant="default">
+                    <div className="flex flex-col text-left p-3 rounded-xl border border-[var(--border-color)] hover:border-[#D4AF37] hover:bg-[#D4AF37]/5 transition-all group shadow-sm bg-[var(--bg-base)] pointer-events-none">
+                      <div className="w-full h-12 bg-black/5 dark:bg-white/5 rounded-lg mb-3 flex flex-col items-center justify-center border border-[var(--border-color)] group-hover:border-[#D4AF37]/30">
+                        <div className="w-2/3 h-1.5 bg-[#D4AF37]/50 rounded-full mb-1"></div>
+                        <div className="w-1/2 h-1 bg-[#D4AF37]/30 rounded-full"></div>
+                      </div>
+                      <div className="text-xs font-bold group-hover:text-[#D4AF37]">Promo Banner</div>
+                      <div className="text-[10px] text-[var(--text-muted)] mt-1">Dynamic from Directory</div>
+                    </div>
+                  </DraggableSidebarBlock>
                 </div>
 
                 <div>

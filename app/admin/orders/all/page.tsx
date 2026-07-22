@@ -9,17 +9,31 @@ import Link from 'next/link';
 
 export default function AllOrdersPage() {
   const [activeTab, setActiveTab] = useState('All');
-  const tabs = ['All', 'Store', 'Ecom', 'Pending', 'Multi', 'New', 'Complete', 'Archived'];
+  const tabs = ['All', 'Ecom', 'Store', 'Pending', 'Multi', 'New', 'Complete', 'Archived'];
 
   // Filters
   const [orderId, setOrderId] = useState('Order ID');
   const [orderStatus, setOrderStatus] = useState('Order Status');
   const [paymentStatus, setPaymentStatus] = useState('Payment Status');
+  const [amountSpent, setAmountSpent] = useState('Amount Spent');
   const [dateRange, setDateRange] = useState('Today');
   
   const [isLogsOpen, setIsLogsOpen] = useState(false);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [logs, setLogs] = useState<LogEntry[]>([]);
+  
+  // New States
+  const [selectedOrders, setSelectedOrders] = useState<string[]>([]);
+  const [kpiStats, setKpiStats] = useState({ orders: 2, sales: 22646, fulfillment: 0 });
+
+  useEffect(() => {
+    // Mock dynamic KPI changes based on time palette
+    if (dateRange === 'Today') setKpiStats({ orders: 2, sales: 22646, fulfillment: 0 });
+    else if (dateRange === 'Yesterday') setKpiStats({ orders: 5, sales: 54100, fulfillment: 2 });
+    else if (dateRange === 'Last 7 Days') setKpiStats({ orders: 34, sales: 342000, fulfillment: 15 });
+    else if (dateRange === 'This Month') setKpiStats({ orders: 120, sales: 1245000, fulfillment: 45 });
+    else setKpiStats({ orders: 1450, sales: 15000000, fulfillment: 400 });
+  }, [dateRange]);
 
   useEffect(() => {
     // Fetch real event logs for the Orders module
@@ -44,6 +58,18 @@ export default function AllOrdersPage() {
     { id: '#KISNA-5962', date: '14-07-2026 at 6:54 pm', fulfilledBy: 'ECOM', user: 'Vijay Yadav', items: 1, total: 1.00, paymentStatus: 'Success', orderStatus: 'Confirmed' },
     { id: '#KISNA-5961', date: '14-07-2026 at 5:53 pm', fulfilledBy: 'ECOM', user: 'Jaan mehndiratta', items: 1, total: 8334.00, paymentStatus: 'Success', orderStatus: 'Confirmed' },
   ];
+
+  const getTabCount = (tabName: string) => {
+    if (tabName === 'All') return mockOrders.length;
+    if (tabName === 'Store') return mockOrders.filter(o => o.fulfilledBy === 'Store').length;
+    if (tabName === 'Ecom') return mockOrders.filter(o => o.fulfilledBy === 'ECOM').length;
+    if (tabName === 'Pending') return mockOrders.filter(o => o.orderStatus === 'Pending').length;
+    if (tabName === 'Multi') return mockOrders.filter(o => o.items > 1).length;
+    if (tabName === 'New') return mockOrders.length;
+    if (tabName === 'Complete') return mockOrders.filter(o => o.orderStatus === 'Completed' || o.orderStatus === 'Confirmed').length;
+    if (tabName === 'Archived') return mockOrders.filter(o => o.orderStatus === 'Archived').length;
+    return 0;
+  };
 
   const allOrdersFiltersConfig: FilterGroup[] = [
     {
@@ -125,7 +151,7 @@ export default function AllOrdersPage() {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-[var(--text-main)]">Orders</h1>
         <div className="flex items-center gap-3">
-          <button onClick={() => setIsLogsOpen(true)} className="inline-flex items-center justify-center px-5 py-2.5 rounded-full bg-[var(--bg-surface)] text-[var(--text-main)] border border-[var(--border-color)] hover:border-[var(--brand-primary)] hover:text-[var(--brand-primary)] transition-all shadow-sm shimmer-hover overflow-hidden relative text-xs font-bold uppercase tracking-wide">
+          <button onClick={() => setIsLogsOpen(true)} className="inline-flex items-center justify-center px-5 py-2.5 rounded-full bg-transparent text-[var(--text-muted)] border border-transparent hover:border-[var(--border-color)] hover:text-[var(--text-main)] hover:bg-black/5 dark:hover:bg-white/5 transition-all shadow-none text-xs font-bold uppercase tracking-wide">
             View Logs
           </button>
           <button className="inline-flex items-center justify-center px-5 py-2.5 rounded-full bg-transparent text-[var(--text-muted)] border border-transparent hover:border-[var(--border-color)] hover:text-[var(--text-main)] hover:bg-black/5 dark:hover:bg-white/5 transition-all shadow-none text-xs font-bold uppercase tracking-wide">
@@ -138,20 +164,20 @@ export default function AllOrdersPage() {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-4 gap-4 mb-6 relative z-30">
         <div className="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-2xl p-6 shadow-sm relative overflow-hidden group">
           <div className="absolute inset-0 bg-gradient-to-br from-[var(--brand-primary)]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-          <h3 className="text-3xl font-bold text-[var(--text-main)] mb-1">2</h3>
+          <h3 className="text-3xl font-bold text-[var(--text-main)] mb-1">{kpiStats.orders.toLocaleString()}</h3>
           <p className="text-xs font-bold uppercase tracking-widest text-[var(--text-muted)]">Orders</p>
         </div>
         <div className="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-2xl p-6 shadow-sm relative overflow-hidden group">
           <div className="absolute inset-0 bg-gradient-to-br from-[var(--brand-primary)]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-          <h3 className="text-3xl font-bold text-[var(--text-main)] mb-1">₹22,646</h3>
+          <h3 className="text-3xl font-bold text-[var(--text-main)] mb-1">₹{kpiStats.sales.toLocaleString('en-IN')}</h3>
           <p className="text-xs font-bold uppercase tracking-widest text-[var(--text-muted)]">Sales Amount</p>
         </div>
         <div className="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-2xl p-6 shadow-sm relative overflow-hidden group">
           <div className="absolute inset-0 bg-gradient-to-br from-[var(--brand-primary)]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-          <h3 className="text-3xl font-bold text-[var(--text-main)] mb-1">0</h3>
+          <h3 className="text-3xl font-bold text-[var(--text-main)] mb-1">{kpiStats.fulfillment.toLocaleString()}</h3>
           <p className="text-xs font-bold uppercase tracking-widest text-[var(--text-muted)]">Fulfillment Items</p>
         </div>
         <div className="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-2xl p-6 shadow-sm flex items-center justify-center">
@@ -161,59 +187,79 @@ export default function AllOrdersPage() {
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="flex items-center gap-6 border-b border-[var(--border-color)] mb-6">
-        {tabs.map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`pb-3 text-sm font-medium transition-all relative ${activeTab === tab ? 'text-[var(--brand-primary)]' : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'}`}
-          >
-            {tab} {tab === 'All' && '(144834)'} {tab === 'Store' && '(110400)'} {tab === 'Ecom' && '(5622)'}
-            {activeTab === tab && (
-              <span className="absolute bottom-0 left-0 w-full h-[2px] bg-[var(--brand-primary)] rounded-t-full shadow-[0_0_8px_var(--brand-primary)] animate-in fade-in zoom-in duration-300" />
-            )}
-          </button>
-        ))}
-      </div>
-
-      {/* Filters (Single Line layout) */}
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-6 bg-[var(--bg-surface)] p-3 rounded-xl border border-[var(--border-color)] shadow-sm">
-        <div className="flex items-center gap-3 flex-1">
-          <div className="relative min-w-[250px]">
-            <input type="text" placeholder="Search..." className="w-full bg-black/5 dark:bg-black/20 border border-[var(--border-color)] rounded-lg pl-10 pr-4 py-2.5 text-sm text-[var(--text-main)] outline-none focus:border-[var(--brand-primary)] transition-colors" />
-            <svg className="w-4 h-4 text-[var(--text-muted)] absolute left-3.5 top-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+      {/* Data Table with encapsulated Tabs and Filters */}
+      <div className="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-2xl shadow-xl overflow-hidden flex flex-col flex-1 min-h-[600px]">
+        
+        {/* Tabs inside wrapper */}
+        <div className="flex justify-between items-end border-b border-[var(--border-color)] px-6 pt-4">
+          <div className="flex items-center gap-8">
+            {tabs.map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`pb-3 text-sm font-medium transition-all relative ${activeTab === tab ? 'text-[var(--brand-primary)]' : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'}`}
+              >
+                {tab} {['All', 'Store', 'Ecom'].includes(tab) ? `(${getTabCount(tab)})` : ''}
+                {activeTab === tab && (
+                  <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[var(--brand-primary)] rounded-t-full shadow-[0_0_8px_var(--brand-primary)] animate-in fade-in zoom-in duration-300" />
+                )}
+              </button>
+            ))}
           </div>
-          <div className="w-[160px]">
-            <CustomDropdown label="" options={['Order ID', 'Client Name', 'SKU']} value={orderId} onChange={setOrderId} />
-          </div>
-          <div className="w-[160px]">
-            <CustomDropdown label="" options={['Order Status', 'Pending', 'Confirmed', 'Shipping']} value={orderStatus} onChange={setOrderStatus} />
-          </div>
-          <div className="w-[160px]">
-            <CustomDropdown label="" options={['Payment Status', 'Success', 'Failed', 'Pending']} value={paymentStatus} onChange={setPaymentStatus} />
+          <div className="pb-3 flex items-center gap-2 text-sm text-[var(--text-main)] font-medium">
+            <img src="/india-flag.svg" alt="India" className="w-6 h-6 rounded-full object-cover shadow-sm" /> India
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <button onClick={() => setIsFiltersOpen(true)} className="inline-flex items-center gap-2 px-4 py-2 text-[var(--text-muted)] hover:text-[var(--text-main)] text-sm font-medium transition-colors">
-            More Filters
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" /></svg>
-          </button>
-          <button className="inline-flex items-center gap-2 px-4 py-2 bg-[var(--text-muted)]/10 rounded-lg text-[var(--text-main)] text-sm font-medium hover:bg-[var(--text-muted)]/20 transition-colors">
-            Sort
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" /></svg>
-          </button>
-        </div>
-      </div>
 
-      {/* Data Table */}
-      <div className="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-2xl shadow-sm overflow-hidden flex flex-col flex-1 min-h-[500px]">
+        {/* Filters Toolbar */}
+        <div className="px-6 py-4 border-b border-[var(--border-color)] flex flex-wrap justify-between items-center gap-4 bg-black/5 dark:bg-black/20 relative z-20">
+          <div className="flex items-center gap-2 bg-[var(--bg-base)] rounded-lg px-4 py-2 border border-[var(--border-color)] focus-within:border-[var(--brand-primary)] transition-colors w-72 shrink-0">
+            <svg className="w-4 h-4 text-[var(--text-muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+            <input type="text" placeholder="Search..." className="bg-transparent text-sm w-full outline-none text-[var(--text-main)] placeholder-[var(--text-muted)]" />
+          </div>
+          <div className="flex gap-3 flex-nowrap flex-1">
+            <div className="w-[160px] shrink-0">
+              <CustomDropdown label="" options={['Order ID', 'Client Name', 'SKU']} value={orderId} onChange={setOrderId} />
+            </div>
+            <div className="w-[160px] shrink-0">
+              <CustomDropdown label="" options={['Order Status', 'Pending', 'Confirmed', 'Shipping']} value={orderStatus} onChange={setOrderStatus} />
+            </div>
+            <div className="w-[160px] shrink-0">
+              <CustomDropdown label="" options={['Payment Status', 'Success', 'Failed', 'Pending']} value={paymentStatus} onChange={setPaymentStatus} />
+            </div>
+            <div className="w-[160px] shrink-0">
+              <CustomDropdown label="" options={['Amount Spent', 'High to Low', 'Low to High']} value={amountSpent} onChange={setAmountSpent} />
+            </div>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <button onClick={() => setIsFiltersOpen(true)} className="inline-flex items-center gap-2 px-4 py-2 text-[var(--text-muted)] hover:text-[var(--text-main)] text-sm font-medium transition-colors">
+              More Filters
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" /></svg>
+            </button>
+            <button className="inline-flex items-center gap-2 px-4 py-2 bg-[var(--text-muted)]/10 rounded-lg text-[var(--text-main)] text-sm font-medium hover:bg-[var(--text-muted)]/20 transition-colors">
+              Sort
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" /></svg>
+            </button>
+          </div>
+        </div>
+
         <div className="w-full overflow-auto flex-1 custom-scrollbar">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-[var(--border-color)] bg-black/5 dark:bg-white/5">
                 <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] w-12">
-                  <input type="checkbox" className="rounded-sm border-[var(--border-color)] bg-transparent text-[var(--brand-primary)] focus:ring-0 cursor-pointer" />
+                  <input 
+                    type="checkbox" 
+                    className="rounded-sm border-[var(--border-color)] bg-transparent text-[var(--brand-primary)] focus:ring-0 cursor-pointer"
+                    checked={filteredOrders.length > 0 && selectedOrders.length === filteredOrders.length}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setSelectedOrders(filteredOrders.map(o => o.id));
+                      } else {
+                        setSelectedOrders([]);
+                      }
+                    }} 
+                  />
                 </th>
                 <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">Order Info (116019)</th>
                 <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">Fulfilled By</th>
@@ -228,8 +274,19 @@ export default function AllOrdersPage() {
             <tbody className="divide-y divide-[var(--border-color)]">
               {filteredOrders.map((order, idx) => (
                 <tr key={order.id} className="hover:bg-black/5 dark:hover:bg-white/5 transition-colors group cursor-pointer animate-in fade-in slide-in-from-bottom-2" style={{ animationDelay: `${idx * 50}ms` }}>
-                  <td className="px-6 py-4">
-                    <input type="checkbox" className="rounded-sm border-[var(--border-color)] bg-transparent text-[var(--brand-primary)] focus:ring-0 cursor-pointer" onClick={(e) => e.stopPropagation()} />
+                  <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
+                    <input 
+                      type="checkbox" 
+                      className="rounded-sm border-[var(--border-color)] bg-transparent text-[var(--brand-primary)] focus:ring-0 cursor-pointer"
+                      checked={selectedOrders.includes(order.id)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedOrders([...selectedOrders, order.id]);
+                        } else {
+                          setSelectedOrders(selectedOrders.filter(id => id !== order.id));
+                        }
+                      }} 
+                    />
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex flex-col">
@@ -266,10 +323,9 @@ export default function AllOrdersPage() {
                       </Link>
                       <OrderActionMenu 
                         actions={[
-                          { label: 'View Details', href: `/admin/orders/${order.id.replace('#','')}` },
                           { label: 'Download Invoice', onClick: () => alert('Downloading invoice...') },
                           { label: 'Email Invoice', onClick: () => alert('Invoice sent to email!') },
-                          { label: 'Cancel Order', isDestructive: true, onClick: () => { if(confirm('Are you sure you want to cancel this order?')) alert('Order Cancelled') } }
+                          { label: 'Cancel Order', isDestructive: true, onClick: () => { if(confirm('Are you sure you want to cancel this order?')) alert('Order Cancelled!') } }
                         ]} 
                       />
                     </div>
@@ -280,7 +336,7 @@ export default function AllOrdersPage() {
           </table>
         </div>
         
-        {/* Pagination */}
+        {/* Dynamic Pagination */}
         <div className="p-4 border-t border-[var(--border-color)] flex items-center justify-between bg-[var(--bg-surface)] sticky bottom-0 z-10">
            <span className="text-xs text-[var(--text-muted)]">Showing {filteredOrders.length} of {mockOrders.length} Orders</span>
            <div className="flex items-center gap-1">
@@ -288,8 +344,10 @@ export default function AllOrdersPage() {
                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
               </button>
               <button className="w-8 h-8 flex items-center justify-center rounded-lg bg-[var(--brand-primary)] text-[var(--brand-text)] text-xs font-bold shadow-md">1</button>
-              <button className="w-8 h-8 flex items-center justify-center rounded-lg border border-[var(--border-color)] text-[var(--text-muted)] hover:bg-[var(--bg-surface)] text-xs font-medium transition-colors">2</button>
-              <button className="p-1.5 rounded-lg border border-[var(--border-color)] text-[var(--text-muted)] hover:bg-[var(--bg-surface)] transition-colors">
+              {filteredOrders.length > 10 && (
+                 <button className="w-8 h-8 flex items-center justify-center rounded-lg border border-[var(--border-color)] text-[var(--text-muted)] hover:bg-[var(--bg-surface)] text-xs font-medium transition-colors">2</button>
+              )}
+              <button className="p-1.5 rounded-lg border border-[var(--border-color)] text-[var(--text-muted)] hover:bg-[var(--bg-surface)] disabled:opacity-50 transition-colors" disabled={filteredOrders.length <= 10}>
                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
               </button>
            </div>

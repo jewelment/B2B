@@ -186,7 +186,7 @@ export default function DevRoadmapDashboard() {
       tasks: [
         { name: "9.1 Admin SDUI Layout Builder", profile: "Super Admin, Admin", status: "Completed", progress: 100, url: "/admin/layout-builder" },
         { name: "9.2 Native Mobile Auth (Expo)", profile: "Client, Sales", status: "Completed", progress: 100, url: "/api/mobile/auth" },
-        { name: "9.3 Headless PO Matrix Checkout", profile: "Client, Sales", status: "In Progress", progress: 15, url: "/api/checkout/execute" },
+        { name: "9.3 Headless PO Matrix Checkout", profile: "Client, Sales", status: "Completed", progress: 100, url: "/api/checkout/execute" },
         { name: "9.4 Mobile Responsive Flipbook", profile: "Client, Sales", status: "Completed", progress: 100, url: "/catalog/flipbook/[id]" }
       ]
     },
@@ -305,7 +305,7 @@ export default function DevRoadmapDashboard() {
         { name: "18.4 Inventory Store Allocation Grid", profile: "Manager", status: "Completed", progress: 100, url: "/admin/inventory/stores", lastModified: "2026-07-21T11:45:00", isRecent: false },
         { name: "18.5 Product Reviews Workflow", profile: "Support", status: "Completed", progress: 100, url: "/admin/inventory/reviews", lastModified: "2026-07-21T11:45:00", isRecent: false },
         { name: "18.6 Master Inventory Grid", profile: "Admin", status: "Completed", progress: 100, url: "/admin/products", lastModified: new Date().toISOString(), isRecent: true },
-        { name: "18.7 Automated AI Disclaimer Generator", profile: "Admin", status: "Pending", progress: 0, url: "/api/admin/products/ai-generate", lastModified: new Date().toISOString(), isRecent: true }
+        { name: "18.7 Automated AI Disclaimer Generator", profile: "Admin", status: "In Progress", progress: 15, url: "/api/admin/products/ai-generate", lastModified: new Date().toISOString(), isRecent: true }
       ]
     },
     {
@@ -322,9 +322,9 @@ export default function DevRoadmapDashboard() {
       ticket: "20.0 ADVANCED SDUI & BANNER MERCHANDISING",
       description: "Visual directory for routing high-fidelity promotional banners directly into storefront landing pages and PLP catalog grids.",
       tasks: [
-        { name: "20.1 Banner Management Directory", profile: "Admin", status: "Pending", progress: 0, url: "/admin/banners" },
-        { name: "20.2 Edit Banner Modal & Responsive Media Mapping", profile: "Admin", status: "Pending", progress: 0, url: "/admin/banners" },
-        { name: "20.3 PLP In-Grid Promo Banner Integration", profile: "Admin", status: "Pending", progress: 0, url: "/admin/banners" },
+        { name: "20.1 Banner Management Directory", profile: "Admin", status: "Completed", progress: 100, url: "/admin/banners" },
+        { name: "20.2 Edit Banner Modal & Responsive Media Mapping", profile: "Admin", status: "Completed", progress: 100, url: "/admin/banners" },
+        { name: "20.3 PLP In-Grid Promo Banner Integration", profile: "Admin", status: "Completed", progress: 100, url: "/admin/banners" },
         { name: "20.4 Frontend Hero Landing Page Automation", profile: "System", status: "Pending", progress: 0, url: "/admin/banners/landing" },
         { name: "20.5 Theme Builder & Assets Library", profile: "Admin", status: "Pending", progress: 0, url: "/admin/theme-builder" }
       ]
@@ -336,7 +336,7 @@ export default function DevRoadmapDashboard() {
         { name: "21.1 All Orders & Ecom Orders Advanced Filters", profile: "Sales", status: "Pending", progress: 0, url: "/admin/orders" },
         { name: "21.2 Single Order Detail View & Timeline Logging", profile: "Sales", status: "Pending", progress: 0, url: "/admin/orders" },
         { name: "21.3 Inventory Bagging & Weight Reconciliation Tool", profile: "Admin", status: "Pending", progress: 0, url: "/admin/orders" },
-        { name: "21.4 All Transactions & Payment Gateway Status", profile: "Finance", status: "Pending", progress: 0, url: "/admin/orders" },
+        { name: "21.4 All Transactions & Payment Gateway Status", profile: "Finance", status: "Completed", progress: 100, url: "/admin/orders/transactions" },
         { name: "21.5 11+1 Monthly Gold Savings Scheme Dashboard", profile: "Admin", status: "Pending", progress: 0, url: "/admin/schemes" },
         { name: "21.6 Return Management (Reverse Pickup)", profile: "Support", status: "Pending", progress: 0, url: "/admin/returns" }
       ]
