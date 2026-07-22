@@ -39,11 +39,26 @@ model Tenant {
   collections     Collection[]
   tags            Tag[]
   vendors         Vendor[]
+  systemLogs      SystemLog[]
 }
 
 // ======================================================
 // 2. THE CORE INVENTORY & PIM MODULE
 // ======================================================
+
+model SystemLog {
+  id          String   @id @default(cuid())
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  user        String   // Display name (e.g. "Admin System", "John Doe")
+  initials    String   // Avatar initials (e.g. "AS", "JD")
+  avatarColor String   // Tailwind class for the avatar styling
+  module      String   // E.g., 'ORDERS', 'INVENTORY', 'CRM'
+  activity    String   // Description (e.g., 'Generated draft PO-20260722-1405.')
+  
+  createdAt   DateTime @default(now())
+}
 
 model AccessRequest {
   id        String   @id @default(cuid())

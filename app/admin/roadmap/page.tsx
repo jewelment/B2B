@@ -333,9 +333,9 @@ export default function DevRoadmapDashboard() {
       ticket: "22.0 CRM, ENQUIRIES & TEAM PERMISSIONS",
       description: "Centralized support hub for tracking video appointments, resolving client tickets, and establishing internal enterprise HR roles.",
       tasks: [
-        { name: "22.1 All Customers & User Group Policy routing", profile: "Sales", status: "Pending", progress: 0, url: "/admin/customers" },
-        { name: "22.2 Enquiries Dashboard", profile: "Support", status: "Pending", progress: 0, url: "/admin/enquiries" },
-        { name: "22.3 Customer Inquiry Modal & Ticket Resolution", profile: "Support", status: "Pending", progress: 0, url: "/admin/enquiries" },
+        { name: "22.1 All Customers & User Group Policy routing", profile: "Sales", status: "Completed", progress: 100, url: "/admin/customers" },
+        { name: "22.2 Enquiries Dashboard", profile: "Support", status: "Completed", progress: 100, url: "/admin/customers/enquiries" },
+        { name: "22.3 Customer Inquiry Modal & Ticket Resolution", profile: "Support", status: "Pending", progress: 0, url: "/admin/customers/enquiries" },
         { name: "22.4 Teams & Permission Roles Access Control", profile: "Super Admin", status: "Pending", progress: 0, url: "/admin/teams" }
       ]
     },
@@ -355,7 +355,7 @@ export default function DevRoadmapDashboard() {
       description: "Primary performance indicators and global audit logging to ensure operational accountability across all users.",
       tasks: [
         { name: "24.1 Executive Dashboard Analytics", profile: "Super Admin", status: "Pending", progress: 0, url: "/admin/dashboard" },
-        { name: "24.2 Global Events & Logs Panel", profile: "System", status: "Pending", progress: 0, url: "/admin/logs" }
+        { name: "24.2 Global Events & Logs Panel", profile: "System", status: "Completed", progress: 100, url: "/admin/events-logs" }
       ]
     }
   ];
@@ -1073,7 +1073,7 @@ async function handleDragEnd(event) {
 
               {/* SECTION 1 */}
               <div id="section-1" className="space-y-4 pt-4 scroll-mt-20">
-                <h3 className="text-xl font-bold flex items-center gap-3"><span className="w-8 h-8 rounded-lg bg-[var(--brand-primary)] text-white flex items-center justify-center text-sm shadow-sm">1</span> Getting Started & Secure Access</h3>
+                <h3 className="text-xl font-bold flex items-center gap-3"><span className="w-8 h-8 rounded-lg bg-[var(--brand-primary)] text-[var(--brand-text)] flex items-center justify-center text-sm shadow-sm font-extrabold">1</span> Getting Started & Secure Access</h3>
                 <div className="bg-[var(--bg-base)] border border-[var(--border-color)] rounded-xl p-6 shadow-sm">
                   <p className="text-sm leading-relaxed text-[var(--text-main)] mb-4">
                     The B2B Portal is strictly invitation-only. To gain access, you must first be approved by an administrator. Once approved, you will log in using your registered email and a secure PIN/Password.
@@ -1091,7 +1091,7 @@ async function handleDragEnd(event) {
 
               {/* SECTION 2 */}
               <div id="section-2" className="space-y-4 pt-4 border-t border-[var(--border-color)] scroll-mt-20">
-                <h3 className="text-xl font-bold flex items-center gap-3"><span className="w-8 h-8 rounded-lg bg-[var(--brand-primary)] text-white flex items-center justify-center text-sm shadow-sm">2</span> The Immersive 3D Flipbook</h3>
+                <h3 className="text-xl font-bold flex items-center gap-3"><span className="w-8 h-8 rounded-lg bg-[var(--brand-primary)] text-[var(--brand-text)] flex items-center justify-center text-sm shadow-sm font-extrabold">2</span> The Immersive 3D Flipbook</h3>
                 <div className="bg-[var(--bg-base)] border border-[var(--border-color)] rounded-xl p-6 shadow-sm">
                   <p className="text-sm leading-relaxed text-[var(--text-main)] mb-4">
                     Instead of static PDFs, we use a fully interactive 3D digital lookbook that adapts to your device.
@@ -1114,7 +1114,7 @@ async function handleDragEnd(event) {
 
               {/* SECTION 3 */}
               <div id="section-3" className="space-y-4 pt-4 border-t border-[var(--border-color)] scroll-mt-20">
-                <h3 className="text-xl font-bold flex items-center gap-3"><span className="w-8 h-8 rounded-lg bg-[var(--brand-primary)] text-white flex items-center justify-center text-sm shadow-sm">3</span> Ordering via the Wholesale Matrix Cart</h3>
+                <h3 className="text-xl font-bold flex items-center gap-3"><span className="w-8 h-8 rounded-lg bg-[var(--brand-primary)] text-[var(--brand-text)] flex items-center justify-center text-sm shadow-sm font-extrabold">3</span> Ordering via the Wholesale Matrix Cart</h3>
                 <div className="bg-[var(--bg-base)] border border-[var(--border-color)] rounded-xl p-6 shadow-sm">
                   <p className="text-sm leading-relaxed text-[var(--text-main)] mb-4">
                     As a wholesale buyer, you often need to order multiple variants of a single design simultaneously. We built the Matrix Cart specifically for this.
@@ -1133,7 +1133,7 @@ async function handleDragEnd(event) {
 
               {/* SECTION 4 */}
               <div id="section-4" className="space-y-4 pt-4 border-t border-[var(--border-color)] scroll-mt-20">
-                <h3 className="text-xl font-bold flex items-center gap-3"><span className="w-8 h-8 rounded-lg bg-[var(--brand-primary)] text-white flex items-center justify-center text-sm shadow-sm">4</span> Tracking Purchase Orders & History</h3>
+                <h3 className="text-xl font-bold flex items-center gap-3"><span className="w-8 h-8 rounded-lg bg-[var(--brand-primary)] text-[var(--brand-text)] flex items-center justify-center text-sm shadow-sm font-extrabold">4</span> Tracking Purchase Orders & History</h3>
                 <div className="bg-[var(--bg-base)] border border-[var(--border-color)] rounded-xl p-6 shadow-sm">
                   <p className="text-sm leading-relaxed text-[var(--text-main)] mb-4">
                     Your Client Dashboard serves as your historical ledger for tracking active fulfillment.
@@ -1162,7 +1162,7 @@ async function handleDragEnd(event) {
 
               {/* SECTION 5 */}
               <div id="section-5" className="space-y-4 pt-4 border-t border-[var(--border-color)] scroll-mt-20">
-                <h3 className="text-xl font-bold flex items-center gap-3"><span className="w-8 h-8 rounded-lg bg-[var(--brand-primary)] text-white flex items-center justify-center text-sm shadow-sm">5</span> Client Support & Ticketing</h3>
+                <h3 className="text-xl font-bold flex items-center gap-3"><span className="w-8 h-8 rounded-lg bg-[var(--brand-primary)] text-[var(--brand-text)] flex items-center justify-center text-sm shadow-sm font-extrabold">5</span> Client Support & Ticketing</h3>
                 <div className="bg-[var(--bg-base)] border border-[var(--border-color)] rounded-xl p-6 shadow-sm">
                   <p className="text-sm leading-relaxed text-[var(--text-main)] mb-4">
                     If you experience any issues, require new features, or have general questions, you can use our built-in Jira-style Agile Ticketing System.
@@ -1180,7 +1180,7 @@ async function handleDragEnd(event) {
 
               {/* SECTION 6 */}
               <div id="section-6" className="space-y-4 pt-4 border-t border-[var(--border-color)] scroll-mt-20">
-                <h3 className="text-xl font-bold flex items-center gap-3"><span className="w-8 h-8 rounded-lg bg-[var(--brand-primary)] text-white flex items-center justify-center text-sm shadow-sm">6</span> Product Variant & Parameters Engine</h3>
+                <h3 className="text-xl font-bold flex items-center gap-3"><span className="w-8 h-8 rounded-lg bg-[var(--brand-primary)] text-[var(--brand-text)] flex items-center justify-center text-sm shadow-sm font-extrabold">6</span> Product Variant & Parameters Engine</h3>
                 <div className="bg-[var(--bg-base)] border border-[var(--border-color)] rounded-xl p-6 shadow-sm">
                   <p className="text-sm leading-relaxed text-[var(--text-main)] mb-4">
                     The backbone of our jewelry catalog is the Dynamic Variant Engine. This allows for complex hierarchical generation of permutations like Gold Purity, Size, and Gemstone.
@@ -1212,11 +1212,11 @@ async function handleDragEnd(event) {
               <button
                 onClick={runQC}
                 disabled={isQC}
-                className="mt-4 md:mt-0 inline-flex items-center gap-2 px-6 py-3 bg-[var(--brand-primary)] text-white font-bold uppercase tracking-widest text-xs rounded-xl shadow-md hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="mt-4 md:mt-0 inline-flex items-center gap-2 px-6 py-3 bg-[var(--brand-primary)] text-[var(--brand-text)] font-bold uppercase tracking-widest text-xs rounded-full shadow-md hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed shimmer-hover overflow-hidden"
               >
                 {isQC ? (
                   <>
-                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-[var(--brand-text)]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                     Running Diagnostics...
                   </>
                 ) : (

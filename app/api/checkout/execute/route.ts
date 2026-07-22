@@ -80,39 +80,46 @@ export async function POST(req: Request) {
       }
     }
 
-    // Try Database Write. If it fails, catch and return success anyway so UI doesn't break
-    try {
-      await prisma.purchaseOrder.create({
-        data: {
-          tenantId, // Inject Tenant Isolation
-          poNumber, 
-          clientId: clientId, 
-          totalAmount: totalValue, 
-          totalUnits: totalUnits, 
-          status: 'PENDING_APPROVAL', 
-          items: { create: orderItemsData }
-        }
-      });
-      
-      // Log Analytics Event
-      await prisma.analyticsEvent.create({
-        data: {
-          tenantId,
-          userId: clientId,
-          eventType: 'CHECKOUT',
-          eventData: JSON.stringify({ poNumber, totalUnits, totalValue })
-        }
-      }).catch(e => console.error("Telemetry log failed:", e));
+    // Try Database Write.
+    await prisma.purchaseOrder.create({
+      data: {
+        tenantId, // Inject Tenant Isolation
+        poNumber, 
+        clientId: clientId, 
+        totalAmount: totalValue, 
+        totalUnits: totalUnits, 
+        status: 'PENDING_APPROVAL', 
+        items: { create: orderItemsData }
+      }
+    });
+    
+    // Log Analytics Event
+    await prisma.analyticsEvent.create({
+      data: {
+        tenantId,
+        userId: clientId,
+        eventType: 'CHECKOUT',
+        eventData: JSON.stringify({ poNumber, totalUnits, totalValue })
+      }
+    }).catch(e => console.error("Telemetry log failed:", e));
 
-    } catch (dbError) {
-      console.warn("⚠️ Database Write Failed (Likely Schema/User mis-mapping). Proceeding with UI Draft PO.", dbError);
-    }
+    // Log System Event (Ethical Logging for Orders UI)
+    await prisma.systemLog.create({
+      data: {
+        tenantId,
+        user: authSource === 'MOBILE_APP' ? 'Mobile App User' : 'Web Portal User',
+        initials: authSource === 'MOBILE_APP' ? 'MA' : 'WP',
+        avatarColor: 'bg-emerald-500/20 text-emerald-500',
+        module: 'ORDERS',
+        activity: `Generated new B2B Purchase Order ${poNumber}.`
+      }
+    }).catch(e => console.error("System Log failed:", e));
 
     return NextResponse.json({ success: true, poNumber }, { status: 200 });
 
   } catch (error: any) {
     console.error('PO Transmission Pipeline Crash:', error);
-    return NextResponse.json({ error: 'Failed to process Purchase Order.' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to process Purchase Order. Please contact support.' }, { status: 500 });
   } finally {
   }
 }

@@ -2,7 +2,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
-import GlobalMap from '@/components/dashboard/GlobalMap';
+import dynamic from 'next/dynamic';
+
+const GlobalMap = dynamic(() => import('@/components/dashboard/GlobalMap'), { ssr: false });
 
 export default function AdminIndex() {
   const { data: session } = useSession();

@@ -24,7 +24,16 @@ This document tracks major features, architectural updates, and tasks completed 
 - **Automated Draft Transitions**: Intelligent scheduling features that automatically restrict live publication for future-scheduled SKUs.
 - **Micro-Interaction UI/UX**: Fluid Framer Motion animations across active states, glassmorphism modal dialogs, and 'Ambient Occlusion' shadowing.
 
-### 3. [Add Previous Major Tasks Here]
+### 3. Phase 2: Orders Module Enhancements
+**Status**: Completed
+**Description**: Built and integrated comprehensive views for managing all e-commerce, store-fulfilled, and B2B Purchase Orders, standardizing layouts with sticky paginations and full-page bento grids.
+**Key Capabilities for User Manual**:
+- **Master PO Ledger (All POs)**: A robust wholesale purchase order interface featuring real-time, multi-parameter filtering (Client, Amount Thresholds, Date) and dynamic sorting.
+- **Store & E-Com Order Splits**: Dedicated pages for tracking branch-fulfilled store orders versus online retail orders, complete with unified action menus.
+- **Unified Action Architecture**: Implemented a globally consistent `OrderActionMenu` across all tables, ensuring secure, one-click access to download invoices or view transaction summaries.
+- **Payment Link Conditioning**: Order Summary dashboards now dynamically display 'Send Payment Link' functionalities based exclusively on active 'Processing' states.
+
+### 4. [Add Previous Major Tasks Here]
 - *System foundation setup*
 - *Authentication and Role-Based Access Control*
 - *Inventory & Catalog APIs*
