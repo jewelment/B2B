@@ -79,6 +79,7 @@ export default function SystemRoutesAuditor() {
     { path: '/api/admin/orders', label: 'Orders API', type: 'API', status: 'Active' },
     { path: '/api/admin/parameters/collections', label: 'Collections API', type: 'API', status: 'Active' },
     { path: '/api/admin/products', label: 'Products Management API', type: 'API', status: 'Active' },
+    { path: '/api/admin/products/ai-generate', label: 'AI Disclaimer Generator API', type: 'API', status: 'Active' },
     { path: '/api/admin/products/bulk-sync', label: 'Products Bulk Sync API', type: 'API', status: 'Active' },
     { path: '/api/admin/products/fields', label: 'Product Fields API', type: 'API', status: 'Active' },
     { path: '/api/admin/products/fields/[id]', label: 'Single Field API', type: 'API', status: 'Active' },

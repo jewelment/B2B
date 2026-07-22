@@ -395,7 +395,38 @@ export default function SingleProductEditAccurateUI() {
     fetchOptionSets();
     fetchProductOptionSets();
     fetchVariants(1);
-  }, [id]);
+    
+    if (!isNewProduct) {
+      fetchProductDetails();
+    }
+  }, [id, isNewProduct]);
+
+  const fetchProductDetails = async () => {
+    try {
+      const res = await fetch(`/api/admin/products/${id}`);
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && json.product) {
+          const p = json.product;
+          setTitle(p.title || '');
+          setDesc(p.description || '');
+          setStatus(p.status || 'Active');
+          setCat(p.category || 'Rings');
+          
+          // Clear dummy images for a real product and populate real ones
+          if (p.media && p.media.length > 0) {
+            setMedia(p.media.map((m: any) => ({
+              id: m.id, url: m.url, type: m.isPrimary ? 'PRIMARY IMAGE' : 'MAKE PRIMARY', active: m.isPrimary, color: m.color || 'Yellow'
+            })));
+          } else {
+            setMedia([]);
+          }
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   const fetchOptionSets = async () => {
     try {
@@ -519,10 +550,20 @@ export default function SingleProductEditAccurateUI() {
     if (isGeneratingAI) return;
     setIsGeneratingAI(true);
     try {
+      let imageBase64 = null;
+      if (media.length > 0) {
+        const primaryImage = media.find(m => m.active) || media[0];
+        try {
+          imageBase64 = await getDownscaledBase64(primaryImage.url, primaryImage.file);
+        } catch (e) {
+          console.warn('Failed to downscale image for AI description', e);
+        }
+      }
+
       const res = await fetch('/api/admin/products/ai-generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, category: cat, metal, purity, diamond })
+        body: JSON.stringify({ title, category: cat, metal, purity, diamond, imageBase64 })
       });
       if (res.ok) {
         const data = await res.json();
@@ -532,6 +573,37 @@ export default function SingleProductEditAccurateUI() {
       console.error(err);
     } finally {
       setIsGeneratingAI(false);
+    }
+  };
+
+  const handleSaveProduct = async () => {
+    setSaveStatus('Saving to DB...');
+    try {
+      const res = await fetch('/api/admin/products', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id, // Pass ID for upsert
+          title,
+          description: desc,
+          category: cat,
+          price: 15000, // default fallback for now
+          status: status,
+          grossWeight: 4.5,
+          media // Send media payload
+        })
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setSaveStatus('Product Saved!');
+        // Note: Do NOT redirect here, as requested by the user.
+      } else {
+        setSaveStatus('Save Failed');
+      }
+    } catch (e) {
+      console.error(e);
+      setSaveStatus('Save Error');
     }
   };
 
@@ -794,7 +866,7 @@ export default function SingleProductEditAccurateUI() {
         
         {/* Back & Title */}
         <div className="flex items-center gap-4">
-          <button onClick={() => router.push('/admin/inventory/master-grid')} className="p-2 bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-full hover:border-[var(--brand-primary)] text-[var(--text-muted)] hover:text-[var(--brand-primary)] transition-all shadow-sm">
+          <button onClick={() => router.back()} className="p-2 bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-full hover:border-[var(--brand-primary)] text-[var(--text-muted)] hover:text-[var(--brand-primary)] transition-all shadow-sm">
             <IconChevronLeft />
           </button>
           <div className="flex flex-col">
@@ -810,7 +882,8 @@ export default function SingleProductEditAccurateUI() {
         <div className="flex items-center justify-end gap-3 text-xs font-bold tracking-widest uppercase">
           <button onClick={() => console.log('Duplicate action pending')} className="px-5 py-2.5 rounded-full bg-[var(--bg-surface)] text-[var(--text-main)] border border-[var(--border-color)] hover:border-[var(--brand-primary)] hover:text-[var(--brand-primary)] transition-all shadow-sm shimmer-hover">Duplicate</button>
           <button onClick={() => console.log('Preview pending')} className="px-5 py-2.5 rounded-full bg-[var(--bg-surface)] text-[var(--text-main)] border border-[var(--border-color)] hover:border-[var(--brand-primary)] hover:text-[var(--brand-primary)] transition-all shadow-sm shimmer-hover">Preview</button>
-          <button onClick={() => console.log('Price Sync pending')} className="px-5 py-2.5 rounded-full bg-[var(--brand-primary)] text-[var(--brand-text)] border border-[var(--brand-primary)] shadow-md transition-all shimmer-hover">Price Sync</button>
+          <button onClick={() => console.log('Price Sync pending')} className="px-5 py-2.5 rounded-full bg-[var(--bg-surface)] text-[var(--text-main)] border border-[var(--border-color)] hover:border-[var(--brand-primary)] hover:text-[var(--brand-primary)] transition-all shadow-sm shimmer-hover">Price Sync</button>
+          <button onClick={handleSaveProduct} className="px-6 py-2.5 rounded-full bg-[var(--brand-primary)] text-[var(--brand-text)] border border-[var(--brand-primary)] shadow-md transition-all shimmer-hover">Save Product</button>
         </div>
       </div>
 
@@ -821,7 +894,7 @@ export default function SingleProductEditAccurateUI() {
         <div className="space-y-8">
           
           {/* Animated Horizontal Timeline Stepper */}
-          <div className="w-full flex justify-center py-6 mb-4">
+          <div className="w-full flex justify-center py-6 mb-12 border-b border-[var(--border-color)] pb-12">
             <div className="flex items-center w-[85%] max-w-2xl justify-between relative">
               {/* Background Line & Progress Line Wrapper */}
               <div className="absolute top-[10px] left-[11px] right-[11px] h-[3px] bg-gray-200 dark:bg-gray-700 rounded-full">
@@ -1000,6 +1073,7 @@ export default function SingleProductEditAccurateUI() {
                   <p className="text-xs text-[var(--text-muted)] mt-1 font-medium">Upload product photos/videos, set primary, and sort the gallery order.</p>
                 </div>
                 <div className="flex items-center gap-3">
+                  <button onClick={() => setMedia([])} className="px-4 py-2.5 bg-transparent border border-transparent hover:border-[var(--border-color)] hover:text-[var(--text-main)] hover:bg-black/5 dark:hover:bg-white/5 rounded-full text-[10px] text-[var(--text-muted)] font-bold tracking-widest uppercase transition-all shadow-none">Clear All</button>
                   <button onClick={handleAutoShuffle} disabled={isDetectingColor} className={`px-5 py-2.5 rounded-full text-[10px] font-bold tracking-widest uppercase transition-all shadow-sm flex items-center gap-2 ${isDetectingColor ? 'bg-[var(--brand-primary)]/50 text-[var(--bg-base)] cursor-not-allowed' : 'bg-gradient-to-r from-[var(--brand-primary)] to-amber-500 text-[var(--bg-base)] hover:opacity-90 shimmer-hover'}`}>
                     {isDetectingColor ? 'DETECTING...' : '✨ AUTO MAGIC'}
                   </button>

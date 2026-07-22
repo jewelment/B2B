@@ -299,12 +299,13 @@ export default function DevRoadmapDashboard() {
       ticket: "18.0 MASTER CATALOG & INVENTORY",
       description: "Extensive product-level configuration, displaying a segmented timeline editor for pricing, multi-level variants, and stock store allocation.",
       tasks: [
-        { name: "18.1 Single Product Editable Timeline", profile: "Admin", status: "Completed", progress: 100, url: "/admin/products/edit/[id]", lastModified: "2026-07-21T10:45:00", isRecent: false },
-        { name: "18.2 Automated Variant Matrix UI", profile: "Admin", status: "Completed", progress: 100, url: "/admin/products", lastModified: "2026-07-21T11:15:00", isRecent: false },
-        { name: "18.3 Variant Media Upload Modal", profile: "Admin", status: "Completed", progress: 100, url: "/admin/products/edit/[id]", lastModified: "2026-07-21T11:45:00", isRecent: true },
-        { name: "18.4 Inventory Store Allocation Grid", profile: "Manager", status: "Completed", progress: 100, url: "/admin/inventory/stores", lastModified: "2026-07-21T11:45:00", isRecent: true },
-        { name: "18.5 Product Reviews Workflow", profile: "Support", status: "Completed", progress: 100, url: "/admin/inventory/reviews", lastModified: "2026-07-21T11:45:00", isRecent: true },
-        { name: "18.6 Master Inventory Grid", profile: "Admin", status: "Completed", progress: 100, url: "/admin/products", lastModified: "2026-07-21T11:18:00", isRecent: false }
+        { name: "18.1 Single Product Editable Timeline", profile: "Admin", status: "Completed", progress: 100, url: "/admin/products/edit/[id]", lastModified: new Date().toISOString(), isRecent: true },
+        { name: "18.2 Automated Variant Matrix UI", profile: "Admin", status: "Completed", progress: 100, url: "/admin/products", lastModified: new Date().toISOString(), isRecent: true },
+        { name: "18.3 Variant Media Upload Modal", profile: "Admin", status: "Completed", progress: 100, url: "/admin/products/edit/[id]", lastModified: new Date().toISOString(), isRecent: true },
+        { name: "18.4 Inventory Store Allocation Grid", profile: "Manager", status: "Completed", progress: 100, url: "/admin/inventory/stores", lastModified: "2026-07-21T11:45:00", isRecent: false },
+        { name: "18.5 Product Reviews Workflow", profile: "Support", status: "Completed", progress: 100, url: "/admin/inventory/reviews", lastModified: "2026-07-21T11:45:00", isRecent: false },
+        { name: "18.6 Master Inventory Grid", profile: "Admin", status: "Completed", progress: 100, url: "/admin/products", lastModified: new Date().toISOString(), isRecent: true },
+        { name: "18.7 Automated AI Disclaimer Generator", profile: "Admin", status: "Completed", progress: 100, url: "/api/admin/products/ai-generate", lastModified: new Date().toISOString(), isRecent: true }
       ]
     },
     {

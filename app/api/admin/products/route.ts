@@ -55,6 +55,73 @@ export async function GET() {
   }
 }
 
+export async function POST(req: Request) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user || (session.user as any).role !== 'ADMIN') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const tenantId = (session.user as any).tenantId;
+    if (!tenantId) {
+      return NextResponse.json({ error: 'Tenant ID missing from session' }, { status: 400 });
+    }
+
+    const { id, title, description, category, price, status, grossWeight, media } = await req.json();
+    
+    // Generate unique handle and design code for new products
+    const baseHandle = title ? title.toLowerCase().replace(/[^a-z0-9]+/g, '-') : 'untitled-product';
+    const randomSuffix = Math.random().toString(36).substring(2, 8);
+    const handle = `${baseHandle}-${randomSuffix}`;
+    const designCode = `DC-${Math.floor(Math.random() * 900000) + 100000}`;
+
+    const productData = {
+      tenantId,
+      title: title || 'Untitled Product',
+      description: description || '',
+      category: category || 'Jewellery',
+      price: parseFloat(price) || 0,
+      status: status || 'DRAFT',
+      weightGrams: parseFloat(grossWeight) || 0,
+    };
+
+    let product;
+    if (id && !id.startsWith('NEW')) {
+      product = await prisma.product.update({
+        where: { id },
+        data: productData
+      });
+    } else {
+      product = await prisma.product.create({
+        data: {
+          ...productData,
+          handle,
+          designCode
+        }
+      });
+    }
+
+    if (media && Array.isArray(media)) {
+      await prisma.productMedia.deleteMany({ where: { productId: product.id } });
+      await prisma.productMedia.createMany({
+        data: media.map((m: any, idx: number) => ({
+          productId: product.id,
+          url: m.url || `/assets/mock-library/${Math.random().toString(36).substring(7)}.jpg`,
+          isPrimary: m.active || false,
+          sequence: idx + 1,
+          color: m.color || null
+        }))
+      });
+    }
+
+    return NextResponse.json({ success: true, product }, { status: 201 });
+
+  } catch (error: any) {
+    console.error('Failed to create product:', error);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+  }
+}
+
 export async function PATCH(req: Request) {
   try {
     const session = await getServerSession(authOptions);

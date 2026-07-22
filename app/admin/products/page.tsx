@@ -66,28 +66,40 @@ const CustomDropdown = ({ label, options, value, onChange }: { label: string, op
 export default function ProductsMasterPage() {
   const router = useRouter();
   
-  // Mock Database
+  // Live Database Connection
   const categories = ['All Categories', 'Rings', 'Necklaces', 'Earrings', 'Bracelets', 'Pendants'];
-  const stockStatuses = ['All Status', 'In Stock', 'Low Stock', 'Out of Stock'];
+  const stockStatuses = ['All Status', 'Active', 'Draft', 'Pending'];
   
   const [selectedCategory, setSelectedCategory] = useState(categories[0]);
   const [selectedStatus, setSelectedStatus] = useState(stockStatuses[0]);
   const [searchQuery, setSearchQuery] = useState('');
 
-  const [products] = useState([
-    { id: '1', sku: 'RNG-GLD-001', name: 'Classic Gold Solitaire Ring', category: 'Rings', image: 'https://images.unsplash.com/photo-1605100804763-247f67b2548e?w=200&q=80', priceINR: 45000, rtsQty: 15, cmQty: 100, variants: 12, status: 'In Stock' },
-    { id: '2', sku: 'NCK-DIA-045', name: 'Diamond Tennis Necklace', category: 'Necklaces', image: 'https://images.unsplash.com/photo-1599643478524-fb66f70d00f8?w=200&q=80', priceINR: 250000, rtsQty: 4, cmQty: 50, variants: 4, status: 'Low Stock' },
-    { id: '3', sku: 'ERG-SLV-089', name: 'Silver Hoop Earrings Set', category: 'Earrings', image: 'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=200&q=80', priceINR: 12500, rtsQty: 42, cmQty: 200, variants: 35, status: 'In Stock' },
-    { id: '4', sku: 'BRL-GLD-112', name: '24k Gold Bangle Bracelet', category: 'Bracelets', image: 'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=200&q=80', priceINR: 85000, rtsQty: 10, cmQty: 20, variants: 8, status: 'In Stock' },
-    { id: '5', sku: 'PND-DIA-033', name: 'Diamond Drop Pendant', category: 'Pendants', image: 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=200&q=80', priceINR: 65000, rtsQty: 0, cmQty: 35, variants: 14, status: 'Out of Stock' },
-    { id: '6', sku: 'RNG-PLT-099', name: 'Platinum Wedding Band', category: 'Rings', image: 'https://images.unsplash.com/photo-1605100804763-247f67b2548e?w=200&q=80', priceINR: 95000, rtsQty: 5, cmQty: 10, variants: 10, status: 'Low Stock' },
-  ]);
+  const [products, setProducts] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const res = await fetch('/api/admin/products');
+        const json = await res.json();
+        if (json.success) {
+          setProducts(json.data);
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchProducts();
+  }, []);
 
   // Filtering Logic
   const filteredProducts = products.filter(p => {
     const matchCat = selectedCategory === 'All Categories' || p.category === selectedCategory;
-    const matchStatus = selectedStatus === 'All Status' || p.status === selectedStatus;
-    const matchSearch = p.sku.toLowerCase().includes(searchQuery.toLowerCase()) || p.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchStatus = selectedStatus === 'All Status' || (p.status || 'Active').toLowerCase() === selectedStatus.toLowerCase();
+    const searchString = `${p.designCode || ''} ${p.title || ''}`.toLowerCase();
+    const matchSearch = searchString.includes(searchQuery.toLowerCase());
     return matchCat && matchStatus && matchSearch;
   });
 
@@ -122,11 +134,27 @@ export default function ProductsMasterPage() {
       {/* Main Grid Wrapper */}
       <div className="w-full bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-2xl shadow-[0_4px_30px_rgba(0,0,0,0.03)] backdrop-blur-xl overflow-hidden flex flex-col">
         
+        {/* TABS */}
+        <div className="flex overflow-x-auto border-b border-[var(--border-color)] scrollbar-hide px-2">
+          {stockStatuses.map((status) => (
+            <button
+              key={status}
+              onClick={() => setSelectedStatus(status)}
+              className={`px-6 py-4 text-sm font-bold whitespace-nowrap transition-all border-b-2 ${
+                selectedStatus === status 
+                  ? 'border-[var(--brand-primary)] text-[var(--brand-primary)] bg-[var(--brand-primary)]/5' 
+                  : 'border-transparent text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-black/5 dark:hover:bg-white/5'
+              }`}
+            >
+              {status.toUpperCase()}
+            </button>
+          ))}
+        </div>
+
         {/* Filters & Search */}
-        <div className="p-6 border-b border-[var(--border-color)] flex flex-wrap justify-between items-center gap-6 bg-black/5 dark:bg-white/5">
+        <div className="p-4 border-b border-[var(--border-color)] flex flex-wrap justify-between items-center gap-6 bg-black/5 dark:bg-white/5">
           <div className="flex items-center gap-4 z-20">
             <CustomDropdown label="Category" options={categories} value={selectedCategory} onChange={setSelectedCategory} />
-            <CustomDropdown label="Status" options={stockStatuses} value={selectedStatus} onChange={setSelectedStatus} />
           </div>
           
           <div className="flex items-center gap-3 bg-white dark:bg-[#121212] rounded-full px-5 py-2.5 border border-[var(--border-color)] focus-within:border-[var(--brand-primary)] transition-all shadow-inner w-full md:w-96">
@@ -156,7 +184,13 @@ export default function ProductsMasterPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-[var(--border-color)]">
-              {filteredProducts.length === 0 ? (
+              {isLoading ? (
+                <tr>
+                  <td colSpan={7} className="py-16 text-center text-[var(--text-muted)] animate-pulse uppercase tracking-widest font-bold text-xs">
+                    Loading Master Catalog...
+                  </td>
+                </tr>
+              ) : filteredProducts.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="py-16 text-center text-[var(--text-muted)]">
                     <div className="flex flex-col items-center justify-center gap-3">
@@ -170,31 +204,31 @@ export default function ProductsMasterPage() {
                   <tr key={product.id} className="hover:bg-black/5 dark:hover:bg-white/5 transition-colors group">
                     <td className="py-5 px-6">
                       <div className="w-14 h-14 rounded-xl border border-[var(--border-color)] overflow-hidden bg-white dark:bg-[#121212] shrink-0 shadow-sm relative group-hover:shadow-md transition-all">
-                        <FallbackImage src={product.image} alt={product.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                        <FallbackImage src={product.image || 'https://images.unsplash.com/photo-1605100804763-247f67b2548e?w=200&q=80'} alt={product.title || 'Product'} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                       </div>
                     </td>
-                    <td className="py-5 px-6 font-mono text-sm font-semibold text-[var(--text-main)] whitespace-nowrap">{product.sku}</td>
+                    <td className="py-5 px-6 font-mono text-sm font-semibold text-[var(--text-main)] whitespace-nowrap">{product.designCode}</td>
                     <td className="py-5 px-6">
-                      <p className="text-sm font-bold text-[var(--brand-primary)] mb-1 truncate max-w-[300px]">{product.name}</p>
+                      <p className="text-sm font-bold text-[var(--brand-primary)] mb-1 truncate max-w-[300px]">{product.title || 'Untitled'}</p>
                       <p className="text-xs text-[var(--text-muted)]">{product.category}</p>
                     </td>
                     <td className="py-5 px-6 text-sm font-bold text-[var(--text-main)] text-right font-mono whitespace-nowrap">
-                      {product.priceINR.toLocaleString('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 })}
+                      {(product.price || 0).toLocaleString('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 })}
                     </td>
                     <td className="py-5 px-6 text-center">
                       <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-black/5 dark:bg-white/5 text-xs font-bold font-mono border border-[var(--border-color)]">
-                        {product.variants}
+                        {product.variants || 0}
                       </span>
                     </td>
                     <td className="py-5 px-6">
                       <div className="flex flex-col gap-2 w-full max-w-[180px] mx-auto">
                         <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-wider">
-                          <span className="text-emerald-500">Ready: {product.rtsQty}</span>
-                          <span className="text-blue-500">CM: {product.cmQty}</span>
+                          <span className="text-emerald-500">Ready: {product.rtsQty || 0}</span>
+                          <span className="text-blue-500">CM: {product.cmQty || 0}</span>
                         </div>
                         <div className="w-full h-1.5 bg-black/10 dark:bg-white/10 rounded-full overflow-hidden flex">
-                          <div className="h-full bg-emerald-500" style={{ width: `${(product.rtsQty / (product.rtsQty + product.cmQty)) * 100}%` }}></div>
-                          <div className="h-full bg-blue-500" style={{ width: `${(product.cmQty / (product.rtsQty + product.cmQty)) * 100}%` }}></div>
+                          <div className="h-full bg-emerald-500" style={{ width: `0%` }}></div>
+                          <div className="h-full bg-blue-500" style={{ width: `0%` }}></div>
                         </div>
                       </div>
                     </td>

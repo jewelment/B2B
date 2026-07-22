@@ -73,4 +73,11 @@ When executing tasks or interacting within this project workspace, you must adhe
 
 ### 4. Layout Architecture & Metadata Rules
 - Automatically utilize the usePathname hook within a global ClientLayout for dynamic page titles instead of defining redundant metadata across client components.
-- When designing data-dense matrices, embed CSS nimate-spin on refresh action buttons paired with global state to handle async latency visually.
+- When designing data-dense matrices, embed CSS  nimate-spin on refresh action buttons paired with global state to handle async latency visually.
+
+### 5. Standardized Tab Layout (CRM Panels)
+- **Consistency Rule:** All tab switching panels across the CRM must use a standardized, clean underline layout (no pill shapes or thick borders).
+- **Styling Architecture:** The tab container must be a flex container with `border-b border-[var(--border-color)] overflow-x-auto scrollbar-hide`. 
+- **Active State:** Active tabs must use `border-b-2 border-[var(--brand-primary)] text-[var(--brand-primary)] bg-[var(--brand-primary)]/5`.
+- **Inactive State:** Inactive tabs must use `border-transparent text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-black/5 dark:hover:bg-white/5`.
+- **Padding:** Tabs should use generous padding (e.g., `px-6 py-4`) with `text-sm font-bold whitespace-nowrap transition-all`.
