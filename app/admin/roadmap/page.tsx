@@ -200,6 +200,17 @@ export default function DevRoadmapDashboard() {
       ]
     },
     {
+      ticket: "11.0 PHASE 2: ORDERS MODULE",
+      description: "Bento grid order management, PO generation, and matrix ledger.",
+      tasks: [
+        { name: "11.1 Master PO Ledger", profile: "Admin", status: "Completed", progress: 100, url: "/admin/orders/all-pos" },
+        { name: "11.2 Store Orders Split", profile: "Admin", status: "Completed", progress: 100, url: "/admin/orders/store" },
+        { name: "11.3 E-Com Orders Split", profile: "Admin", status: "Completed", progress: 100, url: "/admin/orders/ecommerce" },
+        { name: "11.4 Unified Action Architecture", profile: "Admin", status: "Completed", progress: 100, url: "/admin/orders/all" },
+        { name: "11.5 Payment Link Conditioning", profile: "Admin", status: "Completed", progress: 100, url: "/admin/orders/[id]" }
+      ]
+    },
+    {
       ticket: "12.0 V2: FLIPBOOK ANALYTICS & TELEMETRY",
       description: "Tracking catalog impressions, page views, and user engagement metrics.",
       tasks: [
