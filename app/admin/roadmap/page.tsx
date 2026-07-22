@@ -305,7 +305,7 @@ export default function DevRoadmapDashboard() {
         { name: "18.4 Inventory Store Allocation Grid", profile: "Manager", status: "Completed", progress: 100, url: "/admin/inventory/stores", lastModified: "2026-07-21T11:45:00", isRecent: false },
         { name: "18.5 Product Reviews Workflow", profile: "Support", status: "Completed", progress: 100, url: "/admin/inventory/reviews", lastModified: "2026-07-21T11:45:00", isRecent: false },
         { name: "18.6 Master Inventory Grid", profile: "Admin", status: "Completed", progress: 100, url: "/admin/products", lastModified: new Date().toISOString(), isRecent: true },
-        { name: "18.7 Automated AI Disclaimer Generator", profile: "Admin", status: "Completed", progress: 100, url: "/api/admin/products/ai-generate", lastModified: new Date().toISOString(), isRecent: true }
+        { name: "18.7 Automated AI Disclaimer Generator", profile: "Admin", status: "Pending", progress: 0, url: "/api/admin/products/ai-generate", lastModified: new Date().toISOString(), isRecent: true }
       ]
     },
     {
