@@ -2,8 +2,12 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragOverlay } from '@dnd-kit/core';
+import { SortableContext, verticalListSortingStrategy, rectSortingStrategy, useSortable, arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { detectMetalColorAlgorithmically, detectViewAngleAlgorithmically } from '@/utils/colorDetectionEngine';
 
 // Dynamically import Quill to avoid SSR window errors
 const ReactQuill = dynamic(() => import('react-quill-new'), { ssr: false });
@@ -15,6 +19,7 @@ const IconInfo = ({ text }: { text: string }) => <span title={text}><svg classNa
 const IconClose = (props: any) => <svg {...props} className={`w-5 h-5 text-current transition-colors cursor-pointer ${props.className || ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>;
 const IconUpload = () => <svg className="w-6 h-6 text-[var(--brand-primary)] mb-2 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>;
 const IconWand = () => <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg>;
+const IconPen = () => <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>;
 
 // --- Custom Select Component ---
 const CustomSelect = ({ label, options, value, onChange, className = '', required = false, iconInfo, rightAction, size = 'default' }: any) => {
@@ -86,19 +91,19 @@ const MiniSelect = ({ value, onChange, options }: { value: string, onChange: (v:
     <div className="relative" ref={ref}>
       <div 
         onClick={() => setIsOpen(!isOpen)} 
-        className={`bg-[var(--bg-base)] hover:bg-black/5 dark:hover:bg-white/5 text-[10px] font-bold text-[var(--text-main)] px-2.5 py-1.5 rounded-lg border cursor-pointer flex items-center justify-between gap-2 shadow-sm transition-colors ${isOpen ? 'border-[var(--brand-primary)] ring-1 ring-[var(--brand-primary)]' : 'border-[var(--border-color)]'}`}
+        className={`bg-black/80 hover:bg-black text-[10px] font-bold text-white px-2.5 py-1.5 rounded-lg border cursor-pointer flex items-center justify-between gap-2 shadow-md transition-colors backdrop-blur-sm ${isOpen ? 'border-[var(--brand-primary)] ring-1 ring-[var(--brand-primary)]' : 'border-white/20'}`}
       >
         <span>{value === 'Description Image' ? 'Misc / Description' : value}</span>
-        <svg className={`w-3 h-3 transition-transform ${isOpen ? 'rotate-180 text-[var(--brand-primary)]' : 'text-[var(--text-muted)]'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+        <svg className={`w-3 h-3 transition-transform ${isOpen ? 'rotate-180 text-[var(--brand-primary)]' : 'text-gray-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
       </div>
       <AnimatePresence>
         {isOpen && (
-          <motion.div initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} className="absolute z-50 mt-1 w-36 bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-xl shadow-2xl overflow-hidden py-1">
+          <motion.div initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} className="absolute z-50 mt-1 w-36 bg-black/95 border border-white/20 rounded-xl shadow-2xl overflow-hidden py-1 backdrop-blur-md">
             {options.map(opt => (
               <div 
                 key={opt} 
                 onClick={() => { onChange(opt); setIsOpen(false); }} 
-                className={`px-3 py-2 text-[10px] font-bold cursor-pointer transition-colors ${value === opt ? 'bg-[var(--brand-primary)]/10 text-[var(--brand-primary)]' : 'text-[var(--text-main)] hover:bg-black/5 dark:hover:bg-white/5'}`}
+                className={`px-3 py-2 text-[10px] font-bold cursor-pointer transition-colors border-l-2 ${value === opt ? 'border-[var(--brand-primary)] bg-[var(--brand-primary)]/20 text-[var(--brand-primary)]' : 'border-transparent text-gray-200 hover:border-gray-400 hover:bg-white/10 hover:text-white'}`}
               >
                 {opt === 'Description Image' ? 'Misc / Description' : opt}
               </div>
@@ -248,16 +253,81 @@ const CustomDateTimePicker = ({ value, onChange }: { value: string, onChange: (v
   );
 };
 
+// --- Sortable Image Card ---
+const SortableImageCard = ({ img, handleSetPrimary, removeMedia, setMedia, media, MiniSelectComponent, IconCloseComponent }: any) => {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: img.id });
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: isDragging ? 50 : 1,
+  };
+  
+  return (
+    <div 
+      ref={setNodeRef} 
+      style={style} 
+      className={`bg-white dark:bg-[#1A1A1A] rounded-2xl aspect-square relative flex flex-col justify-between p-3 border shadow-sm overflow-visible group hover:shadow-md transition-all select-none ${isDragging ? 'opacity-70 scale-105 border-[var(--brand-primary)] border-2 shadow-2xl ring-4 ring-[var(--brand-primary)]/20 cursor-grabbing' : 'border-gray-200 dark:border-gray-800 hover:border-[var(--brand-primary)]/40'}`}
+    >
+      {/* Top Action Bar */}
+      <div className="flex justify-between items-start z-30">
+        <MiniSelectComponent 
+          value={img.color} 
+          onChange={(val: string) => {
+            const newMedia = media.map((m: any) => m.id === img.id ? { ...m, color: val } : m);
+            setMedia(newMedia);
+          }} 
+          options={['Yellow', 'Rose', 'White', 'Description Image']} 
+        />
+        <button onClick={() => removeMedia(img.id)} className="p-1.5 hover:bg-red-50 rounded-lg text-red-400 hover:text-red-600 transition-colors">
+          <IconCloseComponent />
+        </button>
+      </div>
 
-export default function SingleProductEditAccurateUI({ params }: { params: { id: string } }) {
+      {/* Image Circle Placeholder / Actual Image / Drag Handle overlay */}
+      <div {...attributes} {...listeners} className="absolute inset-0 flex flex-col items-center justify-center z-10 cursor-grab active:cursor-grabbing p-1">
+        {img.url ? (
+          <img src={img.url} className="w-full h-full object-contain rounded-2xl pointer-events-none" alt="Preview" />
+        ) : (
+          <svg className={`w-full h-full p-8 transition-transform duration-500 group-hover:scale-110 drop-shadow-sm ${img.color === 'Yellow' ? 'text-yellow-300' : img.color === 'Rose' ? 'text-rose-200' : 'text-gray-200'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="8" strokeWidth="1.5"/></svg>
+        )}
+      </div>
+
+      {/* Action Buttons */}
+      {/* We removed the duplicate hover-based Action Buttons panel to avoid double X icons */}
+      
+      {/* Bottom Primary Button */}
+      <div className="flex justify-center z-20 pointer-events-auto">
+        <button 
+          onClick={() => handleSetPrimary(img.id)}
+          className={`w-full py-2.5 text-[9px] font-bold tracking-widest uppercase rounded-xl transition-all ${img.active ? 'bg-[#00B060] text-white shadow-md shimmer-hover' : 'bg-[var(--bg-base)] text-[var(--text-muted)] border border-[var(--border-color)] hover:bg-[var(--text-main)] hover:text-[var(--bg-base)] shimmer-hover'}`}
+        >
+          {img.type} {img.active && '★'}
+        </button>
+      </div>
+    </div>
+  );
+};
+
+export default function SingleProductEditAccurateUI() {
   const router = useRouter();
+  const params = useParams();
+  
+  // DndKit Sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
+  const id = (params?.id as string) || '';
   const [mounted, setMounted] = useState(false);
 
   // States
+  const isNewProduct = id.startsWith('NEW');
+  const [isGeneratingAI, setIsGeneratingAI] = useState(false);
   const [activeStep, setActiveStep] = useState(1);
-  const [status, setStatus] = useState('Active');
-  const [title, setTitle] = useState('Gradiant Triangle Diamond Ring');
-  const [desc, setDesc] = useState('<p>Premium diamond jewellery crafted for elegance.</p>');
+  const [status, setStatus] = useState(isNewProduct ? 'Draft' : 'Active');
+  const [title, setTitle] = useState(isNewProduct ? '' : 'Gradiant Triangle Diamond Ring');
+  const [desc, setDesc] = useState(isNewProduct ? '' : '<p>Premium diamond jewellery crafted for elegance.</p>');
   
   // Custom Select States
   const [cat, setCat] = useState('Rings');
@@ -289,7 +359,7 @@ export default function SingleProductEditAccurateUI({ params }: { params: { id: 
   const [scheduleDate, setScheduleDate] = useState('');
 
   // Media State
-  const [media, setMedia] = useState([
+  const [media, setMedia] = useState(isNewProduct ? [] : [
     { id: 1, color: 'Yellow', type: 'PRIMARY IMAGE', active: true },
     { id: 2, color: 'Yellow', type: 'MAKE PRIMARY', active: false },
     { id: 3, color: 'Yellow', type: 'MAKE PRIMARY', active: false },
@@ -298,7 +368,7 @@ export default function SingleProductEditAccurateUI({ params }: { params: { id: 
     { id: 6, color: 'White', type: 'MAKE PRIMARY', active: false },
     { id: 7, color: 'Description Image', type: 'MAKE PRIMARY', active: false },
   ]);
-
+  
   // SEO State
   const [isEditingSEO, setIsEditingSEO] = useState(false);
   const [seoTitle, setSeoTitle] = useState("Buy Gradiant Triangle Diamond Design Ring | Ashok Jewels");
@@ -325,7 +395,7 @@ export default function SingleProductEditAccurateUI({ params }: { params: { id: 
     fetchOptionSets();
     fetchProductOptionSets();
     fetchVariants(1);
-  }, [params.id]);
+  }, [id]);
 
   const fetchOptionSets = async () => {
     try {
@@ -341,7 +411,7 @@ export default function SingleProductEditAccurateUI({ params }: { params: { id: 
 
   const fetchProductOptionSets = async () => {
     try {
-      const res = await fetch(`/api/admin/products/${params.id}/options`);
+      const res = await fetch(`/api/admin/products/${id}/options`);
       if (res.ok) {
         const data = await res.json();
         if (data.data && data.data.length > 0) {
@@ -364,7 +434,7 @@ export default function SingleProductEditAccurateUI({ params }: { params: { id: 
   const fetchVariants = async (page = 1) => {
     setVariantsLoading(true);
     try {
-      const res = await fetch(`/api/admin/products/${params.id}/variants?page=${page}&limit=50`);
+      const res = await fetch(`/api/admin/products/${id}/variants?page=${page}&limit=50`);
       if (res.ok) {
         const data = await res.json();
         const mappedVariants = (data.data || []).map((v: any) => ({
@@ -390,13 +460,13 @@ export default function SingleProductEditAccurateUI({ params }: { params: { id: 
     setIsImporting(true);
     try {
       // 1. Assign OptionSet to Product
-      await fetch(`/api/admin/products/${params.id}/options`, {
+      await fetch(`/api/admin/products/${id}/options`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ optionSetId: setId })
       });
       // 2. Generate Variants Cartesian
-      await fetch(`/api/admin/products/${params.id}/variants`, {
+      await fetch(`/api/admin/products/${id}/variants`, {
         method: 'POST'
       });
       // 3. Refresh State
@@ -445,6 +515,26 @@ export default function SingleProductEditAccurateUI({ params }: { params: { id: 
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
+  const generateAIDescription = async () => {
+    if (isGeneratingAI) return;
+    setIsGeneratingAI(true);
+    try {
+      const res = await fetch('/api/admin/products/ai-generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, category: cat, metal, purity, diamond })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setDesc(data.description);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsGeneratingAI(false);
+    }
+  };
+
   // Auto-save simulation when fields change
   useEffect(() => {
     setSaveStatus('Saving...');
@@ -473,7 +563,11 @@ export default function SingleProductEditAccurateUI({ params }: { params: { id: 
     if (targetImg && targetImg.color !== 'Description Image') {
       // Auto-switch the variant dropdown to match the selected primary image!
       setColor(targetImg.color);
-      setMainImageIdx(0);
+      
+      // Determine what the new filtered array will be so we can find the correct index
+      const expectedFilteredMedia = media.filter(m => m.color === targetImg.color || m.color === 'Description Image');
+      const newIdx = expectedFilteredMedia.findIndex(m => m.id === id);
+      setMainImageIdx(newIdx !== -1 ? newIdx : 0);
     }
     
     setMedia(media.map(m => ({
@@ -483,10 +577,210 @@ export default function SingleProductEditAccurateUI({ params }: { params: { id: 
     })));
   };
 
-  const handleSimulatedUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const [isDetectingColor, setIsDetectingColor] = useState(false);
+
+  const handleSimulatedUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      const newMedia = { id: Date.now(), color: color !== 'Description Image' ? color : 'Yellow', type: 'MAKE PRIMARY', active: false };
-      setMedia([...media, newMedia]);
+      setIsDetectingColor(true);
+      const filesList = Array.from(e.target.files);
+      
+      const timestamp = Date.now();
+      const newMediaItems = filesList.map((file, i) => {
+        const objectUrl = URL.createObjectURL(file);
+        return {
+          id: timestamp + i,
+          color: 'Detecting...',
+          view: 'Front',
+          type: 'MAKE PRIMARY',
+          active: false,
+          url: objectUrl,
+          file: file 
+        };
+      });
+
+      setMedia(prev => {
+        let hasPrimary = prev.some(m => m.active);
+        const finalNewItems = newMediaItems.map((item, i) => {
+          const isFirstAndNoPrimary = !hasPrimary && i === 0;
+          if (isFirstAndNoPrimary) hasPrimary = true;
+          return {
+            ...item,
+            active: isFirstAndNoPrimary,
+            type: isFirstAndNoPrimary ? 'PRIMARY IMAGE' : 'MAKE PRIMARY'
+          };
+        });
+        return [...prev, ...finalNewItems];
+      });
+
+      // Process all images instantly in parallel via HTML5 Canvas (100% Offline)
+      const processingPromises = newMediaItems.map(async (item) => {
+        let finalResult: any = { id: item.id, error: false };
+        try {
+          finalResult.color = await detectMetalColorAlgorithmically(item.url);
+          finalResult.view = await detectViewAngleAlgorithmically(item.url);
+        } catch(e) {
+          console.error("Canvas detector failed", e);
+          finalResult.error = true;
+        }
+        return finalResult;
+      });
+
+      const results = await Promise.all(processingPromises);
+
+      // Perform Perfect Shuffle after all images are processed
+      setMedia(currentMedia => {
+        // Update the new items with their detected colors/views
+        const updatedMedia = currentMedia.map(m => {
+          const result = results.find(r => r.id === m.id);
+          if (result && !result.error) {
+            return { ...m, color: result.color, view: result.view };
+          }
+          return m;
+        });
+
+        const colorOrder = { 'Yellow': 1, 'Rose': 2, 'White': 3, 'Description Image': 4 };
+        const viewOrder = { 'Right Side': 1, 'Front': 2, 'Photoshoot': 3, 'Lifestyle': 4, 'Side': 5, 'Infographic': 6 };
+        
+        const sortedMedia = updatedMedia.sort((a, b) => {
+           const cOrderA = colorOrder[a.color as keyof typeof colorOrder] || 5;
+           const cOrderB = colorOrder[b.color as keyof typeof colorOrder] || 5;
+           
+           if (cOrderA !== cOrderB) {
+              return cOrderA - cOrderB; // Sort by Color first
+           }
+
+           const orderA = viewOrder[a.view as keyof typeof viewOrder] || 7;
+           const orderB = viewOrder[b.view as keyof typeof viewOrder] || 7;
+           return orderA - orderB; // Then by View Angle
+        });
+
+        // Automatically make the first image (Yellow Right Side) the primary image
+        return sortedMedia.map((m, idx) => ({
+          ...m,
+          active: idx === 0,
+          type: idx === 0 ? 'PRIMARY IMAGE' : 'MAKE PRIMARY'
+        }));
+      });
+
+      setIsDetectingColor(false);
+    }
+  };
+
+  const getDownscaledBase64 = async (url: string, file?: File): Promise<string> => {
+    return new Promise(async (resolve, reject) => {
+      let objectUrl = url;
+      
+      // If it's a remote URL, we must fetch it as a blob to avoid Canvas CORS taint
+      if (!file && !url.startsWith('blob:') && !url.startsWith('data:')) {
+        try {
+          const res = await fetch(url);
+          const blob = await res.blob();
+          objectUrl = URL.createObjectURL(blob);
+        } catch(e) {
+          console.error("CORS fetch failed, falling back to direct URL", e);
+        }
+      }
+
+      const img = new Image();
+      img.crossOrigin = 'Anonymous';
+      
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_SIZE = 400; // Perfect for AI analysis while keeping payload under 1MB
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height && width > MAX_SIZE) {
+          height *= MAX_SIZE / width;
+          width = MAX_SIZE;
+        } else if (height > MAX_SIZE) {
+          width *= MAX_SIZE / height;
+          height = MAX_SIZE;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return reject(new Error("No canvas context"));
+
+        // Fill white background in case of transparent PNG
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, width, height);
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+        resolve(dataUrl.split(',')[1]);
+      };
+      
+      img.onerror = (e) => reject(e);
+      img.src = objectUrl;
+    });
+  };
+
+  const handleAutoShuffle = async () => {
+    setIsDetectingColor(true);
+    
+    try {
+      // Process all images instantly in parallel via HTML5 Canvas (100% Offline)
+      const processingPromises = media.map(async (item) => {
+        let finalResult: any = { id: item.id, error: false };
+        
+        try {
+          finalResult.color = await detectMetalColorAlgorithmically(item.url);
+          finalResult.view = await detectViewAngleAlgorithmically(item.url);
+        } catch(e) {
+          console.error("Canvas detector failed", e);
+          finalResult.error = true;
+        }
+        
+        return finalResult;
+      });
+
+      const results = await Promise.all(processingPromises);
+      
+      // Update media array and instantly sort it deterministically
+      setMedia(currentMedia => {
+        const updatedMedia = currentMedia.map(m => {
+          const result = results.find(r => r.id === m.id);
+          if (result && !result.error) {
+            return { ...m, color: result.color, view: result.view };
+          }
+          return m;
+        });
+
+        // Strict deterministic sorting rule
+        const colorOrder = { 'Yellow': 1, 'Rose': 2, 'White': 3, 'Description Image': 4 };
+        
+        // Right Side (Angled Perspective) MUST be Position 1
+        // Front (Round Top-Down) MUST be Position 2
+        const viewOrder = { 'Right Side': 1, 'Front': 2, 'Photoshoot': 3, 'Lifestyle': 4, 'Side': 5, 'Infographic': 6 };
+        
+        const sortedMedia = updatedMedia.sort((a, b) => {
+           const cOrderA = colorOrder[a.color as keyof typeof colorOrder] || 5;
+           const cOrderB = colorOrder[b.color as keyof typeof colorOrder] || 5;
+           
+           if (cOrderA !== cOrderB) {
+              return cOrderA - cOrderB; // Sort by Color first
+           }
+
+           const orderA = viewOrder[a.view as keyof typeof viewOrder] || 7;
+           const orderB = viewOrder[b.view as keyof typeof viewOrder] || 7;
+           return orderA - orderB; // Then by View Angle
+        });
+
+        // Automatically make the first image (Yellow Right Side) the primary image
+        return sortedMedia.map((m, idx) => ({
+          ...m,
+          active: idx === 0,
+          type: idx === 0 ? 'PRIMARY IMAGE' : 'MAKE PRIMARY'
+        }));
+      });
+
+    } catch (error) {
+      console.error("Auto Magic Failed:", error);
+      alert("Failed to Auto Sort. Please check the console for details.");
+    } finally {
+      setIsDetectingColor(false);
     }
   };
 
@@ -655,14 +949,37 @@ export default function SingleProductEditAccurateUI({ params }: { params: { id: 
 
           {/* DESCRIPTION */}
           <div>
-            <label className="block font-bold text-[var(--text-muted)] mb-2 tracking-wider uppercase text-[10px]">Description <IconInfo text="Rich text description supporting HTML formatting." /></label>
-            <div className="rounded-xl bg-[var(--bg-surface)] shadow-sm text-[var(--text-main)] font-sans quill-modern-container transition-all hover:shadow-md">
+            <div className="flex justify-between items-center mb-2">
+              <label className="block font-bold text-[var(--text-muted)] tracking-wider uppercase text-[10px]">Description <IconInfo text="Rich text description supporting HTML formatting." /></label>
+            </div>
+            <div className={`rounded-xl bg-[var(--bg-surface)] shadow-sm text-[var(--text-main)] font-sans quill-modern-container transition-all hover:shadow-md ${isGeneratingAI ? 'opacity-50 pointer-events-none blur-[1px]' : ''}`}>
               <style jsx global>{`
                 .quill-modern-container .ql-toolbar { border-top-left-radius: 0.75rem; border-top-right-radius: 0.75rem; border-color: var(--border-color); background: var(--bg-surface); }
                 .quill-modern-container .ql-container { border-bottom-left-radius: 0.75rem; border-bottom-right-radius: 0.75rem; border-color: var(--border-color); min-height: 180px; font-family: inherit; font-size: 0.875rem; }
                 .quill-modern-container .ql-editor:focus { border-color: var(--brand-primary); outline: none; }
               `}</style>
               <ReactQuill theme="snow" value={desc} onChange={setDesc} />
+            </div>
+            
+            {/* AI Generator Button Moved Below */}
+            <div className="mt-3 flex justify-end">
+              <button 
+                onClick={generateAIDescription}
+                disabled={isGeneratingAI}
+                className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-[10px] font-bold tracking-widest uppercase transition-all shadow-sm ${isGeneratingAI ? 'bg-amber-400/10 text-amber-500 border border-amber-400/30' : 'bg-[var(--bg-surface)] text-[var(--brand-primary)] border border-[var(--brand-primary)] hover:bg-[var(--brand-primary)]/10 shimmer-hover'}`}
+              >
+                {isGeneratingAI ? (
+                  <>
+                    <svg className="w-3.5 h-3.5 animate-spin mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <IconPen />
+                    Write with AI
+                  </>
+                )}
+              </button>
             </div>
           </div>
 
@@ -682,53 +999,62 @@ export default function SingleProductEditAccurateUI({ params }: { params: { id: 
                   <h3 className="text-base font-bold text-[var(--text-main)] tracking-wide">Manual Upload</h3>
                   <p className="text-xs text-[var(--text-muted)] mt-1 font-medium">Upload product photos/videos, set primary, and sort the gallery order.</p>
                 </div>
-                <button className="px-5 py-2.5 bg-[var(--bg-base)] border border-[var(--border-color)] hover:border-[var(--brand-primary)] rounded-full text-[10px] text-[var(--text-main)] font-bold tracking-widest uppercase transition-all shadow-sm shimmer-hover">PRIMARY CONTROL</button>
+                <div className="flex items-center gap-3">
+                  <button onClick={handleAutoShuffle} disabled={isDetectingColor} className={`px-5 py-2.5 rounded-full text-[10px] font-bold tracking-widest uppercase transition-all shadow-sm flex items-center gap-2 ${isDetectingColor ? 'bg-[var(--brand-primary)]/50 text-[var(--bg-base)] cursor-not-allowed' : 'bg-gradient-to-r from-[var(--brand-primary)] to-amber-500 text-[var(--bg-base)] hover:opacity-90 shimmer-hover'}`}>
+                    {isDetectingColor ? 'DETECTING...' : '✨ AUTO MAGIC'}
+                  </button>
+                  <button className="px-5 py-2.5 bg-[var(--bg-base)] border border-[var(--border-color)] hover:border-[var(--brand-primary)] rounded-full text-[10px] text-[var(--text-main)] font-bold tracking-widest uppercase transition-all shadow-sm shimmer-hover">PRIMARY CONTROL</button>
+                </div>
               </div>
               
               {/* Image Grid */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
-                {media.map((img) => (
-                  <div key={img.id} className="bg-white rounded-2xl aspect-square relative flex flex-col justify-between p-3 border border-gray-200 shadow-sm overflow-visible group hover:shadow-md hover:border-[var(--brand-primary)]/40 transition-all">
-                    {/* Top Action Bar */}
-                    <div className="flex justify-between items-start z-20">
-                      <MiniSelect 
-                        value={img.color} 
-                        onChange={(val: string) => {
-                          const newMedia = media.map(m => m.id === img.id ? { ...m, color: val } : m);
-                          setMedia(newMedia);
-                        }} 
-                        options={['Yellow', 'Rose', 'White', 'Description Image']} 
+              <DndContext 
+                sensors={sensors} 
+                collisionDetection={closestCenter} 
+                onDragEnd={(event) => {
+                  const { active, over } = event;
+                  if (over && active.id !== over.id) {
+                    setMedia((items) => {
+                      const oldIndex = items.findIndex((i: any) => i.id === active.id);
+                      const newIndex = items.findIndex((i: any) => i.id === over.id);
+                      return arrayMove(items, oldIndex, newIndex);
+                    });
+                  }
+                }}
+              >
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
+                  <SortableContext items={media.map((m: any) => m.id)} strategy={rectSortingStrategy}>
+                    {media.map((img) => (
+                      <SortableImageCard 
+                        key={img.id} 
+                        img={img} 
+                        handleSetPrimary={handleSetPrimary} 
+                        removeMedia={removeMedia} 
+                        setMedia={setMedia} 
+                        media={media} 
+                        MiniSelectComponent={MiniSelect}
+                        IconCloseComponent={IconClose}
                       />
-                      <button onClick={() => removeMedia(img.id)} className="p-1.5 hover:bg-red-50 rounded-lg text-red-400 hover:text-red-600 transition-colors">
-                        <IconClose />
-                      </button>
-                    </div>
-
-                    {/* Image Circle Placeholder */}
-                    <div className="absolute inset-0 flex flex-col items-center justify-center z-10 pointer-events-none">
-                       <svg className={`w-full h-full p-8 transition-transform duration-500 group-hover:scale-110 drop-shadow-sm ${img.color === 'Yellow' ? 'text-yellow-300' : img.color === 'Rose' ? 'text-rose-200' : 'text-gray-200'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="8" strokeWidth="1.5"/></svg>
-                    </div>
-                    
-                    {/* Bottom Primary Button */}
-                    <div className="flex justify-center z-20">
-                      <button 
-                        onClick={() => handleSetPrimary(img.id)}
-                        className={`w-full py-2.5 text-[9px] font-bold tracking-widest uppercase rounded-xl transition-all ${img.active ? 'bg-[#00B060] text-white shadow-md shimmer-hover' : 'bg-[var(--bg-base)] text-[var(--text-muted)] border border-[var(--border-color)] hover:bg-[var(--text-main)] hover:text-[var(--bg-base)] shimmer-hover'}`}
-                      >
-                        {img.type} {img.active && '★'}
-                      </button>
-                    </div>
-                  </div>
-                ))}
-                
-                {/* Upload Box */}
-                <label className="border-2 border-dashed border-[var(--brand-primary)] rounded-2xl aspect-square flex flex-col items-center justify-center cursor-pointer hover:bg-[var(--brand-primary)]/10 transition-colors group shadow-sm bg-[var(--brand-primary)]/5">
+                    ))}
+                  </SortableContext>
+                  
+                  {/* Upload Box */}
+                <label className="border-2 border-dashed border-[var(--brand-primary)] rounded-2xl aspect-square flex flex-col items-center justify-center cursor-pointer hover:bg-[var(--brand-primary)]/10 transition-colors group shadow-sm bg-[var(--brand-primary)]/5 relative overflow-hidden">
                   <IconUpload />
                   <span className="text-xs font-bold text-[var(--brand-primary)] tracking-wide">Add Image/Video</span>
                   <span className="text-[10px] font-semibold text-[var(--text-muted)] mt-1">Drop files here</span>
-                  <input type="file" multiple className="hidden" onChange={handleSimulatedUpload} />
+                  <div className="w-full h-full absolute inset-0 opacity-0 cursor-pointer group-hover:opacity-100 transition-opacity bg-black/80 backdrop-blur-sm flex flex-col items-center justify-center pointer-events-none">
+                    <IconUpload />
+                    {isDetectingColor ? (
+                      <span className="text-[10px] font-bold text-[var(--brand-primary)] tracking-widest uppercase mt-2">AI Processing...</span>
+                    ) : (
+                      <span className="text-[10px] font-bold text-[var(--brand-primary)] tracking-widest uppercase mt-2">Click to Browse</span>
+                    )}
+                  </div>
+                  <input type="file" multiple accept="image/*,video/*" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={handleSimulatedUpload} disabled={isDetectingColor} />
                 </label>
               </div>
+            </DndContext>
             </div>
 
             {/* AI Generate Banner */}
@@ -1135,11 +1461,15 @@ export default function SingleProductEditAccurateUI({ params }: { params: { id: 
           {/* Main Image Slider - 1:1 Responsive */}
           <div className="w-full mb-6">
             <div 
-              className="bg-white rounded-2xl relative flex items-center justify-center border border-[var(--border-color)] overflow-hidden group shadow-inner"
+              className="bg-white dark:bg-[#161616] rounded-2xl relative flex items-center justify-center border border-[var(--border-color)] overflow-hidden group shadow-inner"
               style={{ aspectRatio: '1/1', width: '100%' }}
             >
               {currentPreviewMedia ? (
-                <svg className={`w-full h-full p-6 drop-shadow-xl transition-transform duration-700 group-hover:scale-110 ${currentPreviewMedia.color === 'Yellow' ? 'text-yellow-400' : currentPreviewMedia.color === 'Rose' ? 'text-rose-300' : 'text-gray-200'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="8" strokeWidth="1"/></svg>
+                currentPreviewMedia.url ? (
+                  <img src={currentPreviewMedia.url} className="w-full h-full object-contain p-2" alt="Live Preview" />
+                ) : (
+                  <svg className={`w-full h-full p-6 drop-shadow-xl transition-transform duration-700 group-hover:scale-110 ${currentPreviewMedia.color === 'Yellow' ? 'text-yellow-400' : currentPreviewMedia.color === 'Rose' ? 'text-rose-300' : 'text-gray-200'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="8" strokeWidth="1"/></svg>
+                )
               ) : (
                 <div className="flex flex-col items-center justify-center text-gray-400">
                   <svg className="w-10 h-10 mb-2 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
@@ -1168,9 +1498,13 @@ export default function SingleProductEditAccurateUI({ params }: { params: { id: 
                 <div 
                   key={img.id} 
                   onClick={() => setMainImageIdx(idx)}
-                  className={`rounded-xl shrink-0 w-10 h-10 flex justify-center items-center p-0.5 cursor-pointer transition-all border-2 bg-white ${safeMainIdx === idx ? 'border-[var(--brand-primary)] scale-110 shadow-md' : 'border-gray-200 hover:border-gray-400 opacity-100'}`}
+                  className={`rounded-xl shrink-0 w-10 h-10 flex justify-center items-center p-0.5 cursor-pointer transition-all border-2 bg-white dark:bg-[#161616] ${safeMainIdx === idx ? 'border-[var(--brand-primary)] scale-110 shadow-md' : 'border-[var(--border-color)] hover:border-[var(--text-muted)] opacity-100'}`}
                 >
-                  <svg className={`w-6 h-6 ${img.color === 'Yellow' ? 'text-yellow-400' : img.color === 'Rose' ? 'text-rose-300' : 'text-gray-200'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="8" strokeWidth="1.5"/></svg>
+                  {img.url ? (
+                    <img src={img.url} className="w-full h-full object-cover rounded-lg" alt="thumb" />
+                  ) : (
+                    <svg className={`w-6 h-6 ${img.color === 'Yellow' ? 'text-yellow-400' : img.color === 'Rose' ? 'text-rose-300' : 'text-gray-200'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="8" strokeWidth="1.5"/></svg>
+                  )}
                 </div>
               ))}
             </div>
@@ -1281,7 +1615,11 @@ export default function SingleProductEditAccurateUI({ params }: { params: { id: 
               className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl lg:max-w-4xl aspect-square max-h-[85vh] flex items-center justify-center relative overflow-hidden" 
               onClick={e => e.stopPropagation()}
             >
-              <svg className={`w-1/2 h-1/2 drop-shadow-sm ${currentPreviewMedia.color === 'Yellow' ? 'text-yellow-400' : currentPreviewMedia.color === 'Rose' ? 'text-rose-300' : 'text-gray-300'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="8" strokeWidth="1"/></svg>
+              {currentPreviewMedia.url ? (
+                <img src={currentPreviewMedia.url} className="w-full h-full object-contain rounded-3xl" alt="Preview" />
+              ) : (
+                <svg className={`w-1/2 h-1/2 drop-shadow-sm ${currentPreviewMedia.color === 'Yellow' ? 'text-yellow-400' : currentPreviewMedia.color === 'Rose' ? 'text-rose-300' : 'text-gray-300'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="8" strokeWidth="1"/></svg>
+              )}
               
               {filteredMedia.length > 1 && (
                 <>

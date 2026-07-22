@@ -4,7 +4,16 @@ This document tracks major features, architectural updates, and tasks completed 
 
 ## Recently Completed Features
 
-### 1. Secure Media Proxy & WebP Image Optimization
+### 1. 100% Offline AI-Free "Auto Magic" Image Sorting
+**Status**: Completed
+**Last Modified**: 22 July 2026
+**Description**: Replaced external API AI sorting with a fully offline, high-speed mathematical HTML5 Canvas geometry scanner.
+**Key Capabilities for User Manual**:
+- **Instant Parallel Processing**: Scans 12+ images simultaneously in milliseconds without API latency or rate limits.
+- **Deterministic Sequencing**: Uses pixel-density and aspect-ratio analysis to guarantee a flawless sequence (Perspective -> Front -> Photoshoot -> Lifestyle -> Side -> Infographic).
+- **Auto Primary Assignment**: Dynamically assigns the master variant's first image (Yellow Gold / Perspective) as the primary thumbnail across the portal automatically on upload.
+
+### 2. Secure Media Proxy & WebP Image Optimization
 **Status**: Completed
 **Description**: Implemented a dynamic image proxy to securely serve product images and optimize them on-the-fly for faster loading.
 **Key Capabilities for User Manual**:
@@ -41,3 +50,15 @@ This document tracks major features, architectural updates, and tasks completed 
 ## Pending / Upcoming Features
 - Real-time Matrix Pricing integration (planned override in storefront)
 - (Add future goals here)
+
+## QC & Diagnostic Checkpoints
+To ensure feature stability prior to production releases, the following checkpoints must be validated:
+
+### 1. Image Sorting Diagnostics
+- **[ ] File Type Independence**: Uploading .png, .jpg, and .webp formats should trigger the same deterministic sorting.
+- **[ ] Color Recognition**: Verify that #FFD700 (Yellow), #B76E79 (Rose), and #E5E4E2 (White) pixels correctly map to their respective metal groups.
+- **[ ] Missing Image Handling**: The system gracefully handles missing perspective/front shots and falls back to side/lifestyle shots according to `viewOrder`.
+
+### 2. General Portal QC
+- **[ ] API Resilience**: Disconnect internet and verify that Canvas pixel processing still functions locally.
+- **[ ] Global UI Compliance**: Validate that all new CTA pills use `shimmer-hover` and `var(--brand-primary)` without native `<select>` dropdowns.
